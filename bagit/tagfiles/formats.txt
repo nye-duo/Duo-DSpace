@@ -1,0 +1,4 @@
+image/jpeg    data/final/segway.jpg
+image/jpeg    data/supporting/segway-detail.jpg
+text/xml    data/metadata/metadata.xml
+text/plain  data/licence/licence.txt

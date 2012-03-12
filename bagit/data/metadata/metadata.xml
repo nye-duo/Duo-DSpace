@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fs:metadata xmlns:fs="http://studentweb.no/terms/"
+                xmlns:ep="http://www.educause.edu/eduperson/"
+                xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                xmlns:mods="http://www.loc.gov/mods/v3/"
+                xmlns:dcterms="http://purl.org/dc/terms/"
+                xmlns:prism="http://prismstandard.org/namespaces/basic/2.0/">
+
+    <!-- Representing the Student -->
+    <foaf:Person>
+        <foaf:name>Thor Heyerdahl</foaf:name>
+        <foaf:givenName>Thor</foaf:givenName>
+        <foaf:familyName>Heyerdahl</foaf:familyName>
+        <ep:uniqueIdentifier>studentnummer:123456789</ep:uniqueIdentifier>
+        <ep:uid>theyerdahl</ep:uid>
+        <fs:foedselsnummer>987654321</fs:foedselsnummer>
+        <ep:postalAddress>Colla Micheri, Italy</ep:postalAddress>
+        <foaf:mbox>t.heyerdahl@kontiki.com</foaf:mbox>
+        <ep:telephoneNumber>0047 123456</ep:telephoneNumber>
+    </foaf:Person>
+    
+    <!-- Representing the subject code and subject name -->
+    <mods:subject>
+        <mods:topic>OC1</mods:topic>
+        <mods:titleInfo>
+            <mods:title>Oceanography</mods:title>
+        </mods:titleInfo>
+    </mods:subject>
+    
+    <!-- the awarding institution's unit code -->
+    <fs:unitcode>123</fs:unitcode>
+    
+    <!-- basic bibliographic metadata -->
+    <dcterms:title>102 days around (some of) the world</dcterms:title>
+    <dcterms:language>nob</dcterms:language>
+    <dcterms:abstract>
+        In the Kon-Tiki Expedition, Heyerdahl and five fellow adventurers went to Peru, where they constructed a pae-pae raft from balsa wood and other native materials, a raft that they called the Kon-Tiki.
+    </dcterms:abstract>
+    
+    <!-- date on which embargo is lifted -->
+    <prism:embargoDate>01-01-2015</prism:embargoDate>
+    
+    <!-- grade (if available) -->
+    <fs:grade>pass</fs:grade>
+    
+</fs:metadata>

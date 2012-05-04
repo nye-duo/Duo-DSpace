@@ -35,6 +35,11 @@
             <version>1.8.2</version>
             <classifier>classes</classifier>
         </dependency>
+        <dependency>
+            <groupId>no.bagit</groupId>
+            <artifactId>bagit-library</artifactId>
+            <version>1.0</version>
+        </dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>

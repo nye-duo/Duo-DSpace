@@ -10,6 +10,14 @@ public class DuoConstants
     public static QName EMBARGO_END_DATE_QNAME = new QName(FS_NAMESPACE, "embargoEndDate");
     public static QName EMBARGO_TYPE_QNAME = new QName(FS_NAMESPACE, "embargoType");
 
+    public static String ORIGINAL_BUNDLE = "ORIGINAL";
+    public static String SECONDARY_BUNDLE = "SECONDARY";
+    public static String SECONDARY_RESTRICTED_BUNDLE = "SECONDARY_RESTRICTED";
     public static String METADATA_BUNDLE = "METADATA";
+    public static String LICENSE_BUNDLE = "LICENSE";
+
     public static String METADATA_FILE = "metadata.xml";
+
+    public static String OPEN = "open";
+    public static String CLOSED = "closed";
 }

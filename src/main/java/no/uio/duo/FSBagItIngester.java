@@ -26,20 +26,13 @@ import org.swordapp.server.Deposit;
 import org.swordapp.server.SwordAuthException;
 import org.swordapp.server.SwordError;
 import org.swordapp.server.SwordServerException;
-import sun.font.BidiUtils;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+
 
 public class FSBagItIngester extends AbstractSwordContentIngester
 {
@@ -90,6 +83,36 @@ public class FSBagItIngester extends AbstractSwordContentIngester
 
             // at this point, one way or another we have an item to work with
 
+            // we can use the item deposit mechanism now that we have a shell item to populate,
+            // so all we need to do is jig the metadata relevant property to ensure that the
+            // item ingest method does the metadata, and we are good to go
+            deposit.setMetadataRelevant(true);
+            result = this.ingestToItem(context, deposit, item, verboseDescription, result);
+
+            // since this is a create, add the item id to the verbose description
+            verboseDescription.append("Item created with internal identifier: " + item.getID());
+
+            return result;
+        }
+        catch (AuthorizeException e)
+        {
+            throw new SwordAuthException(e);
+        }
+        catch (SQLException e)
+        {
+            throw new DSpaceSwordException(e);
+        }
+        catch (IOException e)
+        {
+            throw new DSpaceSwordException(e);
+        }
+    }
+
+    public DepositResult ingestToItem(Context context, Deposit deposit, Item item, VerboseDescription verboseDescription, DepositResult result)
+    			throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
+    {
+        try
+        {
             // prepare a registry for all the bitstreams we derive from the bag
             List<Bitstream> derivedResources = new ArrayList<Bitstream>();
 
@@ -128,6 +151,7 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             this.addInSequence(context, sequencedClosedSecondaries, secondaryRestricted, derivedResources);
 
             // now the METADATA
+            // FIXME: maybe this should overwrite the existing metadata file?
             BaggedItem metadataFile = bag.getMetadata();
             Bitstream mdBs = this.writeToBundle(context, metadata, metadataFile);
             derivedResources.add(mdBs);
@@ -138,7 +162,10 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             derivedResources.add(lbs);
 
             // now we can crosswalk in the metadata
-            this.addMetadataFromBitstream(context, item, mdBs);
+            if (deposit.isMetadataRelevant())
+            {
+                this.addMetadataFromBitstream(context, item, mdBs);
+            }
 
             // finally write the item update
             boolean ignore = context.ignoreAuthorization();
@@ -148,7 +175,6 @@ public class FSBagItIngester extends AbstractSwordContentIngester
 
             // now finish up and pass back
             verboseDescription.append("Ingest successful");
-            verboseDescription.append("Item created with internal identifier: " + item.getID());
 
             result.setItem(item);
             result.setTreatment(this.getTreatment());
@@ -168,13 +194,6 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         {
             throw new DSpaceSwordException(e);
         }
-    }
-
-    public DepositResult ingestToItem(Context context, Deposit deposit, Item item, VerboseDescription verboseDescription, DepositResult result)
-    			throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
-    {
-        // TODO
-        return null;
     }
 
     private Bundle getBundle(Item item, String name)

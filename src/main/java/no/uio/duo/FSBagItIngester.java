@@ -151,8 +151,10 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             this.addInSequence(context, sequencedClosedSecondaries, secondaryRestricted, derivedResources);
 
             // now the METADATA
-            // FIXME: maybe this should overwrite the existing metadata file?
+            // Note: this deletes the old metadata file, as we only want one at any one time.
             BaggedItem metadataFile = bag.getMetadata();
+            Bitstream oldMetadata = metadata.getBitstreamByName(DuoConstants.METADATA_FILE);
+            metadata.removeBitstream(oldMetadata);
             Bitstream mdBs = this.writeToBundle(context, metadata, metadataFile);
             derivedResources.add(mdBs);
 

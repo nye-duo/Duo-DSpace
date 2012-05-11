@@ -27,9 +27,9 @@
     <dcterms:title>101 days around some of the world</dcterms:title>
 
     <!-- 2nd title = Translated title - goes in dc.title.alternative in DSpace -->
-    <dcterms:title>101 days in the Pacific</dcterms:title>
+    <dcterms:title xml:lang="nob">101 days in the Pacific</dcterms:title>
     <dcterms:language>nob</dcterms:language>
-    <dcterms:abstract>Thor Heyerdahl og fem andre dro fra Peru til Raroia i en selvkonstruert balsafl�te ved navn
+    <dcterms:abstract xml:lang="nob">Thor Heyerdahl og fem andre dro fra Peru til Raroia i en selvkonstruert balsafl�te ved navn
         Kon-Tiki.
     </dcterms:abstract>
 

@@ -1,7 +1,7 @@
 package no.uio.duo;
 
-import no.bagit.BagIt;
-import no.bagit.BaggedItem;
+import no.uio.duo.bagit.BagIt;
+import no.uio.duo.bagit.BaggedItem;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.Bitstream;
 import org.dspace.content.BitstreamFormat;

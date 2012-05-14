@@ -27,11 +27,13 @@
     </xsl:template>
 
     <!-- student number -->
+    <!--
     <xsl:template match="/fs:metadata/fs:studentNumber">
         <dim:field mdschema="fs" element="studentnumber">
             <xsl:value-of select="normalize-space(.)"/>
         </dim:field>
     </xsl:template>
+    -->
 
     <!-- UID -->
     <xsl:template match="/fs:metadata/fs:uid">
@@ -41,32 +43,40 @@
     </xsl:template>
 
     <!-- Foedselsnummer -->
+    <!--
     <xsl:template match="/fs:metadata/fs:foedselsnummer">
         <dim:field mdschema="fs" element="foedselsnummer">
             <xsl:value-of select="normalize-space(.)"/>
         </dim:field>
     </xsl:template>
+    -->
 
     <!-- postal address -->
+    <!--
     <xsl:template match="/fs:metadata/fs:postalAddress">
         <dim:field mdschema="fs" element="postaladdress">
             <xsl:value-of select="normalize-space(.)"/>
         </dim:field>
     </xsl:template>
+    -->
 
     <!-- email -->
+    <!--
     <xsl:template match="/fs:metadata/fs:email">
         <dim:field mdschema="fs" element="email">
             <xsl:value-of select="normalize-space(.)"/>
         </dim:field>
     </xsl:template>
+    -->
 
     <!-- Telephone number -->
+    <!--
     <xsl:template match="/fs:metadata/fs:telephoneNumber">
         <dim:field mdschema="fs" element="telephonenumber">
             <xsl:value-of select="normalize-space(.)"/>
         </dim:field>
     </xsl:template>
+    -->
 
     <!-- subject code -->
     <xsl:template match="/fs:metadata/fs:subject/fs:subjectCode">
@@ -105,7 +115,7 @@
 
     <!-- Author -->
     <xsl:template match="/fs:metadata/fs:familyName">
-        <dim:field mdschema="dc" element="contributor" qualifier="author">
+        <dim:field mdschema="dc" element="creator" qualifier="author">
             <xsl:value-of select="normalize-space(/fs:metadata/fs:familyName)"/>
             <xsl:text>, </xsl:text>
             <xsl:value-of select="normalize-space(/fs:metadata/fs:givenName)"/>

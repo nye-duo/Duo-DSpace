@@ -36,7 +36,7 @@
 
     <dc-type>
         <schema>dc</schema>
-        <element>contributor</element>
+        <element>creator</element>
         <qualifier>author</qualifier>
         <scope_note></scope_note>
     </dc-type>

@@ -36,8 +36,8 @@
             <classifier>classes</classifier>
         </dependency>
         <dependency>
-            <groupId>no.bagit</groupId>
-            <artifactId>bagit-library</artifactId>
+            <groupId>no.uio.duo</groupId>
+            <artifactId>bagit</artifactId>
             <version>1.0</version>
         </dependency>
 		<dependency>

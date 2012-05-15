@@ -12,7 +12,7 @@ public class DuoConstants
 
     public static String ORIGINAL_BUNDLE = "ORIGINAL";
     public static String SECONDARY_BUNDLE = "SECONDARY";
-    public static String SECONDARY_RESTRICTED_BUNDLE = "SECONDARY_RESTRICTED";
+    public static String SECONDARY_RESTRICTED_BUNDLE = "SECONDARY_CLOSED"; // must be under 16 characters
     public static String METADATA_BUNDLE = "METADATA";
     public static String LICENSE_BUNDLE = "LICENSE";
 

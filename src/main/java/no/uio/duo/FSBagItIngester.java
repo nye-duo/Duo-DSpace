@@ -116,6 +116,11 @@ public class FSBagItIngester extends AbstractSwordContentIngester
     {
         try
         {
+            if (result == null)
+            {
+                result = new DepositResult();
+            }
+
             // prepare a registry for all the bitstreams we derive from the bag
             List<Bitstream> derivedResources = new ArrayList<Bitstream>();
 
@@ -227,7 +232,7 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         rp.setResourceType(Constants.BUNDLE);
         rp.update();
         */
-        
+
         return bundle;
     }
 

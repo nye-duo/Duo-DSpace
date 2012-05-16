@@ -111,6 +111,7 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         }
     }
 
+    // supports replace only, is not additive
     public DepositResult ingestToItem(Context context, Deposit deposit, Item item, VerboseDescription verboseDescription, DepositResult result)
     			throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
     {
@@ -142,6 +143,13 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             Bundle metadata = this.getBundle(context, item, DuoConstants.METADATA_BUNDLE);
             Bundle license = this.getBundle(context, item, DuoConstants.LICENSE_BUNDLE);
 
+            // empty all of the bundles (no versioning)
+            this.emptyBundle(original);
+            this.emptyBundle(secondary);
+            this.emptyBundle(secondaryRestricted);
+            this.emptyBundle(metadata);
+            this.emptyBundle(license);
+
             // populate each bundle from the bag
 
             // FIXME: we need to ensure that the access privileges on each of the bundles is set correctly
@@ -161,11 +169,12 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             // now the METADATA
             // Note: this deletes the old metadata file, as we only want one at any one time.
             BaggedItem metadataFile = bag.getMetadata();
+            /* this is no longer necessary, as the bundle is emptied in advance
             Bitstream oldMetadata = metadata.getBitstreamByName(DuoConstants.METADATA_FILE);
             if (oldMetadata != null)
             {
                 metadata.removeBitstream(oldMetadata);
-            }
+            }*/
             Bitstream mdBs = this.writeToBundle(context, metadata, metadataFile);
             derivedResources.add(mdBs);
 
@@ -206,6 +215,19 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         catch (IOException e)
         {
             throw new DSpaceSwordException(e);
+        }
+    }
+
+    private void emptyBundle(Bundle bundle)
+            throws AuthorizeException, SQLException, IOException
+    {
+        Bitstream[] bitstreams = bundle.getBitstreams();
+        if (bitstreams != null)
+        {
+            for (Bitstream bs : bitstreams)
+            {
+                bundle.removeBitstream(bs);
+            }
         }
     }
 

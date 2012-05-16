@@ -20,7 +20,7 @@
     <xsl:template match="/fs:metadata/dcterms:title">
         <dim:field mdschema="dc" element="title">
             <xsl:if test="@xml:lang">
-                <xsl:attribute name="language"><xsl:value-of select="normalize-space(@xml:lang)"/></xsl:attribute>
+                <xsl:attribute name="lang"><xsl:value-of select="normalize-space(@xml:lang)"/></xsl:attribute>
             </xsl:if>
             <xsl:value-of select="normalize-space(.)"/>
         </dim:field>
@@ -140,7 +140,7 @@
     <xsl:template match="/fs:metadata/dcterms:abstract">
         <dim:field mdschema="dc" element="description" qualifier="abstract">
             <xsl:if test="@xml:lang">
-                <xsl:attribute name="language"><xsl:value-of select="normalize-space(@xml:lang)"/></xsl:attribute>
+                <xsl:attribute name="lang"><xsl:value-of select="normalize-space(@xml:lang)"/></xsl:attribute>
             </xsl:if>
             <xsl:value-of select="normalize-space(.)"/>
         </dim:field>

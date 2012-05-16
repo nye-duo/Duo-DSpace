@@ -3,6 +3,7 @@ package no.uio.duo;
 import no.uio.duo.bagit.BagIt;
 import no.uio.duo.bagit.BaggedItem;
 import org.dspace.authorize.AuthorizeException;
+import org.dspace.authorize.ResourcePolicy;
 import org.dspace.content.Bitstream;
 import org.dspace.content.BitstreamFormat;
 import org.dspace.content.Bundle;
@@ -12,8 +13,10 @@ import org.dspace.content.Item;
 import org.dspace.content.WorkspaceItem;
 import org.dspace.content.crosswalk.CrosswalkException;
 import org.dspace.content.crosswalk.IngestionCrosswalk;
+import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.core.PluginManager;
+import org.dspace.eperson.Group;
 import org.dspace.sword2.AbstractSwordContentIngester;
 import org.dspace.sword2.DSpaceSwordException;
 import org.dspace.sword2.DepositResult;
@@ -128,11 +131,11 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             // LICENSE - for the licence file (note the US spelling)
             //
             // we can prepare these bundles up-front
-            Bundle original = this.getBundle(item, DuoConstants.ORIGINAL_BUNDLE);
-            Bundle secondary = this.getBundle(item, DuoConstants.SECONDARY_BUNDLE);
-            Bundle secondaryRestricted = this.getBundle(item, DuoConstants.SECONDARY_RESTRICTED_BUNDLE);
-            Bundle metadata = this.getBundle(item, DuoConstants.METADATA_BUNDLE);
-            Bundle license = this.getBundle(item, DuoConstants.LICENSE_BUNDLE);
+            Bundle original = this.getBundle(context, item, DuoConstants.ORIGINAL_BUNDLE);
+            Bundle secondary = this.getBundle(context, item, DuoConstants.SECONDARY_BUNDLE);
+            Bundle secondaryRestricted = this.getBundle(context, item, DuoConstants.SECONDARY_RESTRICTED_BUNDLE);
+            Bundle metadata = this.getBundle(context, item, DuoConstants.METADATA_BUNDLE);
+            Bundle license = this.getBundle(context, item, DuoConstants.LICENSE_BUNDLE);
 
             // populate each bundle from the bag
 
@@ -201,7 +204,7 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         }
     }
 
-    private Bundle getBundle(Item item, String name)
+    private Bundle getBundle(Context context, Item item, String name)
             throws SQLException, AuthorizeException
     {
         Bundle[] bundles = item.getBundles(name);
@@ -214,6 +217,17 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         {
             bundle = item.createBundle(name);
         }
+
+        /*
+        // set a hyper restrictive resource policy for testing purposes
+        ResourcePolicy rp = ResourcePolicy.create(context);
+        rp.setAction(Constants.READ);
+        rp.setGroup(Group.findByName(context, "Administrator"));
+        rp.setResource(bundle);
+        rp.setResourceType(Constants.BUNDLE);
+        rp.update();
+        */
+        
         return bundle;
     }
 

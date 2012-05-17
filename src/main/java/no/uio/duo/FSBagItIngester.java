@@ -189,6 +189,11 @@ public class FSBagItIngester extends AbstractSwordContentIngester
                 this.addMetadataFromBitstream(context, item, mdBs);
             }
 
+            // FIXME: we may want to annotate the item's metadata with an identifier so that
+            // it gets properly identified by the event consumer later on (or that might not
+            // be necessary, since DUO has a security profile for bundles which we are
+            // adhering to)
+
             // finally write the item update
             boolean ignore = context.ignoreAuthorization();
             context.setIgnoreAuthorization(true);
@@ -244,16 +249,6 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         {
             bundle = item.createBundle(name);
         }
-
-        /*
-        // set a hyper restrictive resource policy for testing purposes
-        ResourcePolicy rp = ResourcePolicy.create(context);
-        rp.setAction(Constants.READ);
-        rp.setGroup(Group.findByName(context, "Administrator"));
-        rp.setResource(bundle);
-        rp.setResourceType(Constants.BUNDLE);
-        rp.update();
-        */
 
         return bundle;
     }

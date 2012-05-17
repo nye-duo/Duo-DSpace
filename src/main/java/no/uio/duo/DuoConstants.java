@@ -20,4 +20,7 @@ public class DuoConstants
 
     public static String OPEN = "open";
     public static String CLOSED = "closed";
+
+    public static String ADMIN_GROUP = "Administrator";
+    public static String ANON_GROUP = "Anonymous";
 }

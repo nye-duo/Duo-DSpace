@@ -121,18 +121,18 @@ public class FSEntryIngester implements SwordEntryIngester
         this.addFieldToItem(se.getEntry(), item, DuoConstants.GRADE_QNAME, gradeField);
 
         // deal with the embargo end date
-        String embargoEndField = ConfigurationManager.getProperty("embargo.field.lift");
+        String embargoEndField = ConfigurationManager.getProperty("embargo.field.terms");
         if (embargoEndField == null || "".equals(embargoEndField))
         {
             throw new DSpaceSwordException("No configuration, or configuration is invalid for: embargo.field.lift");
         }
         this.addFieldToItem(se.getEntry(), item, DuoConstants.EMBARGO_END_DATE_QNAME, embargoEndField);
 
-        // deal with the embargo end date
-        String embargoTypeField = ConfigurationManager.getProperty("embargo.field.terms");
+        // deal with the embargo type
+        String embargoTypeField = ConfigurationManager.getProperty("studentweb", "embargo-type.field");
         if (embargoTypeField == null || "".equals(embargoTypeField))
         {
-            throw new DSpaceSwordException("No configuration, or configuration is invalid for: embargo.field.terms");
+            throw new DSpaceSwordException("No configuration, or configuration is invalid for: embargo-type.field");
         }
         this.addFieldToItem(se.getEntry(), item, DuoConstants.EMBARGO_TYPE_QNAME, embargoTypeField);
     }

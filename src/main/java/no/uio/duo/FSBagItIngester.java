@@ -155,7 +155,7 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             // FIXME: we need to ensure that the access privileges on each of the bundles is set correctly
 
             // first the ORIGINAL bundle
-            TreeMap<Integer, BaggedItem> sequencedPrimaries = bag.getSequencedPrimaries();
+            TreeMap<Integer, BaggedItem> sequencedPrimaries = bag.getSequencedFinals();
             this.addInSequence(context, sequencedPrimaries, original, derivedResources);
 
             // next the SECONDARY bundle
@@ -168,7 +168,7 @@ public class FSBagItIngester extends AbstractSwordContentIngester
 
             // now the METADATA
             // Note: this deletes the old metadata file, as we only want one at any one time.
-            BaggedItem metadataFile = bag.getMetadata();
+            BaggedItem metadataFile = bag.getMetadataFile();
             /* this is no longer necessary, as the bundle is emptied in advance
             Bitstream oldMetadata = metadata.getBitstreamByName(DuoConstants.METADATA_FILE);
             if (oldMetadata != null)
@@ -179,7 +179,7 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             derivedResources.add(mdBs);
 
             // finally the LICENCE
-            BaggedItem licenceFile = bag.getLicence();
+            BaggedItem licenceFile = bag.getLicenceFile();
             Bitstream lbs = this.writeToBundle(context, license, licenceFile);
             derivedResources.add(lbs);
 

@@ -120,6 +120,13 @@
             <xsl:text>, </xsl:text>
             <xsl:value-of select="normalize-space(/fs:metadata/fs:givenName)"/>
         </dim:field>
+        <!-- note that we xwalk to both creator (for compliance with the norwegian recommendations)
+            and contributor (for compliance with DSpace functionality) -->
+        <dim:field mdschema="dc" element="contributor" qualifier="author">
+            <xsl:value-of select="normalize-space(/fs:metadata/fs:familyName)"/>
+            <xsl:text>, </xsl:text>
+            <xsl:value-of select="normalize-space(/fs:metadata/fs:givenName)"/>
+        </dim:field>
     </xsl:template>
 
     <!-- embargo type -->
@@ -142,13 +149,6 @@
             <xsl:if test="@xml:lang">
                 <xsl:attribute name="lang"><xsl:value-of select="normalize-space(@xml:lang)"/></xsl:attribute>
             </xsl:if>
-            <xsl:value-of select="normalize-space(.)"/>
-        </dim:field>
-    </xsl:template>
-
-    <!-- language -->
-    <xsl:template match="/fs:metadata/dcterms:language">
-        <dim:field mdschema="dc" element="language" qualifier="iso">
             <xsl:value-of select="normalize-space(.)"/>
         </dim:field>
     </xsl:template>

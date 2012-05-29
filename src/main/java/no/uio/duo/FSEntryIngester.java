@@ -143,11 +143,12 @@ public class FSEntryIngester implements SwordEntryIngester
         List<Element> elements = entry.getExtensions(qname);
         if (elements.size() != 0)
         {
+            MetadataManager mdm = new MetadataManager();
             Element element = elements.get(0);
             String text = element.getText();
             if (text != null)
             {
-                DCValue dc = this.makeDCValue(field, null);
+                DCValue dc = mdm.makeDCValue(field, null);
                 item.clearMetadata(dc.schema, dc.element, dc.qualifier, Item.ANY);
                 item.addMetadata(dc.schema, dc.element, dc.qualifier, null, text.trim());
             }
@@ -171,31 +172,13 @@ public class FSEntryIngester implements SwordEntryIngester
             throw new DSpaceSwordException("No configuration, or configuration is invalid for: sword.updated.field");
         }
 
-        DCValue dc = this.makeDCValue(field, null);
+        MetadataManager mdm = new MetadataManager();
+        DCValue dc = mdm.makeDCValue(field, null);
         item.clearMetadata(dc.schema, dc.element, dc.qualifier, Item.ANY);
         DCDate date = new DCDate(new Date());
         item.addMetadata(dc.schema, dc.element, dc.qualifier, null, date.toString());
 
         verboseDescription.append("Updated date added to response from item metadata where available");
-    }
-
-    private DCValue makeDCValue(String field, String value)
-                throws DSpaceSwordException
-    {
-        DCValue dcv = new DCValue();
-        String[] bits = field.split("\\.");
-        if (bits.length < 2 || bits.length > 3)
-        {
-            throw new DSpaceSwordException("invalid DC value: " + field);
-        }
-        dcv.schema = bits[0];
-        dcv.element = bits[1];
-        if (bits.length == 3)
-        {
-            dcv.qualifier = bits[2];
-        }
-        dcv.value = value;
-        return dcv;
     }
 
     /**

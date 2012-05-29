@@ -8,11 +8,13 @@ import org.dspace.content.Bitstream;
 import org.dspace.content.BitstreamFormat;
 import org.dspace.content.Bundle;
 import org.dspace.content.Collection;
+import org.dspace.content.DCValue;
 import org.dspace.content.DSpaceObject;
 import org.dspace.content.Item;
 import org.dspace.content.WorkspaceItem;
 import org.dspace.content.crosswalk.CrosswalkException;
 import org.dspace.content.crosswalk.IngestionCrosswalk;
+import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.core.PluginManager;
@@ -169,12 +171,6 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             // now the METADATA
             // Note: this deletes the old metadata file, as we only want one at any one time.
             BaggedItem metadataFile = bag.getMetadataFile();
-            /* this is no longer necessary, as the bundle is emptied in advance
-            Bitstream oldMetadata = metadata.getBitstreamByName(DuoConstants.METADATA_FILE);
-            if (oldMetadata != null)
-            {
-                metadata.removeBitstream(oldMetadata);
-            }*/
             Bitstream mdBs = this.writeToBundle(context, metadata, metadataFile);
             derivedResources.add(mdBs);
 
@@ -186,7 +182,13 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             // now we can crosswalk in the metadata
             if (deposit.isMetadataRelevant())
             {
-                this.addMetadataFromBitstream(context, item, mdBs);
+                MetadataManager mdm = new MetadataManager();
+
+                // remove the authority metadata
+                mdm.removeAuthorityMetadata(context, item);
+
+                // add the metadata from the metadata bitstream
+                mdm.addMetadataFromBitstream(context, item, mdBs);
             }
 
             // FIXME: we may want to annotate the item's metadata with an identifier so that
@@ -275,33 +277,9 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         }
     }
 
-    private void addMetadataFromBitstream(Context context, Item item, Bitstream bitstream)
-            throws AuthorizeException, IOException, SQLException, DSpaceSwordException
-    {
-        try
-        {
-            IngestionCrosswalk inxwalk = (IngestionCrosswalk) PluginManager.getNamedPlugin(IngestionCrosswalk.class, "FS");
-            if (inxwalk == null)
-            {
-                throw new DSpaceSwordException("No IngestionCrosswalk configured for FS");
-            }
-            SAXBuilder builder = new SAXBuilder();
-            Document document = builder.build(bitstream.retrieve());
-            Element element = document.getRootElement();
-            inxwalk.ingest(context, item, element);
-        }
-        catch (JDOMException e)
-        {
-            throw new DSpaceSwordException(e);
-        }
-        catch (CrosswalkException e)
-        {
-            throw new DSpaceSwordException(e);
-        }
-    }
-
     private String getTreatment()
     {
         return "Document has been unpackaged, and metadata extracted";
     }
+
 }

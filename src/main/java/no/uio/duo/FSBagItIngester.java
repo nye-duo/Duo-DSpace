@@ -281,6 +281,10 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         try
         {
             IngestionCrosswalk inxwalk = (IngestionCrosswalk) PluginManager.getNamedPlugin(IngestionCrosswalk.class, "FS");
+            if (inxwalk == null)
+            {
+                throw new DSpaceSwordException("No IngestionCrosswalk configured for FS");
+            }
             SAXBuilder builder = new SAXBuilder();
             Document document = builder.build(bitstream.retrieve());
             Element element = document.getRootElement();

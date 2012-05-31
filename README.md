@@ -1,10 +1,16 @@
 DUO Extensions for DSpace
 =========================
 
-This module contains plugins, extensions, and configuration for the DSpace implementation at the University of Oslo (DUO).
+This module contains plugins, extensions, and configuration for a DSpace implementation which will
+
+1. Support SWORDv2 deposit from StudentWeb
+2. Support harvesting content directly from CRISTIN
+
 
 Installation
 ------------
+
+FIXME: this should be created installed overlay, to avoid complex installation
 
 1. Build the code
 
@@ -14,7 +20,7 @@ Installation
 
     mvn dependency:copy-dependencies
 
-3. Deploy to installed DSpace: Copy the duo-1.0.jar and its dependencies to the DSpace swordv2 webapp's WEB-INF/lib directory
+3. Deploy to installed DSpace: Copy the duo-1.0.jar and its dependencies to the DSpace swordv2 webapp's WEB-INF/lib directory, and the DSpace lib directory
 
 4. Deploy the config: Copy the swordv2-server.cfg and studentweb.cfg files to the equivalent directory in DSpace
 
@@ -27,3 +33,8 @@ Installation
 	./dspace dsrun org.dspace.administer.MetadataImporter -f /home/richard/Code/External/Duo-DSpace/config/registries/fs-metadata.xml
 
 8. Restart tomcat
+
+9. Set up the cron job for lifting embargoes, which will need to use the command:
+
+	./dspace embargo-lifter
+

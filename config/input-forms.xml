@@ -50,6 +50,8 @@
 	   	 	<required>You must enter a main title for this item.</required>
 	   	</field>
 
+		<!-- student number -->
+
 		<!-- UID -->
 	   	<field>
 	   	 	<dc-schema>fs</dc-schema>
@@ -61,6 +63,14 @@
 	   	 	<hint>Enter the UID.</hint>
 	   	 	<required>You must enter a UID.</required>
 	   	</field>
+
+		<!-- Foedselsnummer -->
+    
+    	<!-- postal address -->
+    
+    	<!-- email -->
+    
+    	<!-- Telephone number -->
 
 		<!-- subject code -->
 		<field>

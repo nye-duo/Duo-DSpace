@@ -98,7 +98,7 @@
 		   	<required>You must enter a grade.</required>
 		</field> 
     
-    	<!-- unit code -->
+		<!-- unit code -->
 		<field>
 			<dc-schema>fs</dc-schema>
 			<dc-element>unitcode</dc-element>
@@ -110,7 +110,7 @@
 		   	<required>You must enter a unit code.</required>
 		</field>     	
     
-    	<!-- unit name -->
+		<!-- unit name -->
 		<field>
 			<dc-schema>fs</dc-schema>
 			<dc-element>unitname</dc-element>
@@ -122,8 +122,7 @@
 		   	<required>You must enter a unit name.</required>
 		</field>     	
     	
-    
-    	<!-- Author -->
+		<!-- Author -->
  		<field>
     		<dc-schema>dc</dc-schema>
     		<dc-element>contributor</dc-element>
@@ -135,7 +134,6 @@
     		<required></required>
  		</field>   	
 		<!-- need to update dc creator as well -->    	
-    	
     
     	<!-- embargo type -->
  		<field>

@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE input-forms SYSTEM "input-forms.dtd">
 
-
 <input-forms>
 
  <!-- The form-map maps collection handles to forms. DSpace does not       -->
@@ -75,7 +74,7 @@
 	   	 	<required>You must enter a subhect code.</required>
 		</field>
     
-    	<!-- subject title -->
+		<!-- subject title -->
 		<field>
 			<dc-schema>fs</dc-schema>
 			<dc-element>subjecttitle</dc-element>
@@ -87,7 +86,7 @@
 		   	<required>You must enter a subhect title.</required>
 		</field>    	
     
-    	<!-- grade -->
+		<!-- grade -->
 		<field>
 			<dc-schema>fs</dc-schema>
 			<dc-element>grade</dc-element>
@@ -247,52 +246,52 @@
  		</pair>  		 		
    	</value-pairs>
    
-   <!-- default language order: (from dspace 1.2.1)
+   	<!-- default language order: (from dspace 1.2.1)
 		"en_US", "en", "es", "de", "fr", "it", "ja", "zh", "other", ""
 	 -->
-   <value-pairs value-pairs-name="common_iso_languages" dc-term="language_iso">
-	 <pair>
-	   <displayed-value>N/A</displayed-value>
-	   <stored-value></stored-value>
-	 </pair>
-	 <pair>
-	   <displayed-value>English (United States)</displayed-value>
-	   <stored-value>en_US</stored-value>
-	  </pair>
-	 <pair>
-	   <displayed-value>English</displayed-value>
-	   <stored-value>en</stored-value>
-	 </pair>
-	 <pair>
-	   <displayed-value>Spanish</displayed-value>
-	   <stored-value>es</stored-value>
-	 </pair>
-	 <pair>
-	   <displayed-value>German</displayed-value>
-	   <stored-value>de</stored-value>
-	 </pair>
-	 <pair>
-	   <displayed-value>French</displayed-value>
-	   <stored-value>fr</stored-value>
-	 </pair>
-	 <pair>
-	   <displayed-value>Italian</displayed-value>
-	   <stored-value>it</stored-value>
-	 </pair>
-	 <pair>
-	   <displayed-value>Japanese</displayed-value>
-	   <stored-value>ja</stored-value>
-	 </pair>
-	 <pair>
-	   <displayed-value>Chinese</displayed-value>
-	   <stored-value>zh</stored-value>
-	 </pair>
-	 <pair>
-	   <displayed-value>(Other)</displayed-value>
-	   <stored-value>other</stored-value>
-	 </pair>
-   </value-pairs>
+   	<value-pairs value-pairs-name="common_iso_languages" dc-term="language_iso">
+	 	<pair>
+	   		<displayed-value>N/A</displayed-value>
+	   		<stored-value></stored-value>
+	 	</pair>
+	 	<pair>
+	   		<displayed-value>English (United States)</displayed-value>
+	   		<stored-value>en_US</stored-value>
+	  	</pair>
+	 	<pair>
+	   		<displayed-value>English</displayed-value>
+	   		<stored-value>en</stored-value>
+	 	</pair>
+	 	<pair>
+	   		<displayed-value>Spanish</displayed-value>
+	   		<stored-value>es</stored-value>
+	 	</pair>
+	 	<pair>
+	   		<displayed-value>German</displayed-value>
+	   		<stored-value>de</stored-value>
+	 	</pair>
+	 	<pair>
+	   		<displayed-value>French</displayed-value>
+	   		<stored-value>fr</stored-value>
+	 	</pair>
+	 	<pair>
+	   		<displayed-value>Italian</displayed-value>
+	   		<stored-value>it</stored-value>
+	 	</pair>
+	 	<pair>
+	   		<displayed-value>Japanese</displayed-value>
+	   		<stored-value>ja</stored-value>
+	 	</pair>
+	 	<pair>
+	   		<displayed-value>Chinese</displayed-value>
+	   		<stored-value>zh</stored-value>
+	 	</pair>
+	 	<pair>
+	   		<displayed-value>(Other)</displayed-value>
+	   		<stored-value>other</stored-value>
+	 	</pair>
+	</value-pairs>
 
-	</form-value-pairs>
+ </form-value-pairs>
 
 </input-forms>

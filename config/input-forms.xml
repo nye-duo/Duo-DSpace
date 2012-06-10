@@ -145,7 +145,7 @@
  		   	<dc-qualifier></dc-qualifier>
  		   	<repeatable>false</repeatable>
  		   	<label>Embargo Type</label>
- 		   	<input-type>onebox</input-type>
+ 		   	<input-type value-pairs-name="embargo_types">dropdown</input-type>
  		   	<hint>Enter the embargo type.</hint>
  		   	<required></required>
  		</field>     	
@@ -227,6 +227,25 @@
  			<stored-value>Thesis or Dissertation</stored-value>
  		</pair>
  	</value-pairs>
+ 	
+ 	<value-pairs value-pairs-name="embargo_types" dc-term="embargotype">
+ 		<pair>
+ 			<displayed-value>open</displayed-value>
+ 			<stored-value>open</stored-value>
+ 		</pair>
+ 		<pair>
+ 			<displayed-value>closed</displayed-value>
+ 			<stored-value>closed</stored-value>
+ 		</pair> 		
+ 		<pair>
+ 			<displayed-value>restricted</displayed-value>
+ 			<stored-value>restricted</stored-value>
+ 		</pair>
+ 		<pair>
+ 			<displayed-value>3 years</displayed-value>
+ 			<stored-value>3 years</stored-value>
+ 		</pair>  		 		
+   	</value-pairs>
    
    <!-- default language order: (from dspace 1.2.1)
 		"en_US", "en", "es", "de", "fr", "it", "ja", "zh", "other", ""

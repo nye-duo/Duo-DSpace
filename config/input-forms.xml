@@ -135,7 +135,7 @@
  		</field>   	
 		<!-- need to update dc creator as well -->    	
     
-    	<!-- embargo type -->
+		<!-- embargo type -->
  		<field>
  			<dc-schema>fs</dc-schema>
  		   	<dc-element>embargotype</dc-element>
@@ -146,48 +146,46 @@
  		   	<hint>Enter the embargo type.</hint>
  		   	<required></required>
  		</field>     	
-    	
-    
-    	<!-- embargo end date -->    	
-    	<field>
+
+		<!-- embargo end date -->    	
+		<field>
 			<dc-schema>dc</dc-schema>
-    		<dc-element>date</dc-element>
-    		<dc-qualifier>embargoenddate</dc-qualifier>
-    		<repeatable>false</repeatable>
-    		<label>Embargo End Date</label>
-    		<input-type>date</input-type>
-    		<hint>Please give the end date of the embargo.
-    		</hint>
-    		<required></required>
-    	</field>  	
+			<dc-element>date</dc-element>
+			<dc-qualifier>embargoenddate</dc-qualifier>
+			<repeatable>false</repeatable>
+			<label>Embargo End Date</label>
+			<input-type>date</input-type>
+			<hint>Please give the end date of the embargo.</hint>
+			<required></required>
+		</field>  	
     
-    	<!-- abstract -->
-    	<field>
+		<!-- abstract -->
+		<field>
  			<dc-schema>dc</dc-schema>
-    		<dc-element>description</dc-element>
-    		<dc-qualifier>abstract</dc-qualifier>
-    		<repeatable>false</repeatable>
-    		<label>Abstract</label>
-    		<input-type>textarea</input-type>
-    		<hint> Enter the abstract of the item below. </hint>
-    		<required></required>
+			<dc-element>description</dc-element>
+			<dc-qualifier>abstract</dc-qualifier>
+			<repeatable>false</repeatable>
+			<label>Abstract</label>
+			<input-type>textarea</input-type>
+			<hint> Enter the abstract of the item below. </hint>
+			<required></required>
  		</field>
     
-    	<!-- language -->
-	   <field>
-	   	 	<dc-schema>dc</dc-schema>
-	   	 	<dc-element>language</dc-element>
-	   	 	<dc-qualifier>iso</dc-qualifier>
-	   	 	<repeatable>false</repeatable>
-	   	 	<label>Language</label>
-	   	 	<input-type value-pairs-name="common_iso_languages">dropdown</input-type>
-	   	 	<hint>Select the language of the main content of the item.  If the language does not appear in the list below, please select 'Other'.  If the content does not really have a language (for example, if it is a dataset or an image) please select 'N/A'.</hint>
-	   	 	<required></required>
+		<!-- language -->
+		<field>
+			<dc-schema>dc</dc-schema>
+			<dc-element>language</dc-element>
+			<dc-qualifier>iso</dc-qualifier>
+			<repeatable>false</repeatable>
+			<label>Language</label>
+			<input-type value-pairs-name="common_iso_languages">dropdown</input-type>
+			<hint>Select the language of the main content of the item.  If the language does not appear in the list below, please select 'Other'.  If the content does not really have a language (for example, if it is a dataset or an image) please select 'N/A'.</hint>
+			<required></required>
 		</field>
 
 		<!-- type -->
 		<field>
-			 <dc-schema>dc</dc-schema>
+			<dc-schema>dc</dc-schema>
 			<dc-element>type</dc-element>
 			<dc-qualifier></dc-qualifier>
 			<repeatable>true</repeatable>

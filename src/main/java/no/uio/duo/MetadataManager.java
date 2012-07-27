@@ -101,7 +101,13 @@ public class MetadataManager
     public void removeAuthorityMetadata(Context context, Item item)
             throws DSpaceSwordException
     {
-        String raw = ConfigurationManager.getProperty("swordv2-server", "metadata.replaceable");
+        this.removeAuthorityMetadata(context, item, "swordv2-server", "metadata.replaceable");
+    }
+
+    public void removeAuthorityMetadata(Context context, Item item, String module, String config)
+            throws DSpaceSwordException
+    {
+        String raw = ConfigurationManager.getProperty(module, config);
         if (raw == null || "".equals(raw))
         {
             return;

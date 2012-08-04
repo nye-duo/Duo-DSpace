@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<frida xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://frida.usit.uio.no/eksport/forskningsresultater/fridaEksport.xsd">
+    <datoGenerert>2012-06-08</datoGenerert>
+    <skjemaversjon>1.0</skjemaversjon>
+    <forskningsresultat>
+        <fellesdata>
+            <id>12087</id>
+            <eier>
+                <kode>UIO</kode>
+                <navn>Universitetet i Oslo</navn>
+                <navnEngelsk>University of Oslo</navnEngelsk>
+                <akronym>UiO</akronym>
+                <datoNSDRapport>2012-03-30</datoNSDRapport>
+            </eier>
+            <registrert>
+                <dato>2004-11-25T17:02:32Z</dato>
+                <person>
+                    <id>24115</id>
+                    <etternavn>Lien</etternavn>
+                    <fornavn>Marianne Elisabeth</fornavn>
+                </person>
+                <institusjon>
+                    <institusjonsnr>185</institusjonsnr>
+                    <navn>Universitetet i Oslo</navn>
+                    <navnEngelsk>University of Oslo</navnEngelsk>
+                    <akronym>UIO</akronym>
+                    <land>
+                        <kode>NO</kode>
+                        <navn>Norge</navn>
+                        <navnEngelsk>Norway</navnEngelsk>
+                    </land>
+                </institusjon>
+            </registrert>
+            <endret>
+                <dato>2005-03-11T13:51:22Z</dato>
+                <person>
+                    <id>21097</id>
+                    <etternavn>Jensen</etternavn>
+                    <fornavn>Alf Chr</fornavn>
+                </person>
+                <institusjon>
+                    <institusjonsnr>185</institusjonsnr>
+                    <navn>Universitetet i Oslo</navn>
+                    <navnEngelsk>University of Oslo</navnEngelsk>
+                    <akronym>UIO</akronym>
+                    <land>
+                        <kode>NO</kode>
+                        <navn>Norge</navn>
+                        <navnEngelsk>Norway</navnEngelsk>
+                    </land>
+                </institusjon>
+            </endret>
+            <kategori>
+                <hovedkategori>
+                    <kode>BOK</kode>
+                    <navn>Bok</navn>
+                    <navnEngelsk>Book</navnEngelsk>
+                </hovedkategori>
+                <underkategori>
+                    <kode>ANTOLOGI</kode>
+                    <navn>Vitenskapelig antologi</navn>
+                    <navnEngelsk>Academic anthology</navnEngelsk>
+                </underkategori>
+            </kategori>
+            <person>
+                <id>24115</id>
+                <harFodselsnummer>true</harFodselsnummer>
+                <rekkefolgenr>1</rekkefolgenr>
+                <etternavn>Lien</etternavn>
+                <fornavn>Marianne Elisabeth</fornavn>
+                <tilhorighet>
+                    <sted>
+                        <institusjonsnr>185</institusjonsnr>
+                        <avdnr>17</avdnr>
+                        <undavdnr>9</undavdnr>
+                        <gruppenr>0</gruppenr>
+                        <navn>Sosialantropologisk institutt</navn>
+                        <navnEngelsk>Department of Social Anthropology</navnEngelsk>
+                        <institusjon>
+                            <institusjonsnr>185</institusjonsnr>
+                            <navn>Universitetet i Oslo</navn>
+                            <navnEngelsk>University of Oslo</navnEngelsk>
+                            <akronym>UIO</akronym>
+                            <land>
+                                <kode>NO</kode>
+                                <navn>Norge</navn>
+                                <navnEngelsk>Norway</navnEngelsk>
+                            </land>
+                        </institusjon>
+                        <rolle>
+                            <kode>REDAKTØR</kode>
+                            <navn>Redaktør</navn>
+                            <navnEngelsk>Editor</navnEngelsk>
+                        </rolle>
+                    </sted>
+                </tilhorighet>
+            </person>
+            <person>
+                <id>139127</id>
+                <harFodselsnummer>false</harFodselsnummer>
+                <rekkefolgenr>2</rekkefolgenr>
+                <etternavn>Nerlich</etternavn>
+                <fornavn>Brigitte</fornavn>
+                <tilhorighet>
+                    <sted>
+                        <institusjonsnr>0</institusjonsnr>
+                        <avdnr>0</avdnr>
+                        <undavdnr>0</undavdnr>
+                        <gruppenr>0</gruppenr>
+                        <navn>Ukjent</navn>
+                        <navnEngelsk>Unknown</navnEngelsk>
+                        <institusjon>
+                            <institusjonsnr>0</institusjonsnr>
+                            <navn>Ukjent institusjon</navn>
+                            <navnEngelsk>Unknown unit</navnEngelsk>
+                            <akronym>UKJENT</akronym>
+                            <land>
+                                <kode>NO</kode>
+                                <navn>Norge</navn>
+                                <navnEngelsk>Norway</navnEngelsk>
+                            </land>
+                        </institusjon>
+                        <rolle>
+                            <kode>REDAKTØR</kode>
+                            <navn>Redaktør</navn>
+                            <navnEngelsk>Editor</navnEngelsk>
+                        </rolle>
+                    </sted>
+                </tilhorighet>
+            </person>
+            <sprak>
+                <kode>EN</kode>
+                <navn>Engelsk</navn>
+                <navnEngelsk>English</navnEngelsk>
+            </sprak>
+            <tittel>The Politics of Food</tittel>
+            <ar>2004</ar>
+            <sammendrag>
+                <sprak>
+                    <kode>EN</kode>
+                    <navn>Engelsk</navn>
+                    <navnEngelsk>English</navnEngelsk>
+                </sprak>
+            <tekst>� Is shopping for food really a political act? � How is it that in a world
+                    with enough food for everyone, more people than ever go hungry? � Why did
+                    the French resistance against GMO-foods become a fight against McDonalds? �
+                    Why did the Foot-and-Mouth epidemic in the UK become a problem for consumers?
+                    Capable of connecting human bodies to abstract nations and techno-science
+                    to moral concerns, food has become one of the most contested fields of our
+                    time. It is high on the political agenda throughout the world. With disease,
+                    contamination, famine, hunger and imbalanced food markets all unfortunate
+                    realities, a book that interrogates the politics of food is long overdue.
+                    From the BSE outbreak in the 1990s through to cultural taboos and the genetic
+                    modification of produce and livestock, this timely book raises provocative
+                    questions about how we relate to food in the 21st century. Recent food
+                    scandals and GMO controversies have shattered the idea that �food is food�
+                    as we have always known it and exposed fundamental dilemmas related to risk and
+                    control. Taking as its starting point the premise that food is politicized in
+                    arenas not commonly thought of as political, The Politics of Food explores
+                    issues surrounding the development of global food markets in underdeveloped
+                    nations and addresses recent events that have had a profound impact on how
+                    consumers feel about what they eat. The epidemic of Foot-and-Mouth disease
+                    that swept through the UK in 2001 spawned a series of questions concerning the
+                    real costs of cheap food. What lessons have been learned? And how are food
+                    choices linked to the politics of food markets? With globalization, food has
+                    increasingly become entangled in webs of political significance. Through
+                    ethnographic case studies, this book reveals how food has come to serve a key
+                    role in political resistance, grassroots activism and nation-building. Anyone
+                    interested in globalization, food safety, or what food choices say about food
+                    politics will find this book essential reading.
+                </tekst>
+            </sammendrag>
+            <emneord>
+                <id>1227</id>
+                <navn>Politikk</navn>
+                <navnEngelsk>Politics</navnEngelsk>
+            </emneord>
+            <emneord>
+                <id>1214</id>
+                <navn>Globalisering</navn>
+                <navnEngelsk>Globalization</navnEngelsk>
+            </emneord>
+            <emneord>
+                <id>2177</id>
+                <navn>Forbruk</navn>
+                <navnEngelsk>Consumption</navnEngelsk>
+            </emneord>
+            <emneord>
+                <id>1971</id>
+                <navn>Mat</navn>
+                <navnEngelsk>Food</navnEngelsk>
+            </emneord>
+            <emneord>
+                <id>3975</id>
+                <navn>Matproduksjon</navn>
+                <navnEngelsk>Food production</navnEngelsk>
+            </emneord>
+            <erPublisert>true</erPublisert>
+            <fulltekst>
+                <nr>1</nr>
+                <type>preprint</type>
+                <navn>1-introduction.doc</navn>
+                <antallBytes>93696</antallBytes>
+                <dato>2011-07-27</dato>
+                <personreferanse>Marianne Elisabeth Lien, UIO</personreferanse>
+            </fulltekst>
+        </fellesdata>
+        <kategoridata>
+            <bokRapport>
+                <forlag>
+                    <id>103</id>
+                    <navn>Berg Publishers</navn>
+                    <kvalitetsniva>
+                        <kode>2</kode>
+                        <navn>Kvalitetsnivå 2</navn>
+                        <navnEngelsk>Quality level 2</navnEngelsk>
+                    </kvalitetsniva>
+                </forlag>
+                <isbn>1-85973-853-2</isbn>
+                <antallSider>244</antallSider>
+                <deler>
+                    <forskningsresultat>
+                        <fellesdata>
+                            <id>69883</id>
+                            <eier>
+                                <kode>UIO</kode>
+                                <navn>Universitetet i Oslo</navn>
+                                <navnEngelsk>University of Oslo</navnEngelsk>
+                                <akronym>UiO</akronym>
+                                <datoNSDRapport>2012-03-30</datoNSDRapport>
+                            </eier>
+                            <registrert>
+                                <dato>2004-11-25T17:06:07Z</dato>
+                                <person>
+                                    <id>24115</id>
+                                    <etternavn>Lien</etternavn>
+                                    <fornavn>Marianne Elisabeth</fornavn>
+                                </person>
+                                <institusjon>
+                                    <institusjonsnr>185</institusjonsnr>
+                                    <navn>Universitetet i Oslo</navn>
+                                    <navnEngelsk>University of Oslo</navnEngelsk>
+                                    <akronym>UIO</akronym>
+                                    <land>
+                                        <kode>NO</kode>
+                                        <navn>Norge</navn>
+                                        <navnEngelsk>Norway</navnEngelsk>
+                                    </land>
+                                </institusjon>
+                            </registrert>
+                            <endret>
+                                <dato>2004-11-25T17:06:07Z</dato>
+                                <person>
+                                    <id>24115</id>
+                                    <etternavn>Lien</etternavn>
+                                    <fornavn>Marianne Elisabeth</fornavn>
+                                </person>
+                                <institusjon>
+                                    <institusjonsnr>185</institusjonsnr>
+                                    <navn>Universitetet i Oslo</navn>
+                                    <navnEngelsk>University of Oslo</navnEngelsk>
+                                    <akronym>UIO</akronym>
+                                    <land>
+                                        <kode>NO</kode>
+                                        <navn>Norge</navn>
+                                        <navnEngelsk>Norway</navnEngelsk>
+                                    </land>
+                                </institusjon>
+                            </endret>
+                            <kategori>
+                                <hovedkategori>
+                                    <kode>BOKRAPPORTDEL</kode>
+                                    <navn>Del av bok/rapport</navn>
+                                    <navnEngelsk>Part of a book/report</navnEngelsk>
+                                </hovedkategori>
+                                <underkategori>
+                                    <kode>KAPITTEL</kode>
+                                    <navn>Vitenskapelig Kapittel/Artikkel</navn>
+                                    <navnEngelsk>Academic chapter/article</navnEngelsk>
+                                </underkategori>
+                            </kategori>
+                            <person>
+                                <id>24115</id>
+                                <harFodselsnummer>true</harFodselsnummer>
+                                <rekkefolgenr>1</rekkefolgenr>
+                                <etternavn>Lien</etternavn>
+                                <fornavn>Marianne Elisabeth</fornavn>
+                                <tilhorighet>
+                                    <sted>
+                                        <institusjonsnr>185</institusjonsnr>
+                                        <avdnr>17</avdnr>
+                                        <undavdnr>9</undavdnr>
+                                        <gruppenr>0</gruppenr>
+                                        <navn>Sosialantropologisk institutt</navn>
+                                        <navnEngelsk>Department of Social Anthropology</navnEngelsk>
+                                        <institusjon>
+                                            <institusjonsnr>185</institusjonsnr>
+                                            <navn>Universitetet i Oslo</navn>
+                                            <navnEngelsk>University of Oslo</navnEngelsk>
+                                            <akronym>UIO</akronym>
+                                            <land>
+                                                <kode>NO</kode>
+                                                <navn>Norge</navn>
+                                                <navnEngelsk>Norway</navnEngelsk>
+                                            </land>
+                                        </institusjon>
+                                        <rolle>
+                                            <kode>FORFATTER</kode>
+                                            <navn>Forfatter</navn>
+                                            <navnEngelsk>Author</navnEngelsk>
+                                        </rolle>
+                                    </sted>
+                                </tilhorighet>
+                            </person>
+                            <sprak>
+                                <kode>EN</kode>
+                                <navn>Engelsk</navn>
+                                <navnEngelsk>English</navnEngelsk>
+                            </sprak>
+                            <tittel>Dogs, Whales and Kangaroos: Transnational Activism and Food Taboos</tittel>
+                            <ar>2004</ar>
+                            <arRapportert>2004</arRapportert>
+                            <ressurs>
+                                <type>
+                                    <kode>ARKIV</kode>
+                                    <navn>Institusjonsarkiv</navn>
+                                    <navnEngelsk>Institutional archive</navnEngelsk>
+                                </type>
+                                <url>http://urn.nb.no/URN:NBN:no-28671</url>
+                            </ressurs>
+                            <erPublisert>true</erPublisert>
+                            <kontrollert>
+                                <dato>2005-03-11T13:55:34Z</dato>
+                                <person>
+                                    <id>21097</id>
+                                    <etternavn>Jensen</etternavn>
+                                    <fornavn>Alf Chr</fornavn>
+                                    <institusjon>
+                                        <institusjonsnr>185</institusjonsnr>
+                                        <navn>Universitetet i Oslo</navn>
+                                        <navnEngelsk>University of Oslo</navnEngelsk>
+                                        <akronym>UIO</akronym>
+                                        <land>
+                                            <kode>NO</kode>
+                                            <navn>Norge</navn>
+                                            <navnEngelsk>Norway</navnEngelsk>
+                                        </land>
+                                    </institusjon>
+                                </person>
+                                <godkjent>J</godkjent>
+                            </kontrollert>
+                            <rapportdata>
+                                <ar>2004</ar>
+                                <publikasjonsform>
+                                    <kode>2</kode>
+                                    <navn>Artikkel i antologi</navn>
+                                    <navnEngelsk>Article in anthology</navnEngelsk>
+                                </publikasjonsform>
+                                <publikasjonskanal>
+                                    <forlag>
+                                        <id>103</id>
+                                        <navn>Berg Publishers</navn>
+                                        <kvalitetsniva>
+                                            <kode>2</kode>
+                                            <navn>Kvalitetsnivå 2</navn>
+                                            <navnEngelsk>Quality level 2</navnEngelsk>
+                                        </kvalitetsniva>
+                                    </forlag>
+                                </publikasjonskanal>
+                            </rapportdata>
+                            <fulltekst>
+                                <nr>1</nr>
+                                <type>preprint</type>
+                                <navn>10-lien.doc</navn>
+                                <antallBytes>103424</antallBytes>
+                                <dato>2011-07-27</dato>
+                                <personreferanse>Marianne Elisabeth Lien, UIO</personreferanse>
+                            </fulltekst>
+                        </fellesdata>
+                        <kategoridata>
+                            <bokRapportDel>
+                                <delangivelse>kapittel 10</delangivelse>
+                                <sideangivelse>
+                                    <sideFra>179</sideFra>
+                                    <sideTil>199</sideTil>
+                                </sideangivelse>
+                            </bokRapportDel>
+                        </kategoridata>
+                    </forskningsresultat>
+
+                    <forskningsresultat>
+                        <fellesdata>
+                            <id>69884</id>
+                            <eier>
+                                <kode>UIO</kode>
+                                <navn>Universitetet i Oslo</navn>
+                                <navnEngelsk>University of Oslo</navnEngelsk>
+                                <akronym>UiO</akronym>
+                                <datoNSDRapport>2012-03-30</datoNSDRapport>
+                            </eier>
+                            <registrert>
+                                <dato>2004-11-25T17:04:40Z</dato>
+                                <person>
+                                    <id>24115</id>
+                                    <etternavn>Lien</etternavn>
+                                    <fornavn>Marianne Elisabeth</fornavn>
+                                </person>
+                                <institusjon>
+                                    <institusjonsnr>185</institusjonsnr>
+                                    <navn>Universitetet i Oslo</navn>
+                                    <navnEngelsk>University of Oslo</navnEngelsk>
+                                    <akronym>UIO</akronym>
+                                    <land>
+                                        <kode>NO</kode>
+                                        <navn>Norge</navn>
+                                        <navnEngelsk>Norway</navnEngelsk>
+                                    </land>
+                                </institusjon>
+                            </registrert>
+                            <endret>
+                                <dato>2004-11-25T17:04:40Z</dato>
+                                <person>
+                                    <id>24115</id>
+                                    <etternavn>Lien</etternavn>
+                                    <fornavn>Marianne Elisabeth</fornavn>
+                                </person>
+                                <institusjon>
+                                    <institusjonsnr>185</institusjonsnr>
+                                    <navn>Universitetet i Oslo</navn>
+                                    <navnEngelsk>University of Oslo</navnEngelsk>
+                                    <akronym>UIO</akronym>
+                                    <land>
+                                        <kode>NO</kode>
+                                        <navn>Norge</navn>
+                                        <navnEngelsk>Norway</navnEngelsk>
+                                    </land>
+                                </institusjon>
+                            </endret>
+                            <kategori>
+                                <hovedkategori>
+                                    <kode>BOKRAPPORTDEL</kode>
+                                    <navn>Del av bok/rapport</navn>
+                                    <navnEngelsk>Part of a book/report</navnEngelsk>
+                                </hovedkategori>
+                                <underkategori>
+                                    <kode>KAPITTEL</kode>
+                                    <navn>Vitenskapelig Kapittel/Artikkel</navn>
+                                    <navnEngelsk>Academic chapter/article</navnEngelsk>
+                                </underkategori>
+                            </kategori>
+                            <person>
+                                <id>24115</id>
+                                <harFodselsnummer>true</harFodselsnummer>
+                                <rekkefolgenr>1</rekkefolgenr>
+                                <etternavn>Lien</etternavn>
+                                <fornavn>Marianne Elisabeth</fornavn>
+                                <tilhorighet>
+                                    <sted>
+                                        <institusjonsnr>185</institusjonsnr>
+                                        <avdnr>17</avdnr>
+                                        <undavdnr>9</undavdnr>
+                                        <gruppenr>0</gruppenr>
+                                        <navn>Sosialantropologisk institutt</navn>
+                                        <navnEngelsk>Department of Social Anthropology</navnEngelsk>
+                                        <institusjon>
+                                            <institusjonsnr>185</institusjonsnr>
+                                            <navn>Universitetet i Oslo</navn>
+                                            <navnEngelsk>University of Oslo</navnEngelsk>
+                                            <akronym>UIO</akronym>
+                                            <land>
+                                                <kode>NO</kode>
+                                                <navn>Norge</navn>
+                                                <navnEngelsk>Norway</navnEngelsk>
+                                            </land>
+                                        </institusjon>
+                                        <rolle>
+                                            <kode>FORFATTER</kode>
+                                            <navn>Forfatter</navn>
+                                            <navnEngelsk>Author</navnEngelsk>
+                                        </rolle>
+                                    </sted>
+                                </tilhorighet>
+                            </person>
+                            <sprak>
+                                <kode>EN</kode>
+                                <navn>Engelsk</navn>
+                                <navnEngelsk>English</navnEngelsk>
+                            </sprak>
+                            <tittel>The Politics of Food: An Introduction</tittel>
+                            <ar>2004</ar>
+                            <arRapportert>2004</arRapportert>
+                            <erPublisert>true</erPublisert>
+                            <kontrollert>
+                                <dato>2005-03-11T13:52:37Z</dato>
+                                <person>
+                                    <id>21097</id>
+                                    <etternavn>Jensen</etternavn>
+                                    <fornavn>Alf Chr</fornavn>
+                                    <institusjon>
+                                        <institusjonsnr>185</institusjonsnr>
+                                        <navn>Universitetet i Oslo</navn>
+                                        <navnEngelsk>University of Oslo</navnEngelsk>
+                                        <akronym>UIO</akronym>
+                                        <land>
+                                            <kode>NO</kode>
+                                            <navn>Norge</navn>
+                                            <navnEngelsk>Norway</navnEngelsk>
+                                        </land>
+                                    </institusjon>
+                                </person>
+                                <godkjent>J</godkjent>
+                            </kontrollert>
+                            <rapportdata>
+                                <ar>2004</ar>
+                                <publikasjonsform>
+                                    <kode>2</kode>
+                                    <navn>Artikkel i antologi</navn>
+                                    <navnEngelsk>Article in anthology</navnEngelsk>
+                                </publikasjonsform>
+                                <publikasjonskanal>
+                                    <forlag>
+                                        <id>103</id>
+                                        <navn>Berg Publishers</navn>
+                                        <kvalitetsniva>
+                                            <kode>2</kode>
+                                            <navn>Kvalitetsnivå 2</navn>
+                                            <navnEngelsk>Quality level 2</navnEngelsk>
+                                        </kvalitetsniva>
+                                    </forlag>
+                                </publikasjonskanal>
+                            </rapportdata>
+                        </fellesdata>
+                        <kategoridata>
+                            <bokRapportDel>
+                                <delangivelse>Introduksjon</delangivelse>
+                                <sideangivelse>
+                                    <sideFra>1</sideFra>
+                                    <sideTil>17</sideTil>
+                                </sideangivelse>
+                            </bokRapportDel>
+                        </kategoridata>
+                    </forskningsresultat>
+                </deler>
+            </bokRapport>
+        </kategoridata>
+    </forskningsresultat>
+</frida>

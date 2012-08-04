@@ -32,10 +32,13 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 public class CristinOREImporter implements IngestionCrosswalk
@@ -209,8 +212,7 @@ public class CristinOREImporter implements IngestionCrosswalk
         	}
         }
 
-        // FIXME: once ingested, we need to crosswalk from the METADATA bundle
-        // to the item itself
+        // update the metadata from the metadata bundle
         this.addMetadataFromBitstream(context, item, metadataBitstream);
 
         log.info("OREIngest for Item "+ item.getID() + " took: " + (new Date().getTime() - timeStart.getTime()) + "ms.");
@@ -273,23 +275,48 @@ public class CristinOREImporter implements IngestionCrosswalk
 		return processedString.toString();
     }
 
+    private String getType(Document document)
+            throws JDOMException
+    {
+        Properties props = ConfigurationManager.getProperties("cristin");
+        for (Object key : props.keySet())
+        {
+            if (((String) key).startsWith("xpath"))
+            {
+                String xp = (String) props.get(key);
+                XPath xpath = XPath.newInstance(xp);
+                List result = xpath.selectNodes(document);
+                if (result.size() > 0)
+                {
+                    return ((String) key).substring("xpath.".length());
+                }
+            }
+        }
+        return null;
+    }
+
     public void addMetadataFromBitstream(Context context, Item item, Bitstream bitstream)
             throws AuthorizeException, IOException, SQLException, CrosswalkException
     {
         try
         {
-            // FIXME: needs to select the appropriate crosswalk for the document type
-
             // load the document into an Element
             SAXBuilder builder = new SAXBuilder();
             Document document = builder.build(bitstream.retrieve());
             Element element = document.getRootElement();
 
+            // we have to determine the publication type in order to choose the crosswalk
+            String typeConfig = this.getType(document);
+            if (typeConfig == null)
+            {
+                return;
+            }
+
             // prep up the ingestion kit
-            IngestionCrosswalk inxwalk = (IngestionCrosswalk) PluginManager.getNamedPlugin(IngestionCrosswalk.class, "FS");
+            IngestionCrosswalk inxwalk = (IngestionCrosswalk) PluginManager.getNamedPlugin(IngestionCrosswalk.class, typeConfig);
             if (inxwalk == null)
             {
-                throw new CrosswalkException("No IngestionCrosswalk configured for FS");
+                throw new CrosswalkException("No IngestionCrosswalk configured for " + typeConfig);
             }
             
             // now we can do the ingest

@@ -5,19 +5,24 @@ import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.Bitstream;
 import org.dspace.content.BitstreamFormat;
 import org.dspace.content.Bundle;
+import org.dspace.content.DCValue;
 import org.dspace.content.DSpaceObject;
 import org.dspace.content.FormatIdentifier;
 import org.dspace.content.Item;
 import org.dspace.content.crosswalk.CrosswalkException;
 import org.dspace.content.crosswalk.CrosswalkObjectNotSupported;
 import org.dspace.content.crosswalk.IngestionCrosswalk;
+import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
+import org.dspace.core.PluginManager;
+import org.dspace.sword2.DSpaceSwordException;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
+import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
 import java.io.FileNotFoundException;
@@ -104,7 +109,8 @@ public class CristinOREImporter implements IngestionCrosswalk
 			throw new CrosswalkException("JDOM exception occured while ingesting the ORE", e);
 		}
 
-        // FIXME: ensure that the bitstreams are created in the right place...
+        // prep a metadata bitstream that we will extract metadata from later
+        Bitstream metadataBitstream = null;
         
 		// Next for each resource, create a bitstream
     	XPath xpathDesc;
@@ -191,6 +197,12 @@ public class CristinOREImporter implements IngestionCrosswalk
 
 	            targetBundle.addBitstream(newBitstream);
 	        	targetBundle.update();
+
+                // if this was a metadata bitstream then remember it for later
+                if ("METADATA".equals(bundleName))
+                {
+                    metadataBitstream = newBitstream;
+                }
         	}
         	else {
         		throw new CrosswalkException("Could not retrieve bitstream: " + entryId);
@@ -199,6 +211,7 @@ public class CristinOREImporter implements IngestionCrosswalk
 
         // FIXME: once ingested, we need to crosswalk from the METADATA bundle
         // to the item itself
+        this.addMetadataFromBitstream(context, item, metadataBitstream);
 
         log.info("OREIngest for Item "+ item.getID() + " took: " + (new Date().getTime() - timeStart.getTime()) + "ms.");
 	}
@@ -258,5 +271,40 @@ public class CristinOREImporter implements IngestionCrosswalk
 		}
 
 		return processedString.toString();
+    }
+
+    public void addMetadataFromBitstream(Context context, Item item, Bitstream bitstream)
+            throws AuthorizeException, IOException, SQLException, CrosswalkException
+    {
+        try
+        {
+            // FIXME: needs to select the appropriate crosswalk for the document type
+
+            // load the document into an Element
+            SAXBuilder builder = new SAXBuilder();
+            Document document = builder.build(bitstream.retrieve());
+            Element element = document.getRootElement();
+
+            // prep up the ingestion kit
+            IngestionCrosswalk inxwalk = (IngestionCrosswalk) PluginManager.getNamedPlugin(IngestionCrosswalk.class, "FS");
+            if (inxwalk == null)
+            {
+                throw new CrosswalkException("No IngestionCrosswalk configured for FS");
+            }
+            
+            // now we can do the ingest
+            inxwalk.ingest(context, item, element);
+
+            // finally, write the changes
+            item.update();
+        }
+        catch (JDOMException e)
+        {
+            throw new CrosswalkException(e);
+        }
+        catch (CrosswalkException e)
+        {
+            throw new CrosswalkException(e);
+        }
     }
 }

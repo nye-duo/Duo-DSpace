@@ -16,6 +16,7 @@ import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.core.PluginManager;
+import org.dspace.harvest.OAIConfigurableCrosswalk;
 import org.dspace.sword2.DSpaceSwordException;
 import org.jdom.Attribute;
 import org.jdom.Document;
@@ -41,7 +42,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-public class CristinOREImporter implements IngestionCrosswalk
+public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCrosswalk
 {
     /** log4j category */
     private static Logger log = Logger.getLogger(CristinOREImporter.class);
@@ -60,36 +61,46 @@ public class CristinOREImporter implements IngestionCrosswalk
     private static final Namespace DS_NS =
     	Namespace.getNamespace("ds","http://www.dspace.org/objectModel/");
 
+    private boolean updateBitstreams = true;
+
+    public void configure(Properties props)
+    {
+        this.updateBitstreams = (Boolean) props.get("update_bitstreams");
+    }
 
 
-	public void ingest(Context context, DSpaceObject dso, List<Element> metadata) throws CrosswalkException, IOException, SQLException, AuthorizeException {
+	public void ingest(Context context, DSpaceObject dso, List<Element> metadata)
+            throws CrosswalkException, IOException, SQLException, AuthorizeException
+    {
 
 		// If this list contains only the root already, just pass it on
-        if (metadata.size() == 1) {
+        if (metadata.size() == 1)
+        {
 			ingest(context, dso, metadata.get(0));
 		}
 		// Otherwise, wrap them up
-		else {
+		else
+        {
 			Element wrapper = new Element("wrap", metadata.get(0).getNamespace());
 			wrapper.addContent(metadata);
 
-			ingest(context,dso,wrapper);
+			ingest(context, dso, wrapper);
 		}
 	}
 
-
-
-	public void ingest(Context context, DSpaceObject dso, Element root) throws CrosswalkException, IOException, SQLException, AuthorizeException {
-
+	public void ingest(Context context, DSpaceObject dso, Element root)
+            throws CrosswalkException, IOException, SQLException, AuthorizeException
+    {
 		Date timeStart = new Date();
 
 		if (dso.getType() != Constants.ITEM)
         {
-            throw new CrosswalkObjectNotSupported("OREIngestionCrosswalk can only crosswalk an Item.");
+            throw new CrosswalkObjectNotSupported("CristinOREImporter can only crosswalk an Item.");
         }
         Item item = (Item)dso;
 
-        if (root == null) {
+        if (root == null)
+        {
         	System.err.println("The element received by ingest was null");
         	return;
         }
@@ -100,7 +111,8 @@ public class CristinOREImporter implements IngestionCrosswalk
         XPath xpathLinks;
         List<Element> aggregatedResources;
         String entryId;
-		try {
+		try
+        {
 			xpathLinks = XPath.newInstance("/atom:entry/atom:link[@rel=\"" + ORE_NS.getURI()+"aggregates" + "\"]");
 			xpathLinks.addNamespace(ATOM_NS);
 	        aggregatedResources = xpathLinks.selectNodes(doc);
@@ -108,82 +120,125 @@ public class CristinOREImporter implements IngestionCrosswalk
 	        xpathLinks = XPath.newInstance("/atom:entry/atom:link[@rel='alternate']/@href");
 	        xpathLinks.addNamespace(ATOM_NS);
 	        entryId = ((Attribute)xpathLinks.selectSingleNode(doc)).getValue();
-		} catch (JDOMException e) {
+		}
+        catch (JDOMException e)
+        {
 			throw new CrosswalkException("JDOM exception occured while ingesting the ORE", e);
 		}
 
-        // prep a metadata bitstream that we will extract metadata from later
-        Bitstream metadataBitstream = null;
-        
-		// Next for each resource, create a bitstream
+        // now, ingest the bitstreams (if necessary - this method will decide based on the config)
+        Bitstream metadataBitstream = this.ingestBitstreams(context, doc, aggregatedResources, item);
+
+        // update the metadata from the metadata bundle
+        this.addMetadataFromBitstream(context, item, metadataBitstream);
+
+        log.info("CristinOREImporter for Item "+ item.getID() + " took: " + (new Date().getTime() - timeStart.getTime()) + "ms.");
+	}
+
+    private Bitstream ingestBitstreams(Context context, Document doc, List<Element> aggregatedResources, Item item)
+            throws CrosswalkException, IOException, SQLException, AuthorizeException
+    {
+        // Next for each resource, create a bitstream
     	XPath xpathDesc;
-    	NumberFormat nf=NumberFormat.getInstance();
+    	NumberFormat nf = NumberFormat.getInstance();
 		nf.setGroupingUsed(false);
 		nf.setMinimumIntegerDigits(4);
+
+        Bitstream metadataBitstream = null;
 
         for (Element resource : aggregatedResources)
         {
         	String href = resource.getAttributeValue("href");
         	log.debug("ORE processing: " + href);
 
-        	String bundleName;
+        	String bundleName = null;
         	Element desc = null;
-        	try {
+        	try
+            {
+                // FIXME: does this really work?  Why are we not selecting from within the
+                // Element resource
         		xpathDesc = XPath.newInstance("/atom:entry/oreatom:triples/rdf:Description[@rdf:about=\"" + this.encodeForURL(href) + "\"][1]");
         		xpathDesc.addNamespace(ATOM_NS);
         		xpathDesc.addNamespace(ORE_ATOM);
         		xpathDesc.addNamespace(RDF_NS);
         		desc = (Element)xpathDesc.selectSingleNode(doc);
-        	} catch (JDOMException e) {
+        	}
+            catch (JDOMException e)
+            {
         		e.printStackTrace();
         	}
 
-        	if (desc != null && desc.getChild("type", RDF_NS).getAttributeValue("resource", RDF_NS).equals(DS_NS.getURI() + "DSpaceBitstream"))
+            // we only import things from the ORIGINAL bundle in CRISTIN, but
+            // one of those bitstreams actually needs to go into the METADATA
+            // bundle ...
+        	if (desc != null
+                    && desc.getChild("type", RDF_NS).getAttributeValue("resource", RDF_NS).equals(DS_NS.getURI() + "DSpaceBitstream")
+                    && desc.getChild("description", DCTERMS_NS).getText().equals("ORIGINAL"))
         	{
                 bundleName = this.isMetadataBitstream(desc) ? "METADATA" : "ORIGINAL";
         		log.debug("Setting bundle name to: " + bundleName);
         	}
-        	else {
-        		log.info("Could not obtain bundle name; using 'ORIGINAL'");
-        		bundleName = "ORIGINAL";
-        	}
+
+            // if we couldn't determine the bundle name, then we can't import the bitstream
+            // (which is totally fine)
+            if (bundleName == null)
+            {
+                continue;
+            }
+
+            // now, determine if this is a non-metadata bitstream, and if we are allowed
+            // to import them
+            if ("ORIGINAL".equals(bundleName) && !this.updateBitstreams)
+            {
+                continue;
+            }
+
+            // if we get to here then we import the bitstream
 
         	// Bundle names are not unique, so we just pick the first one if there's more than one.
         	Bundle[] targetBundles = item.getBundles(bundleName);
         	Bundle targetBundle;
 
         	// if null, create the new bundle and add it in
-        	if (targetBundles.length == 0) {
+        	if (targetBundles.length == 0)
+            {
         		targetBundle = item.createBundle(bundleName);
         		item.addBundle(targetBundle);
         	}
-        	else {
+        	else
+            {
         		targetBundle = targetBundles[0];
         	}
 
         	URL ARurl = null;
         	InputStream in = null;
-        	if (href != null) {
-        		try {
+        	if (href != null)
+            {
+        		try
+                {
 		        	// Make sure the url string escapes all the oddball characters
         			String processedURL = encodeForURL(href);
         			// Generate a requeset for the aggregated resource
         			ARurl = new URL(processedURL);
 		        	in = ARurl.openStream();
         		}
-        		catch(FileNotFoundException fe) {
+        		catch(FileNotFoundException fe)
+                {
             		log.error("The provided URI failed to return a resource: " + href);
             	}
-        		catch(ConnectException fe) {
+        		catch(ConnectException fe)
+                {
             		log.error("The provided URI was invalid: " + href);
             	}
         	}
-        	else {
-        		throw new CrosswalkException("Entry did not contain link to resource: " + entryId);
+        	else
+            {
+        		throw new CrosswalkException("Entry did not contain link to resource");
         	}
 
         	// ingest and update
-        	if (in != null) {
+        	if (in != null)
+            {
 	        	Bitstream newBitstream = targetBundle.createBitstream(in);
 
 	        	String bsName = resource.getAttributeValue("title");
@@ -207,16 +262,14 @@ public class CristinOREImporter implements IngestionCrosswalk
                     metadataBitstream = newBitstream;
                 }
         	}
-        	else {
-        		throw new CrosswalkException("Could not retrieve bitstream: " + entryId);
+        	else
+            {
+        		throw new CrosswalkException("Could not retrieve bitstream");
         	}
         }
 
-        // update the metadata from the metadata bundle
-        this.addMetadataFromBitstream(context, item, metadataBitstream);
-
-        log.info("OREIngest for Item "+ item.getID() + " took: " + (new Date().getTime() - timeStart.getTime()) + "ms.");
-	}
+        return metadataBitstream;
+    }
 
     private boolean isMetadataBitstream(Element desc)
     {

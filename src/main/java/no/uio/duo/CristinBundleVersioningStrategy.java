@@ -13,6 +13,8 @@ public class CristinBundleVersioningStrategy implements BundleVersioningStrategy
 {
     public void versionBundles(Context context, Item item)
     {
+        // does nothing, the ORE ingestion for CRISTIN handles bitstream
+        // versioning
         return;
     }
 }

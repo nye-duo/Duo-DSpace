@@ -10,6 +10,7 @@ import org.jdom.Element;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Properties;
 
 /*
  *  A crosswalk to be used with the CRISTIN oai_dc document.  This basically
@@ -20,12 +21,14 @@ public class CristinOAIDCCrosswalk implements IngestionCrosswalk
     public void ingest(Context context, DSpaceObject dSpaceObject, List<Element> elements)
             throws CrosswalkException, IOException, SQLException, AuthorizeException
     {
+        // does nothing, the CRISTIN items are not populated by DC
         return;
     }
 
     public void ingest(Context context, DSpaceObject dSpaceObject, Element element)
             throws CrosswalkException, IOException, SQLException, AuthorizeException
     {
+        // does nothing, the CRISTIN items are not populated by DC
         return;
     }
 }

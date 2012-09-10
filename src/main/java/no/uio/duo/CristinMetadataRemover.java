@@ -16,7 +16,7 @@ public class CristinMetadataRemover implements MetadataRemover
         {
             mdm.removeAuthorityMetadata(context, item, "cristin", "metadata.authority");
         }
-        catch (DSpaceSwordException e)
+        catch (DuoException e)
         {
             throw new OAIHarvester.HarvestingException(e);
         }

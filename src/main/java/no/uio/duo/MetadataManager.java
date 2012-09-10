@@ -21,7 +21,7 @@ import java.sql.SQLException;
 public class MetadataManager
 {
     public void addMetadataFromBitstream(Context context, Item item, Bitstream bitstream)
-            throws AuthorizeException, IOException, SQLException, DSpaceSwordException
+            throws AuthorizeException, IOException, SQLException, DuoException
     {
         try
         {
@@ -29,7 +29,7 @@ public class MetadataManager
             IngestionCrosswalk inxwalk = (IngestionCrosswalk) PluginManager.getNamedPlugin(IngestionCrosswalk.class, "FS");
             if (inxwalk == null)
             {
-                throw new DSpaceSwordException("No IngestionCrosswalk configured for FS");
+                throw new DuoException("No IngestionCrosswalk configured for FS");
             }
             SAXBuilder builder = new SAXBuilder();
             Document document = builder.build(bitstream.retrieve());
@@ -90,22 +90,22 @@ public class MetadataManager
         }
         catch (JDOMException e)
         {
-            throw new DSpaceSwordException(e);
+            throw new DuoException(e);
         }
         catch (CrosswalkException e)
         {
-            throw new DSpaceSwordException(e);
+            throw new DuoException(e);
         }
     }
 
     public void removeAuthorityMetadata(Context context, Item item)
-            throws DSpaceSwordException
+            throws DuoException
     {
         this.removeAuthorityMetadata(context, item, "swordv2-server", "metadata.replaceable");
     }
 
     public void removeAuthorityMetadata(Context context, Item item, String module, String config)
-            throws DSpaceSwordException
+            throws DuoException
     {
         String raw = ConfigurationManager.getProperty(module, config);
         if (raw == null || "".equals(raw))
@@ -121,13 +121,13 @@ public class MetadataManager
     }
 
     public DCValue makeDCValue(String field, String value)
-            throws DSpaceSwordException
+            throws DuoException
     {
         DCValue dcv = new DCValue();
         String[] bits = field.split("\\.");
         if (bits.length < 2 || bits.length > 3)
         {
-            throw new DSpaceSwordException("invalid DC value: " + field);
+            throw new DuoException("invalid DC value: " + field);
         }
         dcv.schema = bits[0];
         dcv.element = bits[1];

@@ -94,6 +94,10 @@ public class FSEntryIngester implements SwordEntryIngester
         {
             throw new DSpaceSwordException(e);
         }
+        catch (DuoException e)
+        {
+            throw new DSpaceSwordException(e);
+        }
     }
 
     public DepositResult ingestToCollection(Context context, Deposit deposit, Collection collection, VerboseDescription verboseDescription, DepositResult result)
@@ -104,7 +108,7 @@ public class FSEntryIngester implements SwordEntryIngester
     }
 
     private void addMetadataToItem(Deposit deposit, Item item)
-            throws DSpaceSwordException
+            throws DuoException
     {
         SwordEntry se = deposit.getSwordEntry();
         if (se == null)
@@ -116,7 +120,7 @@ public class FSEntryIngester implements SwordEntryIngester
         String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
         if (gradeField == null || "".equals(gradeField))
         {
-            throw new DSpaceSwordException("No configuration, or configuration is invalid for: studentweb:grade.field");
+            throw new DuoException("No configuration, or configuration is invalid for: studentweb:grade.field");
         }
         this.addFieldToItem(se.getEntry(), item, DuoConstants.GRADE_QNAME, gradeField);
 
@@ -124,7 +128,7 @@ public class FSEntryIngester implements SwordEntryIngester
         String embargoEndField = ConfigurationManager.getProperty("embargo.field.terms");
         if (embargoEndField == null || "".equals(embargoEndField))
         {
-            throw new DSpaceSwordException("No configuration, or configuration is invalid for: embargo.field.lift");
+            throw new DuoException("No configuration, or configuration is invalid for: embargo.field.lift");
         }
         this.addFieldToItem(se.getEntry(), item, DuoConstants.EMBARGO_END_DATE_QNAME, embargoEndField);
 
@@ -132,13 +136,13 @@ public class FSEntryIngester implements SwordEntryIngester
         String embargoTypeField = ConfigurationManager.getProperty("studentweb", "embargo-type.field");
         if (embargoTypeField == null || "".equals(embargoTypeField))
         {
-            throw new DSpaceSwordException("No configuration, or configuration is invalid for: embargo-type.field");
+            throw new DuoException("No configuration, or configuration is invalid for: embargo-type.field");
         }
         this.addFieldToItem(se.getEntry(), item, DuoConstants.EMBARGO_TYPE_QNAME, embargoTypeField);
     }
 
     private void addFieldToItem(Entry entry, Item item, QName qname, String field)
-            throws DSpaceSwordException
+            throws DuoException
     {
         List<Element> elements = entry.getExtensions(qname);
         if (elements.size() != 0)
@@ -164,12 +168,12 @@ public class FSEntryIngester implements SwordEntryIngester
      * @throws DSpaceSwordException
      */
     protected void setUpdatedDate(Item item, VerboseDescription verboseDescription)
-            throws DSpaceSwordException
+            throws DuoException
     {
         String field = ConfigurationManager.getProperty("swordv2-server", "updated.field");
         if (field == null || "".equals(field))
         {
-            throw new DSpaceSwordException("No configuration, or configuration is invalid for: sword.updated.field");
+            throw new DuoException("No configuration, or configuration is invalid for: sword.updated.field");
         }
 
         MetadataManager mdm = new MetadataManager();

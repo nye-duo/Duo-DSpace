@@ -350,7 +350,7 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
 	public boolean isItemInWorkspace(Context context, Item item)
 			throws SQLException
 	{
-        String query = "SELECT workspace_id FROM workspaceitem WHERE item_id = ?";
+        String query = "SELECT workspace_item_id FROM workspaceitem WHERE item_id = ?";
         Object[] params = { item.getID() };
         TableRowIterator tri = DatabaseManager.query(context, query, params);
         if (tri.hasNext())

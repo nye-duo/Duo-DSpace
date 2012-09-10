@@ -223,6 +223,10 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         {
             throw new DSpaceSwordException(e);
         }
+        catch (DuoException e)
+        {
+            throw new DSpaceSwordException(e);
+        }
     }
 
     private void emptyBundle(Bundle bundle)

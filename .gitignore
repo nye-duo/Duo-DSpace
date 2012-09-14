@@ -4,3 +4,6 @@ target/
 lib/
 duo.iws
 duo.ipr
+*.iml
+*.DS_Store
+*.swp

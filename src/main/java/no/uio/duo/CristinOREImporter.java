@@ -283,7 +283,7 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
         String[] urlParts = bits[0].split("/");
         String filename = urlParts[urlParts.length - 1];
 
-        if (filename.startsWith("cristin") && filename.endsWith(".xml"))
+        if (filename.startsWith("cristin-") && filename.endsWith(".xml"))
         {
             return true;
         }

@@ -22,6 +22,8 @@ import org.jdom.Namespace;
 import org.jdom.xpath.XPath;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,12 +146,16 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         List<Bitstream> existingBitstreams = this.getExistingBitstreams(item, "ORIGINAL");
 
         // a/	There are more files than before in the incoming list
+        // remember that there will be a metadata bitstream which we don't care
+        // about couting
         if (incomingBitstreams.size() > existingBitstreams.size())
         {
             return true;
         }
 
         // b/	There are fewer files than before in the incoming list
+        // remember that there will be a metadata bitstream which we don't care
+        // about couting
         if (incomingBitstreams.size() < existingBitstreams.size())
         {
             return true;
@@ -173,23 +179,37 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
 
     private boolean fileOrderChanged(List<Element> incomingBitstreams, List<Bitstream> existingBitstreams)
     {
-        TreeMap<Integer, String> incomingSeq = new TreeMap<Integer, String>();
-        TreeMap<Integer, String> existingSeq = new TreeMap<Integer, String>();
+        TreeMap<Integer, String> rawIncomingSeq = new TreeMap<Integer, String>();
+        TreeMap<Integer, String> rawExistingSeq = new TreeMap<Integer, String>();
 
         // calculate the match map for the incoming items
+        // we need to remember that in the incoming item, the metadata bitstream
+        // is in the ORIGINAL bundle, but not in the existing item, so when determining
+        // the order of the incoming files, we need to close the gap left by the
+        // metadata bitstream
         for (Element element : incomingBitstreams)
         {
-            String url = element.getAttribute("about", RDF_NS).getValue();
+            String url = element.getAttributeValue("href");
             String[] urlParts = url.split("/");
             String[] fileSeq = urlParts[urlParts.length - 1].split("\\?");
             if (fileSeq.length == 2)
             {
-                String filename = fileSeq[0];
+                String filename = null;
+                try
+                {
+                    filename = URLDecoder.decode(fileSeq[0], "UTF-8");
+                }
+                catch (UnsupportedEncodingException e)
+                {
+                    // can't parse the filename for whatever reason, just go ahead
+                    // and re-import
+                    return false;
+                }
                 String[] seqBits = fileSeq[1].split("=");
                 if (seqBits.length == 2)
                 {
                     int seqNo = Integer.parseInt(seqBits[1].trim());
-                    incomingSeq.put(seqNo, filename);
+                    rawIncomingSeq.put(seqNo, filename);
                 }
                 else
                 {
@@ -205,15 +225,19 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
             }
         }
 
+        // normalise the map order
+        TreeMap<Integer, String> incomingSeq = this.normaliseSeq(rawIncomingSeq);
+
         // calculate the match map for the existing bitstreams
         for (Bitstream bitstream : existingBitstreams)
         {
-            existingSeq.put(bitstream.getSequenceID(), bitstream.getName());
+            rawExistingSeq.put(bitstream.getSequenceID(), bitstream.getName());
         }
+        TreeMap<Integer, String> existingSeq = this.normaliseSeq(rawExistingSeq);
 
         // now do the comparison
         int highest = incomingSeq.lastKey() > existingSeq.lastKey() ? incomingSeq.lastKey() : existingSeq.lastKey();
-        for (int i = 0; i < highest; i++)
+        for (int i = 1; i <= highest; i++)
         {
             String in = incomingSeq.get(i);
             String ex = existingSeq.get(i);
@@ -231,6 +255,20 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
 
         // if we don't trip the checks, then the file order is the same
         return false;
+    }
+
+    private TreeMap<Integer, String> normaliseSeq(TreeMap<Integer, String> seqMap)
+    {
+        // go through the keys in order, looking for the gap left by the metadata
+        // bitstream
+        TreeMap<Integer, String> normSeq = new TreeMap<Integer, String>();
+        int seq = 1;
+        for (Integer key : seqMap.keySet())
+        {
+            normSeq.put(seq, seqMap.get(key));
+            seq++;
+        }
+        return normSeq;
     }
 
     private boolean checksumsChanged(List<Element> incomingBitstreams, List<Bitstream> existingBitstreams)
@@ -258,18 +296,66 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
     private List<Element> listBitstreamsInBundle(Document doc, String bundleName)
             throws IOException
     {
+        // FIXME: we need to check whether this is a metadata bitstream, which
+        // we must then skip
         List<Element> bitstreams = new ArrayList<Element>();
-        List<Element> elements = this.listBitstreams(doc);
-        for (Element element : elements)
+        List<Element> links = this.listBitstreams(doc);
+        for (Element link : links)
         {
-            Element desc = element.getChild("description", DCTERMS_NS);
-            if (bundleName.equals(desc.getText()))
+            String incomingBundle = this.getIncomingBundleName(doc, link);
+
+            if (bundleName.equals(incomingBundle))
             {
-                // urls.add(element.getAttribute("about", RDF_NS).getValue());
-                bitstreams.add(desc);
+                // this is a bitstream from the correct bundle
+                // only register it if it is not a metadata bitstream
+                if (!this.isMetadataBitstream(link.getAttributeValue("href")))
+                {
+                    bitstreams.add(link);
+                }
             }
         }
         return bitstreams;
+    }
+
+    private boolean isMetadataBitstream(String url)
+    {
+        // https://w3utv-dspace01.uio.no/dspace/xmlui/bitstream/handle/123456789/982/cristin-12087.xml?sequence=2
+
+        // FIXME: yeah yeah, this would look better with a regex
+        String[] bits = url.split("\\?");
+        String[] urlParts = bits[0].split("/");
+        String filename = urlParts[urlParts.length - 1];
+
+        if (filename.startsWith("cristin-") && filename.endsWith(".xml"))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private String getIncomingBundleName(Document doc, Element link)
+            throws IOException
+    {
+        try
+        {
+            String href = link.getAttributeValue("href");
+            XPath xpathDesc = XPath.newInstance("/atom:entry/oreatom:triples/rdf:Description[@rdf:about=\"" + href + "\"]");
+            xpathDesc.addNamespace(ATOM_NS);
+            xpathDesc.addNamespace(ORE_ATOM);
+            xpathDesc.addNamespace(RDF_NS);
+            List<Element> descs = xpathDesc.selectNodes(doc);
+            for (Element desc : descs)
+            {
+                Element dcdesc = desc.getChild("description", DCTERMS_NS);
+                return dcdesc.getText();
+            }
+        }
+        catch (JDOMException e)
+        {
+            throw new IOException("JDOM exception occured while ingesting the ORE", e);
+        }
+
+        return null;
     }
 
     private List<Element> listBitstreams(Document doc)

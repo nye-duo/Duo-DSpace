@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dim:dim xmlns:dim="http://www.dspace.org/xmlns/dspace/dim" xmlns:dcterms="http://purl.org/dc/terms/"
+         xmlns:fs="http://studentweb.no/terms/">
+    <dim:field qualifier="author" element="contributor" mdschema="dc">Heyerdahl, Thor</dim:field>
+    <dim:field element="studentnumber" mdschema="fs">123456789</dim:field>
+    <dim:field element="uid" mdschema="fs">theyerdahl</dim:field>
+    <dim:field element="foedselsnummer" mdschema="fs">987654321</dim:field>
+    <dim:field element="postaladdress" mdschema="fs">Colla Micheri, Italy</dim:field>
+    <dim:field element="email" mdschema="fs">t.heyerdahl@kontiki.com</dim:field>
+    <dim:field element="telephonenumber" mdschema="fs">0047 123456</dim:field>
+    <dim:field element="subjectcode" mdschema="fs">AST3220</dim:field>
+    <dim:field element="subjecttitle" mdschema="fs">Kosmologi I</dim:field>
+    <dim:field element="unitcode" mdschema="fs">123</dim:field>
+    <dim:field element="unitname" mdschema="fs">Arkeologi, konservering og historie</dim:field>
+    <dim:field element="title" mdschema="dc">101 days around some of the world</dim:field>
+    <dim:field element="title" mdschema="dc" language="nob">101 days in the Pacific</dim:field>
+    <dim:field qualifier="iso" element="language" mdschema="dc">nob</dim:field>
+    <dim:field qualifier="abstract" element="description" mdschema="dc" language="nob">Thor Heyerdahl og fem andre dro
+        fra Peru til Raroia i en selvkonstruert balsafl�te ved navn Kon-Tiki.
+    </dim:field>
+    <dim:field qualifier="abstract" element="description" mdschema="dc">In the Kon-Tiki Expedition, Heyerdahl and five
+        fellow adventurers went to Peru, where they constructed a pae-pae raft from balsa wood and other native
+        materials, a raft that they called the Kon-Tiki.
+    </dim:field>
+    <dim:field element="type" mdschema="dc">Master's thesis</dim:field>
+    <dim:field element="embargotype" mdschema="fs">5 years</dim:field>
+    <dim:field qualifier="embargoenddate" element="date" mdschema="dc">01-01-2015</dim:field>
+    <dim:field element="grade" mdschema="fs">pass</dim:field>
+</dim:dim>

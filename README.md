@@ -28,13 +28,15 @@ FIXME: this should be created installed overlay, to avoid complex installation
 
 6. Deploy the crosswalk: Copy the fs-metadata.xml crosswalk into the appropriate directory in DSpace
 
-7. Import the required metadata schema:
+7. Update the database with the xml-workflow schema
+
+8. Import the required metadata schema:
 
 	./dspace dsrun org.dspace.administer.MetadataImporter -f /home/richard/Code/External/Duo-DSpace/config/registries/fs-metadata.xml
 
-8. Restart tomcat
+9. Restart tomcat
 
-9. Set up the cron job for lifting embargoes, which will need to use the command:
+10. Set up the cron job for lifting embargoes, which will need to use the command:
 
 	./dspace embargo-lifter
 

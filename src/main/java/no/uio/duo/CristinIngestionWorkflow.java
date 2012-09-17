@@ -14,6 +14,8 @@ import org.dspace.storage.rdbms.TableRow;
 import org.dspace.storage.rdbms.TableRowIterator;
 import org.dspace.workflow.WorkflowItem;
 import org.dspace.workflow.WorkflowManager;
+import org.dspace.xmlworkflow.WorkflowConfigurationException;
+import org.dspace.xmlworkflow.WorkflowException;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -21,6 +23,7 @@ import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.xpath.XPath;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -90,13 +93,13 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
     public void postUpdate(Context context, Item item)
             throws SQLException, IOException, AuthorizeException
     {
-        if (this.isItemInWorkspace(context, item))
+        if (WorkflowManagerWrapper.isItemInWorkspace(context, item))
         {
-            this.startWorkflow(context, item);
+            WorkflowManagerWrapper.startWorkflow(context, item);
         }
-        else if (this.isItemInWorkflow(context, item))
+        else if (WorkflowManagerWrapper.isItemInWorkflow(context, item))
         {
-            this.restartWorkflow(context, item);
+            WorkflowManagerWrapper.restartWorkflow(context, item);
         }
         // if the item is in the archive, leave it where it is
     }
@@ -106,7 +109,7 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
             throws SQLException, IOException, AuthorizeException
     {
         // kick off the workflow
-		this.startWorkflow(context, wsi);
+		WorkflowManagerWrapper.startWorkflow(context, wsi);
 
         // return the item, as that's what's required
         return wsi.getItem();
@@ -381,107 +384,4 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
 
         return aggregatedResources;
     }
-
-    private void restartWorkflow(Context context, Item item)
-            throws SQLException, AuthorizeException, IOException
-	{
-		// stop the workflow
-		this.stopWorkflow(context, item);
-
-		// now start the workflow again
-		this.startWorkflow(context, item);
-	}
-
-    private void startWorkflow(Context context, Item item)
-            throws SQLException, AuthorizeException, IOException
-    {
-        WorkspaceItem wsi = this.getWorkspaceItem(context, item);
-        this.startWorkflow(context, wsi);
-    }
-
-    private void startWorkflow(Context context, WorkspaceItem wsi)
-			throws SQLException, AuthorizeException, IOException
-	{
-		WorkflowManager.startWithoutNotify(context, wsi);
-	}
-
-	private void stopWorkflow(Context context, Item item)
-            throws SQLException, AuthorizeException, IOException
-	{
-        // find the item in the workflow if it exists
-        WorkflowItem wfi = this.getWorkflowItem(context, item);
-
-        // abort the workflow
-        if (wfi != null)
-        {
-            WorkflowManager.abort(context, wfi, context.getCurrentUser());
-        }
-	}
-
-    public boolean isItemInWorkflow(Context context, Item item)
-			throws SQLException
-	{
-        String query = "SELECT workflow_id FROM workflowitem WHERE item_id = ?";
-        Object[] params = { item.getID() };
-        TableRowIterator tri = DatabaseManager.query(context, query, params);
-        if (tri.hasNext())
-        {
-            tri.close();
-            return true;
-        }
-        return false;
-	}
-
-	// FIXME: this may become useful when we have a proper treatment for licences
-	public boolean isItemInWorkspace(Context context, Item item)
-			throws SQLException
-	{
-        String query = "SELECT workspace_item_id FROM workspaceitem WHERE item_id = ?";
-        Object[] params = { item.getID() };
-        TableRowIterator tri = DatabaseManager.query(context, query, params);
-        if (tri.hasNext())
-        {
-            tri.close();
-            return true;
-        }
-        return false;
-	}
-
-	//////////////////////////////////////////////
-	// item access methods
-	//////////////////////////////////////////////
-
-	public WorkflowItem getWorkflowItem(Context context, Item item)
-			throws SQLException
-	{
-        String query = "SELECT workflow_id FROM workflowitem WHERE item_id = ?";
-        Object[] params = { item.getID() };
-        TableRowIterator tri = DatabaseManager.query(context, query, params);
-        if (tri.hasNext())
-        {
-            TableRow row = tri.next();
-            int wfid = row.getIntColumn("workflow_id");
-            WorkflowItem wfi = WorkflowItem.find(context, wfid);
-            tri.close();
-            return wfi;
-        }
-        return null;
-	}
-
-	public WorkspaceItem getWorkspaceItem(Context context, Item item)
-			throws SQLException
-	{
-        String query = "SELECT workspace_item_id FROM workspaceitem WHERE item_id = ?";
-        Object[] params = { item.getID() };
-        TableRowIterator tri = DatabaseManager.query(context, query, params);
-        if (tri.hasNext())
-        {
-            TableRow row = tri.next();
-            int wsid = row.getIntColumn("workspace_item_id");
-            WorkspaceItem wsi = WorkspaceItem.find(context, wsid);
-            tri.close();
-            return wsi;
-        }
-        return null;
-	}
 }

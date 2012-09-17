@@ -41,3 +41,22 @@ FIXME: this should be created installed overlay, to avoid complex installation
 	./dspace embargo-lifter
 
 
+As a DSpace Module
+------------------
+
+1. Customise the addmodule.sh script with the path to the dspace source and maven executable
+
+2. Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
+
+3. append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for the additional fields required)
+
+4. Build and install DSpace as normal
+
+5. Update the database with the xml-workflow schema
+
+6. Import the required metadata schema
+
+7. restart tomcat
+
+8. set up the cron jobs for embargo lifting
+

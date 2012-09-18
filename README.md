@@ -7,10 +7,28 @@ This module contains plugins, extensions, and configuration for a DSpace impleme
 2. Support harvesting content directly from CRISTIN
 
 
-Installation
-------------
+As a DSpace Module (recommended)
+--------------------------------
 
-FIXME: this should be created installed overlay, to avoid complex installation
+1. Customise the addmodule.sh and postinstall.sh scripts with the path to the dspace source and maven executable
+
+2. Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
+
+3. append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for the additional fields required)
+
+4. Build and install DSpace as normal
+
+5. If you're installing for the first time on this DSpace instance, you should run the postinstall.sh script.  DO NOT RUN THIS SCRIPT ON A DSPACE UPON WHICH IT HAS PREVIOUSLY BEEN RUN.
+
+6. Restart tomcat
+
+7. Set up the cron job for lifting embargoes, which will need to use the command:
+
+	./dspace embargo-lifter
+
+
+Manual Installation
+-------------------
 
 1. Build the code
 
@@ -39,24 +57,3 @@ FIXME: this should be created installed overlay, to avoid complex installation
 10. Set up the cron job for lifting embargoes, which will need to use the command:
 
 	./dspace embargo-lifter
-
-
-As a DSpace Module
-------------------
-
-1. Customise the addmodule.sh script with the path to the dspace source and maven executable
-
-2. Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
-
-3. append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for the additional fields required)
-
-4. Build and install DSpace as normal
-
-5. Update the database with the xml-workflow schema
-
-6. Import the required metadata schema
-
-7. restart tomcat
-
-8. set up the cron jobs for embargo lifting
-

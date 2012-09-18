@@ -19,6 +19,10 @@ cp config/registries/* $DSPACE/dspace/config/registries
 
 # copy the spring configuration for workflows
 cp config/spring/api/* $DSPACE/dspace/config/spring/api/
+cp config/spring/xmlui/* $DSPACE/dspace/config/sprint/xmlui/
+
+# copy the customised messages fle
+cp poms/messages.xml $DSPACE/dspace/modules/xmlui/overlays/org.dspace.dspace-xmlui-lang-1.8.0.2/i18n/
 
 # build and install the module
 $MAVEN install

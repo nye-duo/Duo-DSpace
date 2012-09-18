@@ -36,6 +36,11 @@
             <classifier>classes</classifier>
         </dependency>
         <dependency>
+            <groupId>org.dspace</groupId>
+            <artifactId>dspace-xmlui-api</artifactId>
+            <version>1.8.2</version>
+        </dependency>
+        <dependency>
             <groupId>no.uio.duo</groupId>
             <artifactId>bagit</artifactId>
             <version>1.0</version>

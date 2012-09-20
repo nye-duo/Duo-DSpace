@@ -8,11 +8,20 @@
     </workflow-map>
 
     <!-- duo/cristin ingest workflow -->
-    <workflow id="cristin">
+    <workflow start="reviewstep" id="cristin">
         <roles>
+            <role id="reviewer" name="Reviewer" description="The people responsible for this step are able to edit the metadata of incoming submissions, and then accept or reject them." />
             <role id="assigner" name="Collection Assigner" description="people responsible for assigning the item to collections"/>
         </roles>
 
+        <step id="reviewstep" role="reviewer" userSelectionMethod="claimaction">
+            <outcomes>
+                <step status="0">assignment</step>
+            </outcomes>
+            <actions>
+                <action id="reviewaction"/>
+            </actions>
+        </step>
         <step id="assignment" role="assigner" userSelectionMethod="claimaction">
             <actions>
                 <action id="assignmentaction"/>

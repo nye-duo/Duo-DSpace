@@ -251,7 +251,7 @@
  			<stored-value>3 years</stored-value>
  		</pair>  		 		
    	</value-pairs>
-   
+
    	<!-- default language order: (from dspace 1.2.1)
 		"en_US", "en", "es", "de", "fr", "it", "ja", "zh", "other", ""
 	 -->
@@ -260,38 +260,14 @@
 	   		<displayed-value>N/A</displayed-value>
 	   		<stored-value></stored-value>
 	 	</pair>
-	 	<pair>
-	   		<displayed-value>English (United States)</displayed-value>
-	   		<stored-value>en_US</stored-value>
-	  	</pair>
-	 	<pair>
-	   		<displayed-value>English</displayed-value>
-	   		<stored-value>en</stored-value>
-	 	</pair>
-	 	<pair>
-	   		<displayed-value>Spanish</displayed-value>
-	   		<stored-value>es</stored-value>
-	 	</pair>
-	 	<pair>
-	   		<displayed-value>German</displayed-value>
-	   		<stored-value>de</stored-value>
-	 	</pair>
-	 	<pair>
-	   		<displayed-value>French</displayed-value>
-	   		<stored-value>fr</stored-value>
-	 	</pair>
-	 	<pair>
-	   		<displayed-value>Italian</displayed-value>
-	   		<stored-value>it</stored-value>
-	 	</pair>
-	 	<pair>
-	   		<displayed-value>Japanese</displayed-value>
-	   		<stored-value>ja</stored-value>
-	 	</pair>
-	 	<pair>
-	   		<displayed-value>Chinese</displayed-value>
-	   		<stored-value>zh</stored-value>
-	 	</pair>
+        <pair>
+            <displayed-value>English</displayed-value>
+            <stored-value>eng</stored-value>
+        </pair>
+        <pair>
+            <displayed-value>Norwegian</displayed-value>
+            <stored-value>nob</stored-value>
+        </pair>
 	 	<pair>
 	   		<displayed-value>(Other)</displayed-value>
 	   		<stored-value>other</stored-value>

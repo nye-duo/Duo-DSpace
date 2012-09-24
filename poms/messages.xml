@@ -25,6 +25,7 @@
 
     <!-- keys used by Cristin -->
     <message key="xmlui.XMLWorkflow.cristin.assignment.claimaction">Assign Collections</message>
+    <message key="xmlui.XMLWorkflow.cristin.reviewstep.claimaction">Review</message>
 
 	<!-- General keys -->
 	<message key="xmlui.general.dspace_home">DSpace Home</message>

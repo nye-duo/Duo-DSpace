@@ -5,6 +5,8 @@ import org.apache.cocoon.environment.Request;
 import org.dspace.app.xmlui.aspect.xmlworkflow.AbstractXMLUIAction;
 import org.dspace.app.xmlui.wing.WingException;
 import org.dspace.app.xmlui.wing.element.Body;
+import org.dspace.app.xmlui.wing.element.Cell;
+import org.dspace.app.xmlui.wing.element.CheckBox;
 import org.dspace.app.xmlui.wing.element.Division;
 import org.dspace.app.xmlui.wing.element.List;
 import org.dspace.app.xmlui.wing.element.Reference;
@@ -39,77 +41,76 @@ public class XmlUICollectionAssignmentUI extends AbstractXMLUIAction
         div.setHead("Assign the Item's Collections");
         div.addPara("Select collections to which the item will be mapped");
 
+        // add the item meta, and also the hidden field required to make the full item display work
         addWorkflowItemInformation(div, item, request);
+        div.addHidden("workflowID").setValue(workflowItem.getID());
+        div.addHidden("stepID").setValue(request.getParameter("stepID"));
+        div.addHidden("actionID").setValue(request.getParameter("actionID"));
 
-        div.addSimpleHTMLFragment(false, "The item is being submitted to the collection: <strong>" + collection.getName() + " (" + collection.getHandle() + ")</strong>");
-
-        Collection[] collections = item.getCollections();
-        List current = null;
-        if (collections.length > 0)
-        {
-            div.addPara("The item is currently mapped to the following collections");
-            current = div.addList("current_collections");
-        }
-        else
-        {
-            div.addPara("This item is not currently mapped to any other collections");
-        }
-        for (Collection col : collections)
-        {
-            current.addItem(col.getName() + " ( " + col.getHandle() + " )");
-        }
-
+        div.addPara("The item is being submitted to the collection:" + collection.getName() + " (" + collection.getHandle() + ")");
         div.addPara("Select collections to add the item to:");
 
         TreeNode root = buildTree(Community.findAllTop(context));
-        //ReferenceSet referenceSet = div.addReferenceSet("community-browser",
-	    //            ReferenceSet.TYPE_SUMMARY_LIST,null,"hierarchy");
+        Collection[] existingCollections = item.getCollections();
+        java.util.List<Integer> existingIDs = new ArrayList<Integer>();
+        for (Collection ec : existingCollections)
+        {
+            existingIDs.add(ec.getID());
+        }
+
 
         java.util.List<TreeNode> rootNodes = root.getChildrenOfType(Constants.COMMUNITY);
 
+        Table comcols = div.addTable("comcol", 1, 1);
+        Row tr = comcols.addRow();
+        tr.addCell(Cell.ROLE_HEADER).addContent("Community/Collection");
+        tr.addCell(Cell.ROLE_HEADER).addContent("Mapped?");
         for (TreeNode node : rootNodes)
         {
-            buildSelector(div, node);
+            buildList(comcols, node, collection, existingIDs);
         }
-
-        /*
-        Community[] communities = Community.findAll(context);
-        List coms = null;
-        if (communities.length > 0)
-        {
-            coms = div.addList("communities");
-        }
-        for (Community com : communities)
-        {
-            coms.addItem(com.getName() + " (" + com.getHandle() + ")");
-        }
-        */
 
         Table table = div.addTable("workflow-actions", 1, 1);
 
         // finish the workflow stage
         Row row = table.addRow();
+        row.addCellContent("Save progress and finish this workflow stage");
         row.addCell().addButton("submit_finished").setValue("Save and Finish");
 
         // Reject item
+        row = table.addRow();
+        row.addCellContent("Save progress, but leave the item in your task list");
         row.addCell().addButton("submit_save").setValue("Save");
 
         // Everyone can just cancel
-        row.addCell().addButton("submit_leave").setValue("Cancel");
+        row = table.addRow();
+        row.addCell(0, 2).addButton("submit_leave").setValue("Return without saving");
+
+        div.addHidden("submission-continue").setValue(knot.getId());
     }
 
-    public void buildSelector(Division div, TreeNode node) throws WingException
+    public void buildList(Table table, TreeNode node, Collection submissionCollection, java.util.List<Integer> existingIDs) throws WingException
     {
         DSpaceObject dso = node.getDSO();
+
+        Row tr = table.addRow();
+        tr.addCell(Cell.ROLE_HEADER).addContent(this.getIndent(node) + dso.getName());
+        tr.addCell().addContent("");
 
         // Add all the sub-collections;
         java.util.List<TreeNode> collectionNodes = node.getChildrenOfType(Constants.COLLECTION);
         if (collectionNodes != null && collectionNodes.size() > 0)
         {
-            org.dspace.app.xmlui.wing.element.List colList = div.addList("collections");
             for (TreeNode collectionNode : collectionNodes)
             {
-                collectionSet.addReference(collectionNode.getDSO());
+                int nodeID = collectionNode.getDSO().getID();
+                tr = table.addRow();
+                tr.addCell().addContent(this.getIndent(collectionNode) + collectionNode.getDSO().getName());
+                if (nodeID != submissionCollection.getID())
+                {
+                    CheckBox cb = tr.addCell().addCheckBox("mapped_collection_" + Integer.toString(nodeID));
+                    cb.addOption(existingIDs.contains(nodeID), Integer.toString(nodeID));
+                }
             }
         }
 
@@ -117,13 +118,21 @@ public class XmlUICollectionAssignmentUI extends AbstractXMLUIAction
         java.util.List<TreeNode> communityNodes = node.getChildrenOfType(Constants.COMMUNITY);
         if (communityNodes != null && communityNodes.size() > 0)
         {
-            ReferenceSet communitySet = objectInclude.addReferenceSet(ReferenceSet.TYPE_SUMMARY_LIST);
-
             for (TreeNode communityNode : communityNodes)
             {
-                buildReferenceSet(communitySet,communityNode);
+                buildList(table, communityNode, submissionCollection, existingIDs);
             }
         }
+    }
+
+    private String getIndent(TreeNode node)
+    {
+        String indent = "";
+        for (int i = 1; i < node.getLevel(); i++)
+        {
+            indent += "--";
+        }
+        return indent + " ";
     }
 
     public void buildReferenceSet(ReferenceSet referenceSet, TreeNode node) throws WingException

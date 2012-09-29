@@ -4,19 +4,15 @@ import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
 import org.dspace.content.Collection;
+import org.dspace.content.DCValue;
 import org.dspace.content.Item;
 import org.dspace.content.WorkspaceItem;
+import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
+import org.dspace.core.Email;
+import org.dspace.core.I18nUtil;
 import org.dspace.harvest.HarvestedItem;
 import org.dspace.harvest.IngestionWorkflow;
-import org.dspace.storage.rdbms.DatabaseManager;
-import org.dspace.storage.rdbms.TableRow;
-import org.dspace.storage.rdbms.TableRowIterator;
-import org.dspace.workflow.WorkflowItem;
-import org.dspace.workflow.WorkflowManager;
-import org.dspace.xmlworkflow.WorkflowConfigurationException;
-import org.dspace.xmlworkflow.WorkflowException;
-import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -29,14 +25,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 public class CristinIngestionWorkflow implements IngestionWorkflow
 {
     private boolean allowUpdateBitstreams = true;
+    private List<String> originalUnits;
 
     /* Namespaces */
     public static final Namespace ATOM_NS =
@@ -56,6 +51,8 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
     public Item preUpdate(Context context, Item item, Collection targetCollection, HarvestedItem harvestedItem, List<Element> descMD, Element oreREM)
         throws SQLException, IOException, AuthorizeException
     {
+        this.originalUnits = this.getUnitCodes(item);
+
         boolean inarch = item.isArchived();
         boolean docsChanged = false;
         if (inarch)
@@ -93,6 +90,9 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
     public void postUpdate(Context context, Item item)
             throws SQLException, IOException, AuthorizeException
     {
+        List<String> newUnits = this.getUnitCodes(item);
+        this.actOnUnitCodes(item, this.originalUnits, newUnits);
+
         if (WorkflowManagerWrapper.isItemInWorkspace(context, item))
         {
             WorkflowManagerWrapper.startWorkflow(context, item);
@@ -126,6 +126,101 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
     {
         WorkspaceItem wi = WorkspaceItem.create(context, targetCollection, false);
     	return wi.getItem();
+    }
+
+    private void actOnUnitCodes(Item item, List<String> before, List<String> after)
+            throws IOException
+    {
+        if (this.changedUnitCodes(before, after))
+        {
+            this.sendEmail(item, before, after);
+        }
+    }
+
+    private void sendEmail(Item item, List<String> before, List<String> after)
+            throws IOException
+    {
+        Email email = ConfigurationManager.getEmail(I18nUtil.getEmailFilename(I18nUtil.getDefaultLocale(), "unitcodes"));
+        String to = ConfigurationManager.getProperty("mail.admin");
+        email.addRecipient(to);
+
+        // add the arguments, which are:
+        // {0} the item that has changed
+        // {1} the old unit codes
+        // {2} the new unit codes
+
+        // {0} - the item that has changed
+        String itemArg = "";
+        DCValue[] titles = item.getMetadata("dc.title");
+        if (titles.length > 0)
+        {
+            itemArg += titles[0].value;
+        }
+        else
+        {
+            itemArg += "Untitled";
+        }
+        itemArg += " (" + item.getHandle() + ")";
+        email.addArgument(itemArg);
+
+        // {1} the old unit codes
+        StringBuilder beforeArg = new StringBuilder();
+        for (String code : before)
+        {
+            beforeArg.append(code + "\n");
+        }
+        email.addArgument(beforeArg.toString());
+
+        // {2} the new unit codes
+        StringBuilder afterArg = new StringBuilder();
+        for (String code : after)
+        {
+            afterArg.append(code + "\n");
+        }
+        email.addArgument(afterArg.toString());
+
+        // now send it
+        try
+        {
+            email.send();
+        }
+        catch (MessagingException e)
+        {
+            throw new IOException(e);
+        }
+    }
+
+    private boolean changedUnitCodes(List<String> before, List<String> after)
+    {
+        if (before.size() != after.size())
+        {
+            return true;
+        }
+
+        for (String code : after)
+        {
+            if (!before.contains(code))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private List<String> getUnitCodes(Item item)
+    {
+        String field = ConfigurationManager.getProperty("cristin", "unitcode.field");
+        DCValue[] dcvs = item.getMetadata(field);
+        List<String> units = new ArrayList<String>();
+        for (DCValue dcv : dcvs)
+        {
+            if (!units.contains(dcv.value))
+            {
+                units.add(dcv.value);
+            }
+        }
+        return units;
     }
 
     private boolean haveDocsChanged(Item item, Element oreREM)

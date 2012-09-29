@@ -130,10 +130,7 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
         Bitstream metadataBitstream = this.ingestBitstreams(context, doc, aggregatedResources, item);
 
         // update the metadata from the metadata bundle
-        // this.getUnitCodes(item)
         this.addMetadataFromBitstream(context, item, metadataBitstream);
-        // this.getUnitCodes(item)
-        // FIXME: now go on and do something useful with the knowledge of whether the unit codes have changed
         
         log.info("CristinOREImporter for Item "+ item.getID() + " took: " + (new Date().getTime() - timeStart.getTime()) + "ms.");
 	}

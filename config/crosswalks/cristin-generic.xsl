@@ -1,220 +1,376 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:dim="http://www.dspace.org/xmlns/dspace/dim">
 
-    <!-- The institution number for oslo is 181 -->
-   <xsl:variable name="instnr" select='181' />
+    <!-- The institution number for oslo is 185 -->
+    <xsl:variable name="instnr" select='185'/>
 
-  <xsl:template match="/" >
-
-    <metadata xmlns:dim="http://www.dspace.org/xmlns/dspace/dim">
-
-        <!-- authors -->
-          <xsl:for-each select="/frida/forskningsresultat/fellesdata/person">
-              <dim:field mdschema="dc" element="contributor" qualifier="author"> <xsl:value-of select="concat(etternavn, string(', '),  fornavn)" /> </dim:field>
-          </xsl:for-each>
-
-        <!-- date issued -->
-        <xsl:for-each select="/frida/forskningsresultat/fellesdata">
-            <dim:field mdschema="dc" element="date" qualifier="issued">
-               <xsl:value-of select="ar" />
+    <xsl:template name="first-person">
+        <xsl:param name="field-nodeset"/>
+        <xsl:for-each select="$field-nodeset[1]">
+            <dim:field mdschema="cristin" element="unitcode">
+                <xsl:value-of select="institusjonsnr"/>
+                <xsl:text>,</xsl:text>
+                <xsl:value-of select="avdnr"/>
+                <xsl:text>,</xsl:text>
+                <xsl:value-of select="undavdnr"/>
+                <xsl:text>,</xsl:text>
+                <xsl:value-of select="gruppenr"/>
+            </dim:field>
+            <dim:field mdschema="cristin" element="unitname">
+                <xsl:value-of select="navn"/>
             </dim:field>
         </xsl:for-each>
-
-        <!-- ISSN -->
-         <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift[1]">
-           <xsl:for-each select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift">
-             <dim:field mdschema="dc" element="identifier" qualifier="issn">
-              <xsl:value-of select="issn" />
-             </dim:field>
-          </xsl:for-each>
-         </xsl:if>
+    </xsl:template>
 
 
-        <!-- abstract -->
-        <xsl:if test="/frida/forskningsresultat/fellesdata/sammendrag">
-          <dim:field mdschema="dc" element="description" qualifier="abstract">
-           <xsl:for-each select="/frida/forskningsresultat/fellesdata/sammendrag">
-                <xsl:value-of select="tekst" />
-           </xsl:for-each>
-          </dim:field>
-        </xsl:if>
 
+    <xsl:template match="/">
 
-        <!-- Norwegian science index? -->
-        <xsl:if test="/frida/forskningsresultat/fellesdata/vitenskapsdisiplin">
-          <dim:field mdschema="dc" element="subject" qualifier="nsi">
-           <xsl:for-each select="/frida/forskningsresultat/fellesdata/vitenskapsdisiplin">
-             <xsl:text>VDP::</xsl:text>
-             <xsl:value-of select="navn"/>
-             <xsl:text>: </xsl:text>
-             <xsl:value-of select="kode" />
-           </xsl:for-each>
-          </dim:field>
-        </xsl:if>
+        <metadata xmlns:dim="http://www.dspace.org/xmlns/dspace/dim">
 
+            <!-- unit code (cristin.unitcode) -->
+            <!-- (/frida/forskningsresultat/fellesdata/person/tilhorighet/sted/) institusjonsnr,avdnr,undavdnr,gruppenr -->
+            <!-- "Must be fetched only for the first author (person) where
+/frida/forskningsresultat/fellesdata/person/tilhorighet/sted/institusjonsnr = 185 (i.e. Universitetet i Oslo)" -->
 
-        <!-- language -->
-        <!-- Mapping from 2 letter to 3 letter language codes:
-           - NO -> nob
-           - SP ->spa
-           - FR -> fra
-           - RU -> rus
-           - EN -> eng
-           - DE -> der
-           - SE -> smi
-           - DK -> dan
-           - FI -> fin
-           - SW -> swe
-        -->
-       <xsl:if test="/frida/forskningsresultat/fellesdata/sprak">
-          <xsl:for-each select="/frida/forskningsresultat/fellesdata/sprak">
-           <dim:field mdschema="dc" element="language" qualifier="iso">
-               <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode = 'NO'">nob</xsl:if>
-               <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode = 'SP'">spa</xsl:if>
-               <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode = 'FR'">fra</xsl:if>
-               <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode = 'RU'">rus</xsl:if>
-               <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode = 'EN'">eng</xsl:if>
-               <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode = 'DE'">ger</xsl:if>
-               <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode = 'SE'">smi</xsl:if>
-               <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode = 'DK'">dan</xsl:if>
-               <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode = 'FI'">fin</xsl:if>
-               <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode = 'SW'">swe</xsl:if>
-            </dim:field>
-         </xsl:for-each>
-       </xsl:if>
+            <!-- cristin.unitname	(/frida/forskningsresultat/fellesdata/person/tilhorighet/sted/) navn	"Must be fetched only for the first author (person) where
+/frida/forskningsresultat/fellesdata/person/tilhorighet/sted/institusjonsnr = 185 (i.e. Universitetet i Oslo)" -->
 
-        <!-- ??? - some sort of subject -->
-       <xsl:if test="/frida/forskningsresultat/fellesdata/emneord">
-          <xsl:for-each select="/frida/forskningsresultat/fellesdata/emneord">
-           <dim:field mdschema="dc" element="subject">
-               <xsl:value-of select="navn" />
-            </dim:field>
-           <dim:field mdschema="dc" element="subject">
-               <xsl:value-of select="navnEngelsk" />
-            </dim:field>
-         </xsl:for-each>
-       </xsl:if>
+            <xsl:call-template name="first-person">
+                <xsl:with-param name="field-nodeset" select="/frida/forskningsresultat/fellesdata/person/tilhorighet/sted[institusjonsnr=$instnr]" />
+            </xsl:call-template>
 
-        <!-- publisher -->
-       <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift">
-          <xsl:for-each select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift">
-           <dim:field mdschema="dc" element="publisher">
-               <xsl:value-of select="utgivernavn" />
-            </dim:field>
-         </xsl:for-each>
-       </xsl:if>
+            <!-- cristin.ispublished	(/frida/forskningsresultat/fellesdata/) erPublisert -->
+            <xsl:if test="/frida/forskningsresultat/fellesdata/erPublisert">
+                <dim:field mdschema="cristin" element="ispublished">
+                    <xsl:value-of select="/frida/forskningsresultat/fellesdata/erPublisert"/>
+                </dim:field>
+            </xsl:if>
 
-        <!-- Title -->
-       <xsl:if test="/frida/forskningsresultat/fellesdata">
-           <xsl:for-each select="/frida/forskningsresultat/fellesdata">
-            <dim:field mdschema="dc" element="title">
-                <xsl:value-of select="tittel" />
-             </dim:field>
-          </xsl:for-each>
-        </xsl:if>
+            <!-- cristin.fulltext	(/frida/forskningsresultat/fellesdata/fulltekst/) type -->
+            <xsl:if test="/frida/forskningsresultat/fellesdata/fulltekst/type">
+                <xsl:for-each select="/frida/forskningsresultat/fellesdata/fulltekst/type">
+                    <dim:field mdschema="cristin" element="fulltext">
+                        <xsl:value-of select="."/>
+                    </dim:field>
+                </xsl:for-each>
+            </xsl:if>
 
-        <!-- alternative title -->
-        <xsl:if test="/frida/forskningsresultat/fellesdata/alternativTittel">
-           <xsl:for-each select="/frida/forskningsresultat/fellesdata">
-            <dim:field mdschema="dc" element="title" qualifier="alternative">
-                <xsl:value-of select="alternativTittel" />
-             </dim:field>
-          </xsl:for-each>
-        </xsl:if>
+            <!-- cristin.qualitycode	"(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/kvalitetsniva/) kode
+(/frida/forskningsresultat/kategoridata/bokRapport/forlag/kvalitetsniva/) kode"	Quality level of publication / journal. -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/kvalitetsniva/kode">
+                <dim:field mdschema="cristin" element="qualitycode">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/kvalitetsniva/kode"/>
+                </dim:field>
+            </xsl:if>
+            <xsl:if test="/frida/forskningsresultat/kategoridata/bokRapport/forlag/kvalitetsniva/kode">
+                <dim:field mdschema="cristin" element="qualitycode">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/bokRapport/forlag/kvalitetsniva/kode"/>
+                </dim:field>
+            </xsl:if>
 
-        <!-- explicitly set the document type -->
-        <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Tidsskriftspublikasjon' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig artikkel'">
-            <dim:field mdschema="dc" element="type">Journal article</dim:field>
-            <dim:field mdschema="dc" element="type">Peer reviewed</dim:field>
-        </xsl:if>
+            <!-- dc.creator.author	(/frida/forskningsresultat/fellesdata/person/) etternavn, fornavn -->
+            <xsl:for-each select="/frida/forskningsresultat/fellesdata/person">
+                <dim:field mdschema="dc" element="creator" qualifier="author">
+                    <xsl:value-of select="concat(etternavn, string(', '),  fornavn)"/>
+                </dim:field>
+            </xsl:for-each>
 
-        <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Tidsskriftspublikasjon' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig oversiktsartikkel/review'">
-            <dim:field mdschema="dc" element="type">Journal article</dim:field>
-        </xsl:if>
+            <!-- dc.date.created	(/frida/forskningsresultat/fellesdata/registrert/) dato -->
+            <xsl:if test="/frida/forskningsresultat/fellesdata/registrert/dato">
+                <dim:field mdschema="dc" element="date" qualifier="created">
+                    <xsl:value-of select="/frida/forskningsresultat/fellesdata/registrert/dato"/>
+                </dim:field>
+            </xsl:if>
 
-        <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Bok' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig antologi'">
-            <dim:field mdschema="dc" element="type">Book chapter</dim:field>
-        </xsl:if>
+            <!-- dc.date.issued	(/frida/forskningsresultat/fellesdata/) ar -->
+            <xsl:for-each select="/frida/forskningsresultat/fellesdata">
+                <dim:field mdschema="dc" element="date" qualifier="issued">
+                    <xsl:value-of select="ar"/>
+                </dim:field>
+            </xsl:for-each>
 
-        <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Bok' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig monografi'">
-            <dim:field mdschema="dc" element="type">Book</dim:field>
-        </xsl:if>
+            <!-- dc.description.abstract	(/frida/forskningsresultat/fellesdata/sammendrag/) tekst -->
+            <xsl:for-each select="/frida/forskningsresultat/fellesdata/sammendrag/tekst">
+                <dim:field mdschema="dc" element="description" qualifier="abstract">
+                    <xsl:value-of select="."/>
+                </dim:field>
+            </xsl:for-each>
 
-        <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Bok' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig kommentarutgave'">
-            <dim:field mdschema="dc" element="type">Book</dim:field>
-        </xsl:if>
+            <!-- dc.identifier.cristin	(/frida/forskningsresultat/fellesdata/) id -->
+            <xsl:if test="/frida/forskningsresultat/fellesdata/id">
+                <dim:field mdschema="dc" element="identifier" qualifier="cristin">
+                    <xsl:value-of select="/frida/forskningsresultat/fellesdata/id"/>
+                </dim:field>
+            </xsl:if>
 
-        <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Del av bok/rapport' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig kapittel/Artikkel'">
-            <dim:field mdschema="dc" element="type">Book chapter</dim:field>
-        </xsl:if>
+            <!-- dc.identifier.jtitle	(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/) navn -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/navn">
+                <dim:field mdschema="dc" element="identifier" qualifier="jtitle">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/navn"/>
+                </dim:field>
+            </xsl:if>
 
+            <!-- dc.identifier.volume	(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/) volum -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/volum">
+                <dim:field mdschema="dc" element="identifier" qualifier="volume">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/volum"/>
+                </dim:field>
+            </xsl:if>
 
-        <!-- explicitly set the peer review type -->
-        <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/kvalitetsniva[kode >= 1]">
-            <dim:field mdschema="dc" element="type">Peer reviewed</dim:field>
-        </xsl:if>
+            <!-- dc.identifier.issue	(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/) hefte -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/hefte">
+                <dim:field mdschema="dc" element="identifier" qualifier="issue">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/hefte"/>
+                </dim:field>
+            </xsl:if>
 
-        <!-- DOI -->
-        <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi">
-            <dim:field mdschema="dc" element="identifier" qualifier="doi">
-            	<xsl:choose>
-            		<xsl:when test='starts-with(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi, "doi:")
+            <!-- dc.identifier.startpage	(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse/) sideFra -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse/sideFra">
+                <dim:field mdschema="dc" element="identifier" qualifier="startpage">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse/sideFra"/>
+                </dim:field>
+            </xsl:if>
+
+            <!-- dc.identifier.endpage	(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse/) sideTil -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse/sideTil">
+                <dim:field mdschema="dc" element="identifier" qualifier="endpage">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse/sideTil"/>
+                </dim:field>
+            </xsl:if>
+
+            <!-- dc.identifier.pagecount	"(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse/) antallSider
+(/frida/forskningsresultat/kategoridata/bokRapport/) antallSider" -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse/antallSider">
+                <dim:field mdschema="dc" element="identifier" qualifier="pagecount">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse/antallSider"/>
+                </dim:field>
+            </xsl:if>
+            <xsl:if test="/frida/forskningsresultat/kategoridata/bokRapport/antallSider">
+                <dim:field mdschema="dc" element="identifier" qualifier="pagecount">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/bokRapport/antallSider"/>
+                </dim:field>
+            </xsl:if>
+
+            <!-- dc.identifier.isbn	(/frida/forskningsresultat/kategoridata/bokRapport/) isbn -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/bokRapport/isbn">
+                <dim:field mdschema="dc" element="identifier" qualifier="isbn">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/bokRapport/isbn"/>
+                </dim:field>
+            </xsl:if>
+
+            <!-- dc.identifier.issn	(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/) issn -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/issn">
+                <dim:field mdschema="dc" element="identifier" qualifier="issn">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/issn"/>
+                </dim:field>
+            </xsl:if>
+
+            <!-- dc.identifier.doi	(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/) doi -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi">
+                <dim:field mdschema="dc" element="identifier" qualifier="doi">
+                    <xsl:choose>
+                        <xsl:when test='starts-with(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi, "doi:")
             					or starts-with(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi, "DOI:")'>
-            			<xsl:text>http://dx.doi.org/</xsl:text>
-            			<xsl:value-of select="substring(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi, 5)" />
-            		</xsl:when>
-            		<xsl:when test='starts-with(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi, "10")'>
-            			<xsl:text>http://dx.doi.org/</xsl:text>
-            			<xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi" />
-            		</xsl:when>
-            		<xsl:otherwise>
-            			<xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi" />
-            		</xsl:otherwise>
-            	</xsl:choose>
-            </dim:field>
-        </xsl:if>
-
-        <!-- Citation (explicitly built) -->
-        <!-- format of the citation is: <title of journal> <vol>(<nr>):<page range> -->
-        <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse">
-         <xsl:for-each select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel">
-            <dim:field mdschema="dc" element="identifier" qualifier="citation">
-             <xsl:value-of select="tidsskrift/navn" />
-             <xsl:value-of select="string(' ')" />
-             <xsl:value-of select="volum" />
-             <!--
-             <xsl:value-of select="string('(')" />
-             <xsl:value-of select="/frida/forskningsresultat/fellesdata/ar" />
-             <xsl:value-of select="string(')')" />
-             -->
-             <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/hefte">
-             	<xsl:value-of select="string('(')" />
-                <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/hefte" />
-				<xsl:value-of select="string(')')" />
-             </xsl:if>
-             <xsl:text>:</xsl:text>
-             <xsl:value-of select="sideangivelse/sideFra" />
-             <xsl:value-of select="string('-')" />
-             <xsl:value-of select="sideangivelse/sideTil" />
-            </dim:field>
-         </xsl:for-each>
-        </xsl:if>
-
-        <!-- fulltext version -->
-        <!--
-        <xsl:for-each select="/frida/forskningsresultat/fellesdata/fulltekst">
-            <xsl:if test="type='preprint'">
-                <dim:field mdschema="dc" element="type" qualifier="version">Submitted</dim:field>
+                            <xsl:text>http://dx.doi.org/</xsl:text>
+                            <xsl:value-of
+                                    select="substring(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi, 5)"/>
+                        </xsl:when>
+                        <xsl:when
+                                test='starts-with(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi, "10")'>
+                            <xsl:text>http://dx.doi.org/</xsl:text>
+                            <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/doi"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </dim:field>
             </xsl:if>
-            <xsl:if test="type='postprint'">
-                <dim:field mdschema="dc" element="type" qualifier="version">Accepted</dim:field>
-            </xsl:if>
-            <xsl:if test="type='versjoin'">
-                <dim:field mdschema="dc" element="type" qualifier="version">Published</dim:field>
-            </xsl:if>
-        </xsl:for-each>
-        -->
-      </metadata>
 
-  </xsl:template>
+            <!-- dc.language	(/frida/forskningsresultat/fellesdata/sprak/) kode -->
+            <xsl:if test="/frida/forskningsresultat/fellesdata/sprak/kode">
+                <dim:field mdschema="dc" element="language">
+                    <xsl:value-of select="/frida/forskningsresultat/fellesdata/sprak/kode"/>
+                </dim:field>
+            </xsl:if>
+
+            <!-- dc.publisher	"(/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/) utgivernavn
+(/frida/forskningsresultat/kategoridata/bokRapport/forlag/) navn" -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/utgivernavn">
+                <dim:field mdschema="dc" element="publisher">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/tidsskrift/utgivernavn"/>
+                </dim:field>
+            </xsl:if>
+            <xsl:if test="/frida/forskningsresultat/kategoridata/bokRapport/forlag/navn">
+                <dim:field mdschema="dc" element="publisher">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/bokRapport/forlag/navn"/>
+                </dim:field>
+            </xsl:if>
+
+            <!-- dc.relation.ispartof	(/frida/forskningsresultat/kategoridata/bokRapport/serie/) navn -->
+            <!-- dc.relation.ispartofseries	(/frida/forskningsresultat/kategoridata/bokRapport/serie/) navn -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/bokRapport/serie/navn">
+                <dim:field mdschema="dc" element="relation" qualifier="ispartof">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/bokRapport/serie/navn"/>
+                </dim:field>
+                <dim:field mdschema="dc" element="relation" qualifier="ispartofseries">
+                    <xsl:value-of select="/frida/forskningsresultat/kategoridata/bokRapport/serie/navn"/>
+                </dim:field>
+            </xsl:if>
+
+            <!-- dc.subject.nvi	(/frida/forskningsresultat/fellesdata/) vitenskapsdisiplin -->
+            <xsl:if test="/frida/forskningsresultat/fellesdata/vitenskapsdisiplin">
+                <dim:field mdschema="dc" element="subject" qualifier="nvi">
+                    <xsl:for-each select="/frida/forskningsresultat/fellesdata/vitenskapsdisiplin">
+                        <xsl:text>VDP::</xsl:text>
+                        <xsl:value-of select="navn"/>
+                        <xsl:text>: </xsl:text>
+                        <xsl:value-of select="kode"/>
+                    </xsl:for-each>
+                </dim:field>
+            </xsl:if>
+
+            <!-- dc.title.alternative	(/frida/forskningsresultat/fellesdata/) alternativTittel -->
+            <xsl:if test="/frida/forskningsresultat/fellesdata/alternativTittel">
+                <xsl:for-each select="/frida/forskningsresultat/fellesdata">
+                    <dim:field mdschema="dc" element="title" qualifier="alternative">
+                        <xsl:value-of select="alternativTittel"/>
+                    </dim:field>
+                </xsl:for-each>
+            </xsl:if>
+
+            <!-- dc.title	(/frida/forskningsresultat/fellesdata/) tittel -->
+            <xsl:if test="/frida/forskningsresultat/fellesdata/tittel">
+                <xsl:for-each select="/frida/forskningsresultat/fellesdata/tittel">
+                    <dim:field mdschema="dc" element="title">
+                        <xsl:value-of select="."/>
+                    </dim:field>
+                </xsl:for-each>
+            </xsl:if>
+            
+
+            <!-- dc.type.document	(/frida/forskningsresultat/fellesdata/kategori/underkategori/) navn
+            BOK/ANTOLOGI (Academic anthology)
+BOK/FAGBOK (Scientific book)
+BOKRAPPORTDEL/ANNET (Other)
+BOKRAPPORTDEL/KAPITTEL (Academic chapter/article)
+FOREDRAG/VIT_FOREDRAG (Academic lecture)
+RAPPORT/DRGRADAVH (Doctoral dissertation)
+RAPPORT/RAPPORT (Report)
+TIDSSKRIFTPUBL/ARTIKKEL (Academic article)
+TIDSSKRIFTPUBL/ARTIKKEL_POP (Popular scientific article)
+TIDSSKRIFTPUBL/OVERSIKTSART (Academic literature review) -->
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'BOK'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'ANTOLOGI'">
+                <dim:field mdschema="dc" element="type" qualifier="document">Acadamic anthology</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'BOK'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'FAGBOK'">
+                <dim:field mdschema="dc" element="type" qualifier="document">Scientific book</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'BOKRAPPORTDEL'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'ANNET'">
+                <dim:field mdschema="dc" element="type" qualifier="document">Other</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'BOKRAPPORTDEL'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'KAPITTEL'">
+                <dim:field mdschema="dc" element="type" qualifier="document">Academic chapter/article</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'FOREDRAG'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'VIT_FOREDRAG'">
+                <dim:field mdschema="dc" element="type" qualifier="document">Academic lecture</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'RAPPORT'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'DRGRADAVH'">
+                <dim:field mdschema="dc" element="type" qualifier="document">Doctoral dissertation</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'RAPPORT'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'RAPPORT'">
+                <dim:field mdschema="dc" element="type" qualifier="document">Report</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'TIDSSKRIFTPUBL'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'ARTIKKEL'">
+                <dim:field mdschema="dc" element="type" qualifier="document">Academic article</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'TIDSSKRIFTPUBL'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'ARTIKKEL_POP'">
+                <dim:field mdschema="dc" element="type" qualifier="document">Popular scientific article</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'TIDSSKRIFTPUBL'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'OVERSIKTSART'">
+                <dim:field mdschema="dc" element="type" qualifier="document">Academic literature review</dim:field>
+            </xsl:if>
+
+
+
+            <!-- explicitly set the document type -->
+            <!--
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Tidsskriftspublikasjon' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig artikkel'">
+                <dim:field mdschema="dc" element="type">Journal article</dim:field>
+                <dim:field mdschema="dc" element="type">Peer reviewed</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Tidsskriftspublikasjon' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig oversiktsartikkel/review'">
+                <dim:field mdschema="dc" element="type">Journal article</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Bok' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig antologi'">
+                <dim:field mdschema="dc" element="type">Book chapter</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Bok' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig monografi'">
+                <dim:field mdschema="dc" element="type">Book</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Bok' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig kommentarutgave'">
+                <dim:field mdschema="dc" element="type">Book</dim:field>
+            </xsl:if>
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/navn = 'Del av bok/rapport' and /frida/forskningsresultat/fellesdata/kategori/underkategori/navn = 'Vitenskapelig kapittel/Artikkel'">
+                <dim:field mdschema="dc" element="type">Book chapter</dim:field>
+            </xsl:if> -->
+
+
+
+            <!-- Citation (explicitly built) -->
+            <!-- format of the citation is: <title of journal> <vol>(<nr>):<page range> -->
+            <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse">
+                <xsl:for-each select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel">
+                    <dim:field mdschema="dc" element="identifier" qualifier="bibliographiccitation">
+                        <xsl:value-of select="tidsskrift/navn"/>
+                        <xsl:value-of select="string(' ')"/>
+                        <xsl:value-of select="volum"/>
+                        <!--
+                        <xsl:value-of select="string('(')" />
+                        <xsl:value-of select="/frida/forskningsresultat/fellesdata/ar" />
+                        <xsl:value-of select="string(')')" />
+                        -->
+                        <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/hefte">
+                            <xsl:value-of select="string('(')"/>
+                            <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/hefte"/>
+                            <xsl:value-of select="string(')')"/>
+                        </xsl:if>
+                        <xsl:text>:</xsl:text>
+                        <xsl:value-of select="sideangivelse/sideFra"/>
+                        <xsl:value-of select="string('-')"/>
+                        <xsl:value-of select="sideangivelse/sideTil"/>
+                    </dim:field>
+                </xsl:for-each>
+            </xsl:if>
+
+            
+        </metadata>
+
+    </xsl:template>
 </xsl:stylesheet>

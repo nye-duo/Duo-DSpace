@@ -27,6 +27,16 @@
     <message key="xmlui.XMLWorkflow.cristin.assignment.claimaction">Assign Collections</message>
     <message key="xmlui.XMLWorkflow.cristin.reviewstep.claimaction">Review</message>
 
+    <message key="xmlui.administrative.collection.EditCollectionHarvestingForm.label_ingest_filter">Ingest Filter</message>
+    <message key="xmlui.administrative.collection.EditCollectionHarvestingForm.label_metadata_update">Metadata Removal Strategy</message>
+    <message key="xmlui.administrative.collection.EditCollectionHarvestingForm.label_bundle_versioning">Bundle Versioning Strategy</message>
+    <message key="xmlui.administrative.collection.EditCollectionHarvestingForm.label_ingest_workflow">Ingest Workflow</message>
+    <message key="xmlui.administrative.collection.SetupCollectionHarvestingForm.label_ingest_filter">Ingest Filter</message>
+    <message key="xmlui.administrative.collection.SetupCollectionHarvestingForm.label_metadata_update">Metadata Removal Strategy</message>
+    <message key="xmlui.administrative.collection.SetupCollectionHarvestingForm.label_bundle_versioning">Bundle Versioning Strategy</message>
+    <message key="xmlui.administrative.collection.SetupCollectionHarvestingForm.label_ingest_workflow">Ingest Workflow</message>
+
+
 	<!-- General keys -->
 	<message key="xmlui.general.dspace_home">DSpace Home</message>
 	<message key="xmlui.general.search">Search</message>

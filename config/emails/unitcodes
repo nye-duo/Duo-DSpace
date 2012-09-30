@@ -1,0 +1,26 @@
+# Email sent to DSpace admin when unit codes on incoming cristin
+# items have changed
+#
+# Parameters: {0} the item that has changed
+#             {1} the old unit codes
+#             {2} the new unit codes
+#
+#
+# See org.dspace.core.Email for information on the format of this file.
+#
+Subject: DSpace - unit codes on updated item have changed
+The item:
+
+{0}
+
+Has been updated in the archive by the Cristin importer.  It previously had the unit codes:
+
+{1}
+
+These have now changed to:
+
+{2}
+
+You may wish to update the collection mappings for this item.
+
+- The Cristin Importer

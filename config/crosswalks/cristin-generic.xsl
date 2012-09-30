@@ -100,7 +100,7 @@
             <!-- dc.identifier.cristin	(/frida/forskningsresultat/fellesdata/) id -->
             <xsl:if test="/frida/forskningsresultat/fellesdata/id">
                 <dim:field mdschema="dc" element="identifier" qualifier="cristin">
-                    <xsl:value-of select="/frida/forskningsresultat/fellesdata/id"/>
+                    <xsl:text>FRIDAID </xsl:text><xsl:value-of select="/frida/forskningsresultat/fellesdata/id"/>
                 </dim:field>
             </xsl:if>
 

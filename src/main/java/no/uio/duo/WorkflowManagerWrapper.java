@@ -55,6 +55,21 @@ public class WorkflowManagerWrapper
     public static void abort(Context context, InProgressSubmission wfItem, EPerson ePerson)
             throws SQLException, AuthorizeException, IOException, WorkflowException, WorkflowConfigurationException, MessagingException
     {
+        // ugly eperson verification/acquisition/error bit
+        if (ePerson == null)
+        {
+            String adminEperson = ConfigurationManager.getProperty("cristin", "admin.eperson");
+            ePerson = EPerson.findByEmail(context, adminEperson);
+            if (ePerson == null)
+            {
+                ePerson = EPerson.findByNetid(context, adminEperson);
+            }
+        }
+        if (ePerson == null)
+        {
+            throw new WorkflowException("No admin eperson defined, and passed eperson is null - probably need to fix your config");
+        }
+
         if (ConfigurationManager.getProperty("workflow", "workflow.framework").equals("xmlworkflow"))
         {
             XmlWorkflowManager.sendWorkflowItemBackSubmission(context, (XmlWorkflowItem) wfItem, ePerson, "", "");

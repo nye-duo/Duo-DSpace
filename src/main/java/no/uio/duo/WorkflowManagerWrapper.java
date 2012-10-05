@@ -216,7 +216,7 @@ public class WorkflowManagerWrapper
         if (tri.hasNext())
         {
             TableRow row = tri.next();
-            int wfid = row.getIntColumn("workflow_id");
+            int wfid = row.getIntColumn("workflowitem_id");
             XmlWorkflowItem.find(context, wfid);
             XmlWorkflowItem wfi = XmlWorkflowItem.find(context, wfid);
             tri.close();

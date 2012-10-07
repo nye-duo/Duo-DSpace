@@ -131,12 +131,17 @@ public class XmlUIBitstreamReorderUI extends AbstractXMLUIAction
 
 
                 Row row = files.addRow("bitstream_row_" + bitstream.getID(), Row.ROLE_DATA, "");
-                Select sel = row.addCell().addSelect("move_to_bundle");
+                Cell moveCell = row.addCell();
+                Select sel = moveCell.addSelect("move_" + bitstream.getID());
                 sel.addOption("-1", "Move to ...");
                 for (Bundle b : bundles)
                 {
-                    sel.addOption(Integer.toString(b.getID()), b.getName());
+                    if (b.getID() != bundle.getID())
+                    {
+                        sel.addOption(Integer.toString(b.getID()), b.getName());
+                    }
                 }
+                moveCell.addButton("submit_move").setValue("Go");
 
                 if (AuthorizeManager.authorizeActionBoolean(context, bitstream, Constants.WRITE)) {
                     // The user can edit the bitstream give them a link.

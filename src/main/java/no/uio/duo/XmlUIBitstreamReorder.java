@@ -16,6 +16,9 @@ import org.dspace.xmlworkflow.storedcomponents.XmlWorkflowItem;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 public class XmlUIBitstreamReorder extends ProcessingAction
 {
@@ -32,20 +35,63 @@ public class XmlUIBitstreamReorder extends ProcessingAction
     {
         String button = Util.getSubmitButton(request, "submit_leave");
 
-        if ("submit_update".equals(button))
+        if ("submit_move".equals(button))
         {
-            this.save(context, wfi, request);
+            this.move(context, wfi, request);
+            return new ActionResult(ActionResult.TYPE.TYPE_PAGE);
+        }
+        else if ("submit_update".equals(button))
+        {
+            this.reorder(context, wfi, request);
         }
         else if ("submit_update_finish".equals(button))
         {
-            this.save(context, wfi, request);
+            this.reorder(context, wfi, request);
             return new ActionResult(ActionResult.TYPE.TYPE_OUTCOME, ActionResult.OUTCOME_COMPLETE);
         }
 
         return new ActionResult(ActionResult.TYPE.TYPE_CANCEL);
+
+
     }
 
-    private void save(Context context, XmlWorkflowItem wfi, HttpServletRequest request)
+    private void move(Context context, XmlWorkflowItem wfi, HttpServletRequest request)
+            throws SQLException, AuthorizeException, IOException
+    {
+        Map<Integer, Integer> moves = new HashMap<Integer, Integer>();
+        Enumeration params = request.getParameterNames();
+        while (params.hasMoreElements())
+        {
+            String key = (String) params.nextElement();
+            if (key.startsWith("move_"))
+            {
+                String val = request.getParameter(key);
+                if (!"-1".equals(val))
+                {
+                    int bsid = Integer.parseInt(key.substring("move_".length()));
+                    int bundleid = Integer.parseInt(val);
+                    moves.put(bsid, bundleid);
+                }
+            }
+        }
+
+        for (Integer bsid : moves.keySet())
+        {
+            Bitstream bitstream = Bitstream.find(context, bsid);
+            Bundle target = Bundle.find(context, moves.get(bsid));
+
+            Bundle[] existing = bitstream.getBundles();
+            target.addBitstream(bitstream);
+            target.update();
+            for (Bundle b : existing)
+            {
+                b.removeBitstream(bitstream);
+                b.update();
+            }
+        }
+    }
+
+    private void reorder(Context context, XmlWorkflowItem wfi, HttpServletRequest request)
             throws SQLException, AuthorizeException
     {
         Item item = wfi.getItem();

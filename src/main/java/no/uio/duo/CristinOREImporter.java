@@ -135,7 +135,7 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
         log.info("CristinOREImporter for Item "+ item.getID() + " took: " + (new Date().getTime() - timeStart.getTime()) + "ms.");
 	}
 
-    private Bitstream ingestBitstreams(Context context, Document doc, List<Element> aggregatedResources, Item item)
+    private Bitstream OLDingestBitstreams(Context context, Document doc, List<Element> aggregatedResources, Item item)
             throws CrosswalkException, IOException, SQLException, AuthorizeException
     {
         // Next for each resource, create a bitstream
@@ -175,7 +175,8 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
                     && desc.getChild("type", RDF_NS).getAttributeValue("resource", RDF_NS).equals(DS_NS.getURI() + "DSpaceBitstream")
                     && desc.getChild("description", DCTERMS_NS).getText().equals("ORIGINAL"))
         	{
-                bundleName = this.isMetadataBitstream(desc) ? "METADATA" : "ORIGINAL";
+                FileManager fm = new FileManager();
+                bundleName = fm.isMetadataBitstream(desc) ? "METADATA" : "ORIGINAL";
         		log.debug("Setting bundle name to: " + bundleName);
         	}
 
@@ -271,23 +272,141 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
         return metadataBitstream;
     }
 
-    private boolean isMetadataBitstream(Element desc)
+    private void backupAndRemove(Item item, List<Bitstream> bitstreams)
+            throws SQLException, AuthorizeException, IOException
     {
-        // https://w3utv-dspace01.uio.no/dspace/xmlui/bitstream/handle/123456789/982/cristin-12087.xml?sequence=2
-        
-        Attribute about = desc.getAttribute("about", RDF_NS);
-        String url = about.getValue();
-
-        // FIXME: yeah yeah, this would look better with a regex
-        String[] bits = url.split("\\?");
-        String[] urlParts = bits[0].split("/");
-        String filename = urlParts[urlParts.length - 1];
-
-        if (filename.startsWith("cristin-") && filename.endsWith(".xml"))
+        // get the backup bundle
+        Bundle deleted = null;
+        Bundle[] deleteds = item.getBundles("DELETED");
+        if (deleteds.length > 0)
         {
-            return true;
+            deleted = deleteds[0];
         }
-        return false;
+        else
+        {
+            deleted = item.createBundle("DELETED");
+        }
+
+        for (Bitstream bitstream : bitstreams)
+        {
+            Bundle[] currentBundles = bitstream.getBundles();
+            deleted.addBitstream(bitstream);
+
+            for (Bundle current : currentBundles)
+            {
+                current.removeBitstream(bitstream);
+            }
+        }
+    }
+
+    private Bitstream ingestBitstreams(Context context, Document doc, List<Element> aggregatedResources, Item item)
+            throws CrosswalkException, IOException, SQLException, AuthorizeException
+    {
+        // get a list of the aggregated resources in the ORIGINAL bundle
+        FileManager fm = new FileManager();
+        List<Element> incomingBitstreams = fm.listBitstreamsInBundle(doc, "ORIGINAL", false);
+        List<Bitstream> originalBitstreams = fm.getExistingBitstreams(item, "ORIGINAL");
+        List<Bitstream> metadataBitstreams = fm.getExistingBitstreams(item, "METADATA");
+
+        // backup the existing bitstreams
+        this.backupAndRemove(item, originalBitstreams);
+        this.backupAndRemove(item, metadataBitstreams);
+
+        Bitstream metadataBitstream = null;
+
+        for (Element link : incomingBitstreams)
+        {
+        	String href = link.getAttributeValue("href");
+        	log.debug("Cristin ORE processing: " + href);
+
+            String bundleName = fm.isMetadataBitstream(href) ? "METADATA" : "ORIGINAL";
+        	log.debug("Setting bundle name to: " + bundleName);
+
+            // now, determine if this is a non-metadata bitstream, and if we are allowed
+            // to import them
+            if ("ORIGINAL".equals(bundleName) && !this.updateBitstreams)
+            {
+                continue;
+            }
+
+            // if we get to here then we import the bitstream
+
+        	// Bundle names are not unique, so we just pick the first one if there's more than one.
+        	Bundle[] targetBundles = item.getBundles(bundleName);
+        	Bundle targetBundle;
+
+        	// if null, create the new bundle and add it in
+        	if (targetBundles.length == 0)
+            {
+        		targetBundle = item.createBundle(bundleName);
+        		item.addBundle(targetBundle);
+        	}
+        	else
+            {
+        		targetBundle = targetBundles[0];
+        	}
+
+            // ingest the bitstream from the remote url
+        	URL ARurl = null;
+        	InputStream in = null;
+        	if (href != null)
+            {
+        		try
+                {
+		        	// Make sure the url string escapes all the oddball characters
+        			String processedURL = encodeForURL(href);
+        			// Generate a requeset for the aggregated resource
+        			ARurl = new URL(processedURL);
+		        	in = ARurl.openStream();
+        		}
+        		catch(FileNotFoundException fe)
+                {
+            		log.error("The provided URI failed to return a resource: " + href);
+            	}
+        		catch(ConnectException fe)
+                {
+            		log.error("The provided URI was invalid: " + href);
+            	}
+        	}
+        	else
+            {
+        		throw new CrosswalkException("Entry did not contain link to resource");
+        	}
+
+        	// ingest and update
+        	if (in != null)
+            {
+	        	Bitstream newBitstream = targetBundle.createBitstream(in);
+
+	        	String bsName = link.getAttributeValue("title");
+	        	newBitstream.setName(bsName);
+
+	            // Identify the format
+	        	String mimeString = link.getAttributeValue("type");
+	        	BitstreamFormat bsFormat = BitstreamFormat.findByMIMEType(context, mimeString);
+	        	if (bsFormat == null)
+                {
+	        		bsFormat = FormatIdentifier.guessFormat(context, newBitstream);
+	        	}
+	        	newBitstream.setFormat(bsFormat);
+	            newBitstream.update();
+
+	            targetBundle.addBitstream(newBitstream);
+	        	targetBundle.update();
+
+                // if this was a metadata bitstream then remember it for later
+                if ("METADATA".equals(bundleName))
+                {
+                    metadataBitstream = newBitstream;
+                }
+        	}
+        	else
+            {
+        		throw new CrosswalkException("Could not retrieve bitstream");
+        	}
+        }
+
+        return metadataBitstream;
     }
 
 	/**

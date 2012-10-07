@@ -240,8 +240,9 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         doc.addContent(oreREM.detach());
 
         // get a list of the aggregated resources in the ORIGINAL bundle
-        List<Element> incomingBitstreams = this.listBitstreamsInBundle(doc, "ORIGINAL");
-        List<Bitstream> existingBitstreams = this.getExistingBitstreams(item, "ORIGINAL");
+        FileManager fm = new FileManager();
+        List<Element> incomingBitstreams = fm.listBitstreamsInBundle(doc, "ORIGINAL");
+        List<Bitstream> existingBitstreams = fm.getExistingBitstreams(item, "ORIGINAL");
 
         // a/	There are more files than before in the incoming list
         // remember that there will be a metadata bitstream which we don't care
@@ -373,110 +374,5 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
     {
         // FIXME: we don't have enough information to do this yet
         return false;
-    }
-
-    private List<Bitstream> getExistingBitstreams(Item item, String bundleName)
-            throws SQLException
-    {
-        List<Bitstream> bss = new ArrayList<Bitstream>();
-        Bundle[] bundles = item.getBundles(bundleName);
-        for (Bundle bundle : bundles)
-        {
-            Bitstream[] bitstreams = bundle.getBitstreams();
-            for (Bitstream bitstream : bitstreams)
-            {
-                bss.add(bitstream);
-            }
-        }
-        return bss;
-    }
-
-    private List<Element> listBitstreamsInBundle(Document doc, String bundleName)
-            throws IOException
-    {
-        // FIXME: we need to check whether this is a metadata bitstream, which
-        // we must then skip
-        List<Element> bitstreams = new ArrayList<Element>();
-        List<Element> links = this.listBitstreams(doc);
-        for (Element link : links)
-        {
-            String incomingBundle = this.getIncomingBundleName(doc, link);
-
-            if (bundleName.equals(incomingBundle))
-            {
-                // this is a bitstream from the correct bundle
-                // only register it if it is not a metadata bitstream
-                if (!this.isMetadataBitstream(link.getAttributeValue("href")))
-                {
-                    bitstreams.add(link);
-                }
-            }
-        }
-        return bitstreams;
-    }
-
-    private boolean isMetadataBitstream(String url)
-    {
-        // https://w3utv-dspace01.uio.no/dspace/xmlui/bitstream/handle/123456789/982/cristin-12087.xml?sequence=2
-
-        // FIXME: yeah yeah, this would look better with a regex
-        String[] bits = url.split("\\?");
-        String[] urlParts = bits[0].split("/");
-        String filename = urlParts[urlParts.length - 1];
-
-        if (filename.startsWith("cristin-") && filename.endsWith(".xml"))
-        {
-            return true;
-        }
-        return false;
-    }
-
-    private String getIncomingBundleName(Document doc, Element link)
-            throws IOException
-    {
-        try
-        {
-            String href = link.getAttributeValue("href");
-            XPath xpathDesc = XPath.newInstance("/atom:entry/oreatom:triples/rdf:Description[@rdf:about=\"" + href + "\"]");
-            xpathDesc.addNamespace(ATOM_NS);
-            xpathDesc.addNamespace(ORE_ATOM);
-            xpathDesc.addNamespace(RDF_NS);
-            List<Element> descs = xpathDesc.selectNodes(doc);
-            for (Element desc : descs)
-            {
-                Element dcdesc = desc.getChild("description", DCTERMS_NS);
-                return dcdesc.getText();
-            }
-        }
-        catch (JDOMException e)
-        {
-            throw new IOException("JDOM exception occured while ingesting the ORE", e);
-        }
-
-        return null;
-    }
-
-    private List<Element> listBitstreams(Document doc)
-            throws IOException
-    {
-        XPath xpathLinks;
-        List<Element> aggregatedResources;
-        // String entryId;
-        try
-        {
-            xpathLinks = XPath.newInstance("/atom:entry/atom:link[@rel=\"" + ORE_NS.getURI() + "aggregates" + "\"]");
-            xpathLinks.addNamespace(ATOM_NS);
-            aggregatedResources = xpathLinks.selectNodes(doc);
-
-            // xpathLinks = XPath.newInstance("/atom:entry/atom:link[@rel='alternate']/@href");
-            // xpathLinks.addNamespace(ATOM_NS);
-            // entryId = ((Attribute) xpathLinks.selectSingleNode(doc)).getValue();
-        }
-        catch (JDOMException e)
-        {
-            throw new IOException("JDOM exception occured while ingesting the ORE", e);
-        }
-
-        return aggregatedResources;
     }
 }

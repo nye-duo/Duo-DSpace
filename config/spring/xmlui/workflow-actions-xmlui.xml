@@ -18,6 +18,6 @@
     <bean id="scorereviewaction_xmlui" class="org.dspace.app.xmlui.aspect.xmlworkflow.actions.processingaction.ScoreReviewAction" scope="singleton"/>
 
     <bean id="assignmentaction_xmlui" class="no.uio.duo.XmlUICollectionAssignmentUI" scope="singleton"/>
-
+    <bean id="bitstreamaction_xmlui" class="no.uio.duo.XmlUIBitstreamReorderUI" scope="singleton"/>
 
 </beans>

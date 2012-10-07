@@ -24,6 +24,9 @@ cp config/spring/xmlui/* $DSPACE/dspace/config/sprint/xmlui/
 # copy the customised messages fle
 cp poms/messages.xml $DSPACE/dspace/modules/xmlui/overlays/org.dspace.dspace-xmlui-lang-1.8.0.2/i18n/
 
+# copy the javascript for the workflow
+cp poms/bitstream-reorder-workflow.js $DSPACE/dspace-xmlui/dspace-xmlui-webapp/src/main/webapp/static/js/
+
 # build and install the module
 $MAVEN install
 

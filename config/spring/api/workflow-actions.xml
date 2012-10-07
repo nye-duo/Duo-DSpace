@@ -27,6 +27,8 @@
 
     <!-- cristin API bean definitions -->
     <bean id="assignmentactionAPI" class="no.uio.duo.XmlUICollectionAssignment" scope="prototype"/>
+    <bean id="bitstreamactionAPI" class="no.uio.duo.XmlUIBitstreamReorder" scope="prototype"/>
+
 
     <!-- action configurations -->
     <bean id="reviewaction" class="org.dspace.xmlworkflow.state.actions.WorkflowActionConfig" scope="prototype">
@@ -50,6 +52,12 @@
     <bean id="assignmentaction" class="org.dspace.xmlworkflow.state.actions.WorkflowActionConfig" scope="prototype">
         <constructor-arg type="java.lang.String" value="assignmentaction"/>
         <property name="processingAction" ref="assignmentactionAPI"/>
+        <property name="requiresUI" value="true"/>
+    </bean>
+
+    <bean id="bitstreamaction" class="org.dspace.xmlworkflow.state.actions.WorkflowActionConfig" scope="prototype">
+        <constructor-arg type="java.lang.String" value="bitstreamaction"/>
+        <property name="processingAction" ref="bitstreamactionAPI"/>
         <property name="requiresUI" value="true"/>
     </bean>
 

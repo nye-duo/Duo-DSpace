@@ -108,26 +108,8 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
         Document doc = new Document();
         doc.addContent(root.detach());
 
-        XPath xpathLinks;
-        List<Element> aggregatedResources;
-        String entryId;
-		try
-        {
-			xpathLinks = XPath.newInstance("/atom:entry/atom:link[@rel=\"" + ORE_NS.getURI()+"aggregates" + "\"]");
-			xpathLinks.addNamespace(ATOM_NS);
-	        aggregatedResources = xpathLinks.selectNodes(doc);
-
-	        xpathLinks = XPath.newInstance("/atom:entry/atom:link[@rel='alternate']/@href");
-	        xpathLinks.addNamespace(ATOM_NS);
-	        entryId = ((Attribute)xpathLinks.selectSingleNode(doc)).getValue();
-		}
-        catch (JDOMException e)
-        {
-			throw new CrosswalkException("JDOM exception occured while ingesting the ORE", e);
-		}
-
         // now, ingest the bitstreams (if necessary - this method will decide based on the config)
-        Bitstream metadataBitstream = this.ingestBitstreams(context, doc, aggregatedResources, item);
+        Bitstream metadataBitstream = this.ingestBitstreams(context, doc, item);
 
         // update the metadata from the metadata bundle
         this.addMetadataFromBitstream(context, item, metadataBitstream);
@@ -276,6 +258,50 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
             throws SQLException, AuthorizeException, IOException
     {
         // get the backup bundle
+        Bundle deleted = this.getDeletedBundle(item);
+
+        for (Bitstream bitstream : bitstreams)
+        {
+            this.backupAndRemove(item, bitstream, deleted);
+
+        }
+    }
+
+    private void backupAndRemove(Item item, Bitstream bitstream)
+            throws SQLException, AuthorizeException, IOException
+    {
+        // get the backup bundle
+        Bundle deleted = this.getDeletedBundle(item);
+
+        // do the backup
+        this.backupAndRemove(item, bitstream, deleted);
+    }
+
+    private void backupAndRemove(Item item, Bitstream bitstream, Bundle backupBundle)
+            throws SQLException, AuthorizeException, IOException
+    {
+        Bundle[] currentBundles = bitstream.getBundles();
+        backupBundle.addBitstream(bitstream);
+
+        for (Bundle current : currentBundles)
+        {
+            current.removeBitstream(bitstream);
+        }
+    }
+
+    private void backupAndRemove(Item item, Bundle sourceBundle, IncomingBitstream ib)
+            throws SQLException, AuthorizeException, IOException
+    {
+        Bitstream[] bitstreams = sourceBundle.getBitstreams();
+        FileManager fm = new FileManager();
+        Bitstream bs = fm.findBitstream(ib, bitstreams);
+        Bundle deleted = this.getDeletedBundle(item);
+        this.backupAndRemove(item, bs, deleted);
+    }
+
+    private Bundle getDeletedBundle(Item item)
+            throws SQLException, AuthorizeException, IOException
+    {
         Bundle deleted = null;
         Bundle[] deleteds = item.getBundles("DELETED");
         if (deleteds.length > 0)
@@ -286,127 +312,114 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
         {
             deleted = item.createBundle("DELETED");
         }
-
-        for (Bitstream bitstream : bitstreams)
-        {
-            Bundle[] currentBundles = bitstream.getBundles();
-            deleted.addBitstream(bitstream);
-
-            for (Bundle current : currentBundles)
-            {
-                current.removeBitstream(bitstream);
-            }
-        }
+        return deleted;
     }
 
-    private Bitstream ingestBitstreams(Context context, Document doc, List<Element> aggregatedResources, Item item)
+    private Bitstream ingestBitstreams(Context context, Document doc, Item item)
             throws CrosswalkException, IOException, SQLException, AuthorizeException
     {
         // get a list of the aggregated resources in the ORIGINAL bundle
         FileManager fm = new FileManager();
-        List<Element> incomingBitstreams = fm.listBitstreamsInBundle(doc, "ORIGINAL", false);
+        List<IncomingBitstream> incomingBitstreams = fm.listBitstreamsInBundle(doc, "ORIGINAL", false);
         List<Bitstream> originalBitstreams = fm.getExistingBitstreams(item, "ORIGINAL");
         List<Bitstream> metadataBitstreams = fm.getExistingBitstreams(item, "METADATA");
 
         // backup the existing bitstreams
-        this.backupAndRemove(item, originalBitstreams);
-        this.backupAndRemove(item, metadataBitstreams);
+        // this.backupAndRemove(item, originalBitstreams);
+        // this.backupAndRemove(item, metadataBitstreams);
 
         Bitstream metadataBitstream = null;
 
-        for (Element link : incomingBitstreams)
+        for (IncomingBitstream ib : incomingBitstreams)
         {
-        	String href = link.getAttributeValue("href");
+        	String href = ib.getUrl();
         	log.debug("Cristin ORE processing: " + href);
 
-            String bundleName = fm.isMetadataBitstream(href) ? "METADATA" : "ORIGINAL";
+            boolean isMdBs = fm.isMetadataBitstream(href);
+            String bundleName = isMdBs ? "METADATA" : "ORIGINAL";
         	log.debug("Setting bundle name to: " + bundleName);
 
             // now, determine if this is a non-metadata bitstream, and if we are allowed
             // to import them
-            if ("ORIGINAL".equals(bundleName) && !this.updateBitstreams)
+            if (!isMdBs && !this.updateBitstreams)
             {
                 continue;
             }
 
-            // if we get to here then we import the bitstream
+            // if we get to here then we want to update the bitstream
 
+            // select the potential target bundle
         	// Bundle names are not unique, so we just pick the first one if there's more than one.
-        	Bundle[] targetBundles = item.getBundles(bundleName);
-        	Bundle targetBundle;
+            Bundle targetBundle = this.getTargetBundle(item, bundleName);
 
-        	// if null, create the new bundle and add it in
-        	if (targetBundles.length == 0)
+            // now ingest based on the following rules:
+            //
+            // 0 - we always ingest the metadata bitstream
+            // 1 - does the bitstream already exist - and is the same - in the item?  If so, don't update it
+            // 2 - if the bitstream already exists, but has changed, replace it
+            // 3 - if the bitstream does not exist, create it
+            // 4 - if there is not a version of an existing bitstream in the incoming bitstreams, delete it
+            // 5 - ensure that the resulting order of the bitstreams is commensurate with the incoming bitstreams
+
+            // 0 - we always ingest the metadata bitstream
+            if (isMdBs)
             {
-        		targetBundle = item.createBundle(bundleName);
-        		item.addBundle(targetBundle);
-        	}
-        	else
+                this.backupAndRemove(item, metadataBitstreams);
+                metadataBitstream = fm.ingestBitstream(context, href, ib.getName(), ib.getMimetype(), targetBundle);
+            }
+
+            // 1 - does the bitstream already exist - and is the same - in the item?  If so, don't update it
+            else if (fm.bitstreamInstanceAlreadyExists(ib, originalBitstreams))
             {
-        		targetBundle = targetBundles[0];
-        	}
+                continue;
+            }
 
-            // ingest the bitstream from the remote url
-        	URL ARurl = null;
-        	InputStream in = null;
-        	if (href != null)
+            // 2 - if the bitstream already exists, but has changed, replace it
+            else if (fm.bitstreamNameAlreadyExists(ib, originalBitstreams))
             {
-        		try
-                {
-		        	// Make sure the url string escapes all the oddball characters
-        			String processedURL = encodeForURL(href);
-        			// Generate a requeset for the aggregated resource
-        			ARurl = new URL(processedURL);
-		        	in = ARurl.openStream();
-        		}
-        		catch(FileNotFoundException fe)
-                {
-            		log.error("The provided URI failed to return a resource: " + href);
-            	}
-        		catch(ConnectException fe)
-                {
-            		log.error("The provided URI was invalid: " + href);
-            	}
-        	}
-        	else
+                this.backupAndRemove(item, targetBundle, ib);
+                fm.ingestBitstream(context, href, ib.getName(), ib.getMimetype(), targetBundle);
+            }
+
+            // 3 - if the bitstream does not exist, create it
+            else if (fm.isNewBitstream(ib, originalBitstreams))
             {
-        		throw new CrosswalkException("Entry did not contain link to resource");
-        	}
-
-        	// ingest and update
-        	if (in != null)
-            {
-	        	Bitstream newBitstream = targetBundle.createBitstream(in);
-
-	        	String bsName = link.getAttributeValue("title");
-	        	newBitstream.setName(bsName);
-
-	            // Identify the format
-	        	String mimeString = link.getAttributeValue("type");
-	        	BitstreamFormat bsFormat = BitstreamFormat.findByMIMEType(context, mimeString);
-	        	if (bsFormat == null)
-                {
-	        		bsFormat = FormatIdentifier.guessFormat(context, newBitstream);
-	        	}
-	        	newBitstream.setFormat(bsFormat);
-	            newBitstream.update();
-
-	            targetBundle.addBitstream(newBitstream);
-	        	targetBundle.update();
-
-                // if this was a metadata bitstream then remember it for later
-                if ("METADATA".equals(bundleName))
-                {
-                    metadataBitstream = newBitstream;
-                }
-        	}
-        	else
-            {
-        		throw new CrosswalkException("Could not retrieve bitstream");
-        	}
+                fm.ingestBitstream(context, href, ib.getName(), ib.getMimetype(), targetBundle);
+            }
         }
 
+        // 4 - if there is not a version of an existing bitstream in the incoming bitstreams, delete it
+        for (Bitstream bs : originalBitstreams)
+        {
+            if (!fm.bitstreamIsIncoming(bs, incomingBitstreams))
+            {
+                this.backupAndRemove(item, bs);
+            }
+        }
+
+        // 5 - ensure that the resulting order of the bitstreams is commensurate with the incoming bitstreams
+        fm.sequenceBitstreams(item, "ORIGINAL", incomingBitstreams);
+
         return metadataBitstream;
+    }
+
+    private Bundle getTargetBundle(Item item, String bundleName)
+            throws SQLException, AuthorizeException
+    {
+        Bundle[] targetBundles = item.getBundles(bundleName);
+        Bundle targetBundle;
+
+        // if null, create the new bundle and add it in
+        if (targetBundles.length == 0)
+        {
+            targetBundle = item.createBundle(bundleName);
+            item.addBundle(targetBundle);
+        }
+        else
+        {
+            targetBundle = targetBundles[0];
+        }
+        return targetBundle;
     }
 
 	/**

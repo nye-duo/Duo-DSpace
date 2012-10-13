@@ -25,7 +25,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class CristinIngestionWorkflow implements IngestionWorkflow
@@ -59,7 +61,7 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         {
             // if the item is in the archive, check to see if we need to update
             // the bitstreams
-            docsChanged = this.haveDocsChanged(item, oreREM);
+            docsChanged = this.haveDocsChanged(context, item, oreREM);
             if (docsChanged)
             {
                 // if we need to update the bitstreams, then create a new
@@ -223,7 +225,7 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         return units;
     }
 
-    private boolean haveDocsChanged(Item item, Element oreREM)
+    private boolean haveDocsChanged(Context context, Item item, Element oreREM)
             throws IOException, SQLException
     {
         /*
@@ -241,7 +243,7 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
 
         // get a list of the aggregated resources in the ORIGINAL bundle
         FileManager fm = new FileManager();
-        List<Element> incomingBitstreams = fm.listBitstreamsInBundle(doc, "ORIGINAL");
+        List<IncomingBitstream> incomingBitstreams = fm.listBitstreamsInBundle(doc, "ORIGINAL");
         List<Bitstream> existingBitstreams = fm.getExistingBitstreams(item, "ORIGINAL");
 
         // a/	There are more files than before in the incoming list
@@ -268,7 +270,7 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         }
 
         // d/	The set of files are in a different order than before
-        if (this.fileOrderChanged(incomingBitstreams, existingBitstreams))
+        if (this.fileOrderChanged(context, incomingBitstreams, existingBitstreams))
         {
             return true;
         }
@@ -276,52 +278,25 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         return false;
     }
 
-    private boolean fileOrderChanged(List<Element> incomingBitstreams, List<Bitstream> existingBitstreams)
+    private boolean fileOrderChanged(Context context, List<IncomingBitstream> incomingBitstreams, List<Bitstream> existingBitstreams)
+            throws SQLException
     {
         TreeMap<Integer, String> rawIncomingSeq = new TreeMap<Integer, String>();
         TreeMap<Integer, String> rawExistingSeq = new TreeMap<Integer, String>();
+
+        FileManager fm = new FileManager();
 
         // calculate the match map for the incoming items
         // we need to remember that in the incoming item, the metadata bitstream
         // is in the ORIGINAL bundle, but not in the existing item, so when determining
         // the order of the incoming files, we need to close the gap left by the
         // metadata bitstream
-        for (Element element : incomingBitstreams)
+        for (IncomingBitstream ib : incomingBitstreams)
         {
-            String url = element.getAttributeValue("href");
-            String[] urlParts = url.split("/");
-            String[] fileSeq = urlParts[urlParts.length - 1].split("\\?");
-            if (fileSeq.length == 2)
-            {
-                String filename = null;
-                try
-                {
-                    filename = URLDecoder.decode(fileSeq[0], "UTF-8");
-                }
-                catch (UnsupportedEncodingException e)
-                {
-                    // can't parse the filename for whatever reason, just go ahead
-                    // and re-import
-                    return false;
-                }
-                String[] seqBits = fileSeq[1].split("=");
-                if (seqBits.length == 2)
-                {
-                    int seqNo = Integer.parseInt(seqBits[1].trim());
-                    rawIncomingSeq.put(seqNo, filename);
-                }
-                else
-                {
-                    // if the sequence number is not well formed, then force a re-import
-                    return true;
-                }
-            }
-            else
-            {
-                // if we can't get a sequence number for a file, then the sequence is changed
-                // by definition (this ought not to happen)
-                return true;
-            }
+            // FIXME: at the moment we do the matching on filename, but what we
+            // really want is to do this by MD5.  This should be easy to sort out
+            // by simply switching ib.getName() for ib.getMd5()
+            rawIncomingSeq.put(ib.getOrder(), ib.getName());
         }
 
         // normalise the map order
@@ -330,7 +305,11 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         // calculate the match map for the existing bitstreams
         for (Bitstream bitstream : existingBitstreams)
         {
-            rawExistingSeq.put(bitstream.getSequenceID(), bitstream.getName());
+            // FIXME: at the moment we do the matching on filename, but what we
+            // really want is to do this by MD5.  This should be easy to sort out
+            // by simply switching bitstream.getName() for bitstream.getChecksum()
+            int order = fm.getBitstreamOrder(context, bitstream);
+            rawExistingSeq.put(order, bitstream.getName());
         }
         TreeMap<Integer, String> existingSeq = this.normaliseSeq(rawExistingSeq);
 
@@ -370,9 +349,33 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         return normSeq;
     }
 
-    private boolean checksumsChanged(List<Element> incomingBitstreams, List<Bitstream> existingBitstreams)
+    private boolean checksumsChanged(List<IncomingBitstream> incomingBitstreams, List<Bitstream> existingBitstreams)
     {
         // FIXME: we don't have enough information to do this yet
         return false;
+
+        /*
+        List<String> incomingChecks = new ArrayList<String>();
+        List<String> existingChecks = new ArrayList<String>();
+
+        for (IncomingBitstream ib : incomingBitstreams)
+        {
+            incomingChecks.add(ib.getMd5());
+        }
+
+        for (Bitstream bs : existingBitstreams)
+        {
+            existingChecks.add(bs.getChecksum());
+        }
+
+        for (String check : incomingChecks)
+        {
+            if (!existingChecks.contains(check))
+            {
+                return true;
+            }
+        }
+        return false;
+        */
     }
 }

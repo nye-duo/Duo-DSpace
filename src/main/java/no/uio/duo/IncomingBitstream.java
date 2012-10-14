@@ -4,7 +4,7 @@ public class IncomingBitstream
 {
     private String url;
     private String name;
-    private int order;
+    private int order = -1;
     private String md5;
     private String mimetype;
 

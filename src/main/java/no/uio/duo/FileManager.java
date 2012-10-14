@@ -129,7 +129,7 @@ public class FileManager
             }
         }
 
-        List<IncomingBitstream> ibs = this.makeIncomingBitstreams(links, fulltexts);
+        List<IncomingBitstream> ibs = this.makeIncomingBitstreams(bitstreams, fulltexts);
 
         return ibs;
     }
@@ -467,6 +467,7 @@ public class FileManager
         // go through the incoming bitstreams and find the corresponding
         // DSpace bitstream (this will ignore any incoming bitstreams
         // that didn't find their way into the bundle of interest)
+        int offset = 1;
         for (IncomingBitstream ib : ibs)
         {
             if (ib.getMd5() != null)
@@ -475,7 +476,13 @@ public class FileManager
                 {
                     if (ib.getMd5().equals(bitstream.getChecksum()))
                     {
-                        orderMap.put(ib.getOrder(), bitstream.getID());
+                        int pos = ib.getOrder();
+                        if (pos == -1)
+                        {
+                            pos = -1 * offset;
+                            offset++;
+                        }
+                        orderMap.put(pos, bitstream.getID());
                     }
                 }
             }
@@ -485,7 +492,13 @@ public class FileManager
                 {
                     if (ib.getName().equals(bitstream.getName()))
                     {
-                        orderMap.put(ib.getOrder(), bitstream.getID());
+                        int pos = ib.getOrder();
+                        if (pos == -1)
+                        {
+                            pos = -1 * offset;
+                            offset++;
+                        }
+                        orderMap.put(pos, bitstream.getID());
                     }
                 }
             }

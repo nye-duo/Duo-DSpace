@@ -162,7 +162,7 @@ public class FileManager
                     // are unique within the context of the item
                     // FIXME: once we have md5 checksums in the ORE feed, we will be able
                     // to match on checksum, which will be a more formal solution
-                    if (ft.getChildTextTrim("navn").equals(this.getFilename(ib.getUrl())))
+                    if (ft.getChildTextTrim("navn").equals(ib.getName()))
                     {
                         String nr = ft.getChildTextTrim("nr");
                         String md5 = ft.getChildTextTrim("md5");

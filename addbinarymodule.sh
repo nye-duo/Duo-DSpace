@@ -27,8 +27,8 @@ cp poms/messages.xml $DSPACE_SRC/dspace/modules/xmlui/overlays/org.dspace.dspace
 # copy the javascript for the workflow
 cp poms/bitstream-reorder-workflow.js $DSPACE_SRC/dspace-xmlui/dspace-xmlui-webapp/src/main/webapp/static/js/
 
-# build and install the module
-$MAVEN install
+# install the module
+$MAVEN install:install-file -Dfile=duo-1.0.jar -DpomFile=pom.xml
 
 # send the pom over to incorporate the dependency
 mv $DSPACE_SRC/dspace-api/pom.xml $DSPACE_SRC/dspace-api/original.pom.xml

@@ -34,6 +34,10 @@ You will also need to check this code library out of GitHub, which you can do wi
 
     git clone https://github.com/nye-duo/Duo-DSpace.git
 
+Or you can download the binary version from:
+
+[https://github.com/downloads/nye-duo/Duo-DSpace/dspace-duo-1.0.tar.gz](https://github.com/downloads/nye-duo/Duo-DSpace/dspace-duo-1.0.tar.gz)
+
 You can then carry on with your preferred installation process below
 
 

@@ -461,7 +461,7 @@ public class FileManager
 
         // get the existing bitstreams, and prepare the ordering array
         Bitstream[] bss = bundle.getBitstreams();
-        int[] order = new int[bss.length];
+        // int[] order = new int[bss.length];
         Map<Integer, Integer> orderMap = new TreeMap<Integer, Integer>();
 
         // go through the incoming bitstreams and find the corresponding
@@ -504,17 +504,38 @@ public class FileManager
             }
         }
 
-        // now convert the order map to the correct array format, normalising
-        // the numbering as we go
-        int idx = 0;
-        for (Integer ord : orderMap.keySet())
+        // if there is an order map, then sequence the bitstreams properly
+        if (orderMap.size() > 0)
         {
-            order[idx] = orderMap.get(ord);
-            idx++;
-        }
+            Map<Integer, Integer> normalisedOrder = new TreeMap<Integer, Integer>();
+            
+            // now convert the order map to the correct array format, normalising
+            // the numbering as we go
+            int idx = 0;
+            for (Integer ord : orderMap.keySet())
+            {
+                int bsid = orderMap.get(ord);
+                if (bsid == 0)
+                {
+                    // if there is an erroneous bitstream id skip it
+                    log.info("Skipping bitstream id of 0!");
+                    continue;
+                }
+                normalisedOrder.put(idx, orderMap.get(ord));
+                log.info("Allocating bitstream order " + idx + " to bitstream with id " + orderMap.get(ord));
+                idx++;
+            }
 
-        // finally, as the bundle to order the bitstreams
-        bundle.setOrder(order);
+            // "cast" the order to an array
+            int[] order = new int[normalisedOrder.size()];
+            for (Integer ord : normalisedOrder.keySet())
+            {
+                order[ord] = normalisedOrder.get(ord);
+            }
+
+            // finally, as the bundle to order the bitstreams
+            bundle.setOrder(order);
+        }
     }
 
     /**

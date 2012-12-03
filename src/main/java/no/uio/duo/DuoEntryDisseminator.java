@@ -1,12 +1,16 @@
 package no.uio.duo;
 
 import org.apache.abdera.Abdera;
+import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Element;
+import org.apache.abdera.model.ExtensibleElement;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
+import org.dspace.content.DCValue;
 import org.dspace.content.Item;
+import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
 import org.dspace.sword2.DSpaceSwordException;
 import org.dspace.sword2.SimpleDCEntryDisseminator;
@@ -15,6 +19,7 @@ import org.swordapp.server.DepositReceipt;
 import org.swordapp.server.SwordError;
 import org.swordapp.server.SwordServerException;
 
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -44,8 +49,13 @@ public class DuoEntryDisseminator extends SimpleDCEntryDisseminator implements S
 
                 // parse the bitstream into an abdera element
                 Abdera ab = new Abdera();
-                Document<Element> doc = ab.getParserFactory().getParser().parse(bitstream.retrieve());
-                Element element = doc.getRoot();
+                Document<ExtensibleElement> doc = ab.getParserFactory().getParser().parse(bitstream.retrieve());
+                ExtensibleElement element = doc.getRoot();
+
+                // add the grade and embargo metadata (which can be added separately to the main
+                // metadata)
+                this.addGradeMetadata(element, item);
+                this.addEmbargoMetadata(element, item);
 
                 // add the element as an extension to the receipt.
                 receipt.getWrappedEntry().addExtension(element);
@@ -67,6 +77,46 @@ public class DuoEntryDisseminator extends SimpleDCEntryDisseminator implements S
         catch (AuthorizeException e)
         {
             throw new DSpaceSwordException(e);
+        }
+    }
+
+    private void addGradeMetadata(ExtensibleElement element, Item item)
+    {
+        String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
+        DCValue[] dcvs = item.getMetadata(gradeField);
+        if (dcvs.length > 0)
+        {
+            String grade = dcvs[0].value;
+            Abdera abdera = new Abdera();
+            Element gradeElement = abdera.getFactory().newElement(DuoConstants.GRADE_QNAME);
+            gradeElement.setText(grade);
+            element.addExtension(gradeElement);
+        }
+    }
+
+    private void addEmbargoMetadata(ExtensibleElement element, Item item)
+    {
+        String embargoField = ConfigurationManager.getProperty("embargo.field.lift");
+        String termsField = ConfigurationManager.getProperty("studentweb", "embargo-type.field");
+
+        DCValue[] edcvs = item.getMetadata(embargoField);
+        DCValue[] tdcvs = item.getMetadata(termsField);
+
+        Abdera abdera = new Abdera();
+        Factory factory = abdera.getFactory();
+
+        if (edcvs.length > 0)
+        {
+            Element embargoElement = factory.newElement(DuoConstants.EMBARGO_END_DATE_QNAME);
+            embargoElement.setText(edcvs[0].value);
+            element.addExtension(embargoElement);
+        }
+
+        if (tdcvs.length > 0)
+        {
+            Element termsElement = factory.newElement(DuoConstants.EMBARGO_TYPE_QNAME);
+            termsElement.setText(tdcvs[0].value);
+            element.addExtension(termsElement);
         }
     }
 }

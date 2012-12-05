@@ -1,5 +1,6 @@
 package no.uio.duo;
 
+import org.dspace.authorize.AuthorizeException;
 import org.dspace.authorize.AuthorizeManager;
 import org.dspace.authorize.ResourcePolicy;
 import org.dspace.content.Bitstream;
@@ -10,23 +11,16 @@ import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.eperson.Group;
-import org.dspace.event.Consumer;
-import org.dspace.event.Event;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FSInstallConsumer implements Consumer
+public class DuoPolicyManager
 {
-    public void initialize() throws Exception { }
-
-    public void end(Context context) throws Exception { }
-
-    public void finish(Context context) throws Exception { }
-
-    public void consume(Context context, Event event) throws Exception
+    public void setDefaultPolicies(Context context, Item item)
+            throws SQLException, AuthorizeException
     {
-        Item item = (Item) event.getSubject(context);
         String swordBundle = ConfigurationManager.getProperty("swordv2-server", "bundle.name");
         if (swordBundle == null)
         {
@@ -41,7 +35,7 @@ public class FSInstallConsumer implements Consumer
     }
 
     private void setReadPolicies(Context context, Item item, String bundleName, String groupName, boolean respectDefault)
-            throws Exception
+            throws SQLException, AuthorizeException
     {
         Bundle[] bundles = item.getBundles(bundleName);
         for (Bundle b : bundles)
@@ -60,7 +54,7 @@ public class FSInstallConsumer implements Consumer
     }
 
     private boolean doPolicy(Context context, DSpaceObject dso, String groupName, int resourceType, boolean respectDefault)
-            throws Exception
+            throws SQLException, AuthorizeException
     {
         List<ResourcePolicy> read = this.getReadPolicies(context, dso);
         if (read.size() > 0 && respectDefault)
@@ -78,7 +72,7 @@ public class FSInstallConsumer implements Consumer
     }
 
     private void setReadPolicy(Context context, DSpaceObject dso, int resourceType, String groupName)
-            throws Exception
+            throws SQLException, AuthorizeException
     {
         // set a hyper restrictive resource policy for testing purposes
         ResourcePolicy rp = ResourcePolicy.create(context);
@@ -90,7 +84,7 @@ public class FSInstallConsumer implements Consumer
     }
 
     private List<ResourcePolicy> getReadPolicies(Context context, DSpaceObject dso)
-            throws Exception
+            throws SQLException
     {
         List<ResourcePolicy> read = new ArrayList<ResourcePolicy>();
         List<ResourcePolicy> all = AuthorizeManager.getPolicies(context, dso);
@@ -105,7 +99,7 @@ public class FSInstallConsumer implements Consumer
     }
 
     private void removePolicies(List<ResourcePolicy> policies)
-            throws Exception
+            throws SQLException
     {
         for (ResourcePolicy policy : policies)
         {

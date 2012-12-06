@@ -22,14 +22,17 @@ cp config/spring/api/* $DSPACE_SRC/dspace/config/spring/api/
 cp config/spring/xmlui/* $DSPACE_SRC/dspace/config/spring/xmlui/
 
 # copy the customised messages fle
-cp poms/messages.xml $DSPACE_SRC/dspace/modules/xmlui/overlays/org.dspace.dspace-xmlui-lang-1.8.0.2/i18n/
+cp deploy/messages.xml $DSPACE_SRC/dspace/modules/xmlui/overlays/org.dspace.dspace-xmlui-lang-1.8.0.2/i18n/
 
 # copy the javascript for the workflow
-cp poms/bitstream-reorder-workflow.js $DSPACE_SRC/dspace-xmlui/dspace-xmlui-webapp/src/main/webapp/static/js/
+cp deploy/bitstream-reorder-workflow.js $DSPACE_SRC/dspace-xmlui/dspace-xmlui-webapp/src/main/webapp/static/js/
 
 # install the module
 $MAVEN install:install-file -Dfile=duo-1.0.jar -DpomFile=pom.xml
 
-# send the pom over to incorporate the dependency
-mv $DSPACE_SRC/dspace-api/pom.xml $DSPACE_SRC/dspace-api/original.pom.xml
-cp poms/dspace-api.pom.xml $DSPACE_SRC/dspace-api/pom.xml
+# send the poms over to incorporate the dependency
+mv $DSPACE_SRC/dspace/pom.xml $DSPACE_SRC/dspace/original.pom.xml
+cp deploy/dspace.pom.xml $DSPACE_SRC/dspace/pom.xml
+
+mv $DSPACE_SRC/dspace/modules/pom.xml $DSPACE_SRC/dspace/modules/original.pom.xml
+cp deploy/modules.pom.xml $DSPACE_SRC/dspace/modules/pom.xml

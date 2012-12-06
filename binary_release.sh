@@ -16,7 +16,7 @@ cp target/duo-1.0.jar $OUT
 
 # copy all the supporting material into the output directory
 cp -r config $OUT
-cp -r poms $OUT
+cp -r deploy $OUT
 cp postinstall.sh $OUT
 cp addbinarymodule.sh $OUT
 cp README.md $OUT

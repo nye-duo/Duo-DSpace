@@ -25,7 +25,9 @@ cp config/spring/api/* $DSPACE_SRC/dspace/config/spring/api/
 cp config/spring/xmlui/* $DSPACE_SRC/dspace/config/spring/xmlui/
 
 # copy the customised messages fle
-cp deploy/messages.xml $DSPACE_SRC/dspace/modules/xmlui/overlays/org.dspace.dspace-xmlui-lang-1.8.0.2/i18n/
+#cp deploy/messages.xml $DSPACE_SRC/dspace/modules/xmlui/overlays/org.dspace.dspace-xmlui-lang-1.8.0.2/i18n/
+mkdir -p $DSPACE_SRC/dspace/modules/xmlui/src/main/webapp/i18n/
+cp deploy/messages.xml $DSPACE_SRC/dspace/modules/xmlui/src/main/webapp/i18n/
 
 # copy the javascript for the workflow
 cp deploy/bitstream-reorder-workflow.js $DSPACE_SRC/dspace-xmlui/dspace-xmlui-webapp/src/main/webapp/static/js/

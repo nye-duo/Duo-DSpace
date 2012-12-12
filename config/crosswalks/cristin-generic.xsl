@@ -100,7 +100,7 @@
             <!-- dc.identifier.cristin	(/frida/forskningsresultat/fellesdata/) id -->
             <xsl:if test="/frida/forskningsresultat/fellesdata/id">
                 <dim:field mdschema="dc" element="identifier" qualifier="cristin">
-                    <xsl:text>FRIDAID </xsl:text><xsl:value-of select="/frida/forskningsresultat/fellesdata/id"/>
+                    <xsl:value-of select="/frida/forskningsresultat/fellesdata/id"/>
                 </dim:field>
             </xsl:if>
 
@@ -264,52 +264,62 @@ TIDSSKRIFTPUBL/OVERSIKTSART (Academic literature review) -->
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'BOK'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'ANTOLOGI'">
-                <dim:field mdschema="dc" element="type" qualifier="document">Acadamic anthology</dim:field>
+                <dim:field mdschema="dc" element="type">Acadamic anthology</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Antologi</dim:field>
             </xsl:if>
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'BOK'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'FAGBOK'">
-                <dim:field mdschema="dc" element="type" qualifier="document">Scientific book</dim:field>
+                <dim:field mdschema="dc" element="type">Scientific book</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Fagbok</dim:field>
             </xsl:if>
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'BOKRAPPORTDEL'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'ANNET'">
-                <dim:field mdschema="dc" element="type" qualifier="document">Other</dim:field>
+                <dim:field mdschema="dc" element="type">Other</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Annet</dim:field>
             </xsl:if>
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'BOKRAPPORTDEL'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'KAPITTEL'">
-                <dim:field mdschema="dc" element="type" qualifier="document">Academic chapter/article</dim:field>
+                <dim:field mdschema="dc" element="type">Academic chapter/article</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Kapittel</dim:field>
             </xsl:if>
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'FOREDRAG'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'VIT_FOREDRAG'">
-                <dim:field mdschema="dc" element="type" qualifier="document">Academic lecture</dim:field>
+                <dim:field mdschema="dc" element="type">Academic lecture</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Vit Foredrag</dim:field>
             </xsl:if>
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'RAPPORT'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'DRGRADAVH'">
-                <dim:field mdschema="dc" element="type" qualifier="document">Doctoral dissertation</dim:field>
+                <dim:field mdschema="dc" element="type">Doctoral dissertation</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Drgradavh</dim:field>
             </xsl:if>
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'RAPPORT'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'RAPPORT'">
-                <dim:field mdschema="dc" element="type" qualifier="document">Report</dim:field>
+                <dim:field mdschema="dc" element="type">Report</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Rapport</dim:field>
             </xsl:if>
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'TIDSSKRIFTPUBL'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'ARTIKKEL'">
-                <dim:field mdschema="dc" element="type" qualifier="document">Academic article</dim:field>
+                <dim:field mdschema="dc" element="type">Academic article</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Artikkel</dim:field>
             </xsl:if>
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'TIDSSKRIFTPUBL'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'ARTIKKEL_POP'">
-                <dim:field mdschema="dc" element="type" qualifier="document">Popular scientific article</dim:field>
+                <dim:field mdschema="dc" element="type">Popular scientific article</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Artikkel Pop</dim:field>
             </xsl:if>
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'TIDSSKRIFTPUBL'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'OVERSIKTSART'">
-                <dim:field mdschema="dc" element="type" qualifier="document">Academic literature review</dim:field>
+                <dim:field mdschema="dc" element="type">Academic literature review</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Oversiktsart</dim:field>
             </xsl:if>
 
 
@@ -341,13 +351,30 @@ TIDSSKRIFTPUBL/OVERSIKTSART (Academic literature review) -->
                 <dim:field mdschema="dc" element="type">Book chapter</dim:field>
             </xsl:if> -->
 
-
-
             <!-- Citation (explicitly built) -->
             <!-- format of the citation is: <title of journal> <vol>(<nr>):<page range> -->
             <xsl:if test="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/sideangivelse">
                 <xsl:for-each select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel">
+
                     <dim:field mdschema="dc" element="identifier" qualifier="bibliographiccitation">
+                        <xsl:text>info:ofi/fmt:kev:mtx:ctx&amp;ctx_ver=Z39.88-2004&amp;rft_val_fmt=info:ofi/fmt:kev:mtx:journal&amp;rft.jtitle=</xsl:text>
+                        <xsl:value-of select="tidsskrift/navn"/>
+                        <xsl:text>&amp;rft.volume=</xsl:text>
+                        <xsl:value-of select="volum"/>
+                        <xsl:text>&amp;rft.date=</xsl:text>
+                        <xsl:value-of select="/frida/forskningsresultat/fellesdata/ar"/>
+                    </dim:field>
+
+                    <dim:field mdschema="dc" element="identifier" qualifier="citation">
+
+                        <xsl:for-each select="/frida/forskningsresultat/fellesdata/person">
+                            <xsl:value-of select="concat(etternavn, string(', '),  fornavn)"/>
+                            <xsl:text> </xsl:text>
+                        </xsl:for-each>
+
+                        <xsl:value-of select="/frida/forskningsresultat/fellesdata/tittel"/>
+                        <xsl:text> </xsl:text>
+
                         <xsl:value-of select="tidsskrift/navn"/>
                         <xsl:value-of select="string(' ')"/>
                         <xsl:value-of select="volum"/>

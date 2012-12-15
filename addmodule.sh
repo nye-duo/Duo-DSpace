@@ -18,7 +18,7 @@ cp config/modules/* $DSPACE_SRC/dspace/config/modules/
 cp config/registries/* $DSPACE_SRC/dspace/config/registries
 
 # copy the emails
-cp emails/* $DSPACE_SRC/dspace/config/emails
+cp config/emails/* $DSPACE_SRC/dspace/config/emails
 
 # copy the spring configuration for workflows
 cp config/spring/api/* $DSPACE_SRC/dspace/config/spring/api/

@@ -9,6 +9,10 @@ This module contains plugins, extensions, and configuration for a DSpace impleme
 Dependencies
 ------------
 
+###Java 1.6
+
+Both DSpace 1.8.2 and the code provided here are dependent on a Java 1.6 installation.  It may well not work with the 1.7 version.
+
 ###BagIt
 
 This library depends on the related BagIt library, which must be installed as per the instructions here:
@@ -27,6 +31,16 @@ This can be obtained with the following commands:
     git checkout duo
 
 This will be the source of your ultimate DSpace installation
+
+####SWORDv2 Server Library
+
+In order to build this you will also need to have installed the new swordv2-server library upon which this version of DSpace depends.  This can be obtained with
+
+    git clone https://github.com/swordapp/JavaServer2.0.git
+
+and then installed to the local maven repository with
+
+    mvn install
 
 ###Duo-DSpace
 
@@ -71,7 +85,6 @@ Since the source installation requires Duo-DSpace to be compiled against a modif
     mvn install -Dlicense.skip=true
     
 in the root of the modified DSPace instance.
-
 
 1. Customise the addmodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
 

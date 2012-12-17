@@ -6,6 +6,15 @@ This module contains plugins, extensions, and configuration for a DSpace impleme
 1. Support SWORDv2 deposit from StudentWeb
 2. Support harvesting content directly from CRISTIN
 
+How to use this documentation
+-----------------------------
+
+Before going on to any form of installation, be sure that the Dependencies are satisfied, as documented in the next section
+
+If you are installing a fresh DSpace, you can safely follow the sections **Fresh Installation** section.
+
+If you are installing on an existing DSpace instace, you should follow the section **Update existing DSpace**/**
+
 Dependencies
 ------------
 
@@ -55,8 +64,10 @@ Or you can download the binary version from:
 You can then carry on with your preferred installation process below
 
 
-Binary Installation (recommended)
----------------------------------
+Fresh Installation
+------------------
+
+###Binary Installation (recommended)
 
 1. Customise the addbinarymodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
 
@@ -64,21 +75,10 @@ Binary Installation (recommended)
 
 3. Run the addbinarymodule.sh script to prepare the dspace source to be built with the duo code incorporated.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build.
 
-4. Append/Replace the values in dspace.cfg with the duo values (see the config/dspace.cfg in the duo binary release directory for fields required)
-
-5. Build and install DSpace as normal
-
-6. If you're installing for the first time on this DSpace instance, you should run the postinstall.sh script.  DO NOT RUN THIS SCRIPT ON A DSPACE UPON WHICH IT HAS PREVIOUSLY BEEN RUN.
-
-7. Restart tomcat
-
-7. Set up the cron job for lifting embargoes, which will need to use the command:
-
-	./dspace embargo-lifter
+Now go on to the **Common Installation Steps**
 
 
-Source Installation
--------------------
+###Source Installation
 
 Since the source installation requires Duo-DSpace to be compiled against a modified version of DSpace, it is necessary to install that modified DSpace into the local maven repository /before/ following the steps below.  This can be done with:
 
@@ -92,17 +92,87 @@ in the root of the modified DSPace instance.
 
 3. Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will compile and install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
 
+Now go on to the **Common Installation Steps**
+
+
+###Common Installation Steps
+
 4. Append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for fields required)
 
 5. Build and install DSpace as normal
 
-6. If you're installing for the first time on this DSpace instance, you should run the postinstall.sh script.  DO NOT RUN THIS SCRIPT ON A DSPACE UPON WHICH IT HAS PREVIOUSLY BEEN RUN.
+6. If you're installing for the first time on this DSpace instance, you should customise and run the postinstall.sh script.  DO NOT RUN THIS SCRIPT ON A DSPACE UPON WHICH IT HAS PREVIOUSLY BEEN RUN.
 
 7. Restart tomcat
 
 8. Set up the cron job for lifting embargoes, which will need to use the command:
 
 	./dspace embargo-lifter
+
+
+
+Update existing DSpace
+----------------------
+
+This approach should be used if you want to install the Duo Extensions onto an existing vanilla DSpace instance.
+
+The Duo Extensions will overwrite any existing messages files and config files for your DSpace, so you should be sure
+to merge the provided messages and configs with your existing ones, and place them into the config and deploy directories
+within the Duo Extension codebase before proceeding.
+
+Configuration can all be found in the sub-directory:
+
+    config
+
+The Duo Extension messages file can be found in the sub-directory:
+
+    deploy
+
+During installation, the files in these two directories will overwrite any files in the DSpace source directories, so
+you shoud merge your custom configuration into the files in the directories within this package.
+
+###Binary Installation (recommended)
+
+1. Customise the addbinarymodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
+
+2. Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+
+3. Run the addbinarymodule.sh script to prepare the dspace source to be built with the duo code incorporated.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build.
+
+Now go on to the **Common Installation Steps**
+
+
+###Source Installation
+
+Since the source installation requires Duo-DSpace to be compiled against a modified version of DSpace, it is necessary to install that modified DSpace into the local maven repository /before/ following the steps below.  This can be done with:
+
+    mvn install -Dlicense.skip=true
+
+in the root of the modified DSPace instance.
+
+1. Customise the addmodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
+
+2. Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+
+3. Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will compile and install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
+
+Now go on to the **Common Installation Steps**
+
+
+###Common Installation Steps
+
+4. Append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for fields required)
+
+5. Build and update DSpace as normal
+
+6. If you're installing for the first time on this DSpace instance, you should customise and run the postupdate.sh script.  DO NOT RUN THIS SCRIPT ON A DSPACE UPON WHICH IT HAS PREVIOUSLY BEEN RUN.
+
+7. Restart tomcat
+
+8. Set up the cron job for lifting embargoes, which will need to use the command:
+
+	./dspace embargo-lifter
+
 
 
 Manual Installation on running DSpace (only if you know what you're doing)

@@ -24,3 +24,4 @@ cp README.md $OUT
 cp migratedspace.sh $OUT
 
 tar -zcvf dspace-duo-1.0.tar.gz $OUT
+mv dspace-duo-1.0.tar.gz release

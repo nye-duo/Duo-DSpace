@@ -13,7 +13,7 @@ Before going on to any form of installation, be sure that the Dependencies are s
 
 If you are installing a fresh DSpace, you can safely follow the sections **Fresh Installation** section.
 
-If you are installing on an existing DSpace instace, you should follow the section **Update existing DSpace**/**
+If you are installing on an existing DSpace instace, you should follow the section **Update existing DSpace**
 
 Dependencies
 ------------
@@ -88,7 +88,7 @@ Since the source installation requires Duo-DSpace to be compiled against a modif
 
     mvn install -Dlicense.skip=true
     
-in the root of the modified DSPace instance.
+in the root of the modified DSpace instance.
 
 1. Customise the addmodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
 
@@ -112,8 +112,6 @@ Now go on to the **Common Installation Steps**
 8. Set up the cron job for lifting embargoes, which will need to use the command:
 
 	./dspace embargo-lifter
-
-
 
 Update existing DSpace
 ----------------------
@@ -188,6 +186,19 @@ Now go on to the **Common Installation Steps**
 
 	./dspace embargo-lifter
 
+
+Setting up a Cristin Workflow
+-----------------------------
+
+Once you have set up a Collection for harvesting from Cristin, you need to enable the correct workflow for it.  To do this edit the file
+
+	[dspace]/config/workflow.xml
+
+And add a name-map reference in the heading section of the file, mapping your collection's handle to the "cristin" workflow, for example:
+
+	<name-map collection="123456789/4404" workflow="cristin"/>
+
+For this change to take effect, you will need to restart tomcat.
 
 
 Manual Installation on running DSpace (only if you know what you're doing)

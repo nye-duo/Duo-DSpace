@@ -14,15 +14,17 @@ $DSPACE/bin/dspace dsrun org.dspace.administer.MetadataImporter -f config/regist
 # copy over the configuration
 #
 # copy the relevant contents of the root config file
+mv $DSPACE/config/dspace.cfg $DSPACE/config/dspace.cfg.old
+mv $DSPACE/config/dspace.cfg.new $DSPACE/config/dspace.cfg
 cp $DSPACE_SRC/dspace/config/input-forms.xml $DSPACE/config
 cp $DSPACE_SRC/dspace/config/workflow.xml $DSPACE/config
-cp $DSPACE_SRC/config/xmlui.xconf $DSPACE/config
+cp $DSPACE_SRC/dspace/config/xmlui.xconf $DSPACE/config
 
 # copy the crosswalks
-cp $DSPACE_SRC/dspace/config/crosswalks/* $DSPACE_SRC/config/crosswalks/
+cp $DSPACE_SRC/dspace/config/crosswalks/* $DSPACE/config/crosswalks/
 
 # copy the module configuration
-cp $DSPACE_SRC/dspace/config/modules/* $DSPACE_SRC/config/modules/
+cp $DSPACE_SRC/dspace/config/modules/* $DSPACE/config/modules/
 
 # copy the registries
 cp $DSPACE_SRC/dspace/config/registries/* $DSPACE/config/registries

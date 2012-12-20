@@ -22,6 +22,10 @@ Dependencies
 
 Both DSpace 1.8.2 and the code provided here are dependent on a Java 1.6 installation.  It may well not work with the 1.7 version.
 
+###Maven 2.2
+
+The build of some parts of the system won't work properly with a Maven version prior to 2.2, but later versions of Maven such as Maven 3 should also be fine.
+
 ###BagIt
 
 This library depends on the related BagIt library, which must be installed as per the instructions here:
@@ -116,7 +120,15 @@ Update existing DSpace
 
 This approach should be used if you want to install the Duo Extensions onto an existing vanilla DSpace instance.
 
-The Duo Extensions will overwrite any existing messages files and config files for your DSpace, so you should be sure
+Start by following **Preparing the DSpace source** and then choose one of **Binary Installation** or **Source Installation** and finish with the **Custom Installation Steps**
+
+###Preparing the DSpace source
+
+1. Checkout the Duo version of DSpace listed in the **Dependencies** section above
+
+2. Migrate all of your existing localisations for your DSpace installation into this newly checked out version of DSpace (this will include things such as your themes, custom/modified DSpace classes, and configuration)
+
+3. The Duo Extensions will overwrite any existing messages files and config files for your DSpace, so you should be sure
 to merge the provided messages and configs with your existing ones, and place them into the config and deploy directories
 within the Duo Extension codebase before proceeding.
 
@@ -130,6 +142,9 @@ The Duo Extension messages file can be found in the sub-directory:
 
 During installation, the files in these two directories will overwrite any files in the DSpace source directories, so
 you shoud merge your custom configuration into the files in the directories within this package.
+
+(At the University of Oslo, this can be partially automated by customising and running the migratedspace.sh script provided)
+
 
 ###Binary Installation (recommended)
 
@@ -150,7 +165,7 @@ Since the source installation requires Duo-DSpace to be compiled against a modif
 
 in the root of the modified DSPace instance.
 
-1. Customise the addmodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
+1. Customise the addmodule.sh and postupdate.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
 
 2. Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
 

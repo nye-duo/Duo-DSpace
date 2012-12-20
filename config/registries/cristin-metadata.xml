@@ -15,7 +15,7 @@
 
     <dc-schema>
         <name>cristin</name>
-        <namespace>http://www.uio.no/cristin/</namespace>
+        <namespace>http://www.cristin.no</namespace>
     </dc-schema>
 
     <!-- dc metadata elements required -->

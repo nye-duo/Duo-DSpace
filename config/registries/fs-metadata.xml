@@ -15,7 +15,7 @@
 
     <dc-schema>
         <name>fs</name>
-        <namespace>http://studentweb.no/terms/</namespace>
+        <namespace>http://fs.uio.no/</namespace>
     </dc-schema>
 
     <!-- dc metadata elements required -->

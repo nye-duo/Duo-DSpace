@@ -18,7 +18,9 @@ cp target/duo-1.0.jar $OUT
 cp -r config $OUT
 cp -r deploy $OUT
 cp postinstall.sh $OUT
+cp postupdate.sh $OUT
 cp addbinarymodule.sh $OUT
 cp README.md $OUT
+cp migratedspace.sh $OUT
 
 tar -zcvf dspace-duo-1.0.tar.gz $OUT

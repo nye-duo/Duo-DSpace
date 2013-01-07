@@ -55,7 +55,7 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
     {
         this.originalUnits = this.getUnitCodes(item);
 
-        boolean inarch = item.isArchived();
+        boolean inarch = item.isArchived() || item.isWithdrawn();
         boolean docsChanged = false;
         if (inarch)
         {

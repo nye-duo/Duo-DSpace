@@ -2,12 +2,9 @@ package no.uio.duo;
 
 import org.apache.log4j.Logger;
 import org.dspace.content.DCValue;
-import org.dspace.content.DSpaceObject;
 import org.dspace.content.Item;
 import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
-import org.dspace.curate.AbstractCurationTask;
-import org.dspace.curate.Curator;
 import org.dspace.storage.rdbms.DatabaseManager;
 import org.dspace.storage.rdbms.TableRow;
 import org.dspace.storage.rdbms.TableRowIterator;
@@ -19,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DeduplicateCristinIds extends AbstractCurationTask
+public class DeduplicateCristinIds
 {
     /*
     select metadatavalue.item_id, metadatavalue.text_value
@@ -36,29 +33,73 @@ public class DeduplicateCristinIds extends AbstractCurationTask
     // map to hold the item id to cristin id mapping
     private Map<String, List<Integer>> cristinIds = new HashMap<String, List<Integer>>();
 
-    // dc value representing the cristing id field
-    private DCValue dcv = null;
-
-    // The status of the de-duplicating of this item
-    private int status = Curator.CURATE_UNSET;
-
-    private List<String> results = null;
+    // dc value representing the cristin id field
+    public DCValue dcv = null;
 
     // The log4j logger for this class
     private static Logger log = Logger.getLogger(DeduplicateCristinIds.class);
 
-    @Override
-    public void init(Curator curator, String taskId) throws IOException
+    public static void main(String[] args)
+            throws Exception
     {
-        super.init(curator, taskId);
+        DeduplicateCristinIds dedupe = new DeduplicateCristinIds();
+        Map<String, List<Integer>> duplicates = dedupe.detect();
+        String report = dedupe.reportOn(duplicates);
+        System.out.println(report);
+    }
 
-        // set the result list to an empty list, since it might have stuff left over from
-        // the last run
-        this.results = new ArrayList<String>();
+    public String reportOn(Map<String, List<Integer>> duplicates)
+            throws SQLException
+    {
+        Context context = new Context();
+        StringBuilder sb = new StringBuilder();
+        for (String cristinId : duplicates.keySet())
+        {
+            StringBuilder ib = new StringBuilder();
+            boolean first = true;
+            for (int iid : duplicates.get(cristinId))
+            {
+                String separator = first ? "" : ", ";
+                first = false;
+                Item item = Item.find(context, iid);
+                ib.append(separator + getItemHandle(item) + " (id: " + item.getID() + ")");
+            }
+            sb.append("Cristin ID " + cristinId + " is shared by items: ");
+            sb.append(ib);
+            sb.append("\n");
+        }
+        context.abort();
+        return sb.toString();
+    }
 
-        // populate the cristin id mapping, remembering that this sits in memory after
-        // the first time it is run, so we must only add new things, not repeatedly add
-        // the same data
+    public Map<String, List<Integer>> detect()
+            throws IOException, DuoException
+    {
+        this.getCristinIdMap();
+        Map<String, List<Integer>> duplicates = this.extractDuplicates();
+        return duplicates;
+    }
+
+    private Map<String, List<Integer>> extractDuplicates()
+    {
+        Map<String, List<Integer>> duplicates = new HashMap<String, List<Integer>>();
+        for (String cristinId : this.cristinIds.keySet())
+        {
+            if (this.cristinIds.get(cristinId).size() > 1)
+            {
+                duplicates.put(cristinId, this.cristinIds.get(cristinId));
+            }
+        }
+        return duplicates;
+    }
+
+    private void getCristinIdMap()
+            throws IOException, DuoException
+    {
+        // just mine all of the cristin ids in the database, and record all the ids
+        // of the items that have those ids.  This means by the end we will know
+        // which cristin ids are associated with which item ids, and it iwll be easy to
+        // test for and report on multiples
         try
         {
             String cfg = ConfigurationManager.getProperty("cristin", "cristinid.field");
@@ -90,81 +131,10 @@ public class DeduplicateCristinIds extends AbstractCurationTask
             tri.close();
             context.abort();
         }
-        catch (DuoException e)
-        {
-            throw new IOException(e);
-        }
         catch (SQLException e)
         {
             throw new IOException(e);
         }
-    }
-
-    @Override
-    public int perform(DSpaceObject dso) throws IOException
-    {
-        // Unless this is  an item, we'll skip this item
-        status = Curator.CURATE_SKIP;
-        if (!(dso instanceof Item))
-        {
-            return status;
-        }
-
-        Item item = (Item)dso;
-        DCValue[] cids = item.getMetadata(this.dcv.schema, this.dcv.element, this.dcv.qualifier, Item.ANY);
-        for (DCValue cristinid : cids)
-        {
-            // if the cristin id isn't registered for whatever reason, just carry on
-            if (!this.cristinIds.containsKey(cristinid.value))
-            {
-                continue;
-            }
-
-            // if the list of ids in the cristin id registry is greater than one
-            // then we have a duplicate
-            if (this.cristinIds.get(cristinid.value).size() > 1)
-            {
-                StringBuilder itemList = new StringBuilder();
-                for (int iid : this.cristinIds.get(cristinid.value))
-                {
-                    boolean first = true;
-                    if (iid != item.getID())
-                    {
-                        if (!first)
-                        {
-                            itemList.append(",");
-                        }
-                        else
-                        {
-                            first = false;
-                        }
-                        itemList.append(" ").append(iid);
-                    }
-                }
-
-                String reportable = "Item: " + getItemHandle(item) + "(id: " + item.getID() +
-                            ") has a duplicate Cristin ID with the following items: " +
-                            itemList.toString() + "\n";
-
-                this.results.add(reportable);
-                status = Curator.CURATE_FAIL;
-            }
-            else
-            {
-                status = Curator.CURATE_SUCCESS;
-            }
-        }
-
-        // FIXME: this seems terribly inefficient, but seems to be the only way to go in a curation task
-        StringBuilder out = new StringBuilder();
-        for (String r : this.results)
-        {
-            out.append(r);
-        }
-        setResult(out.toString());
-        report(out.toString());
-
-        return status;
     }
 
     /**

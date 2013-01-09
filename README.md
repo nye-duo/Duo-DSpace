@@ -180,11 +180,9 @@ Now go on to the **Common Installation Steps**
 
 6. If you're installing for the first time on this DSpace instance, you should customise and run the postupdate.sh script.  DO NOT RUN THIS SCRIPT ON A DSPACE UPON WHICH IT HAS PREVIOUSLY BEEN RUN.
 
-7. Updating DSpace does not update the database schema under normal circumstances, so we need to run the following command to load the schema changes used by the Duo version of DSpace:
+7. Updating DSpace does not update the database schema under normal circumstances, so we need to run the following command to load the schema changes used by the Duo version of DSpace (where [dspace-live] is the installed DSpace instance and [dspace-src] is the Duo DSpace source code):
 
     [dspace-live]/bin/dspace dsrun org.dspace.storage.rdbms.InitializeDatabase [dspace-src]/dspace/etc/postgres/database_schema_duo.sql
-
-where [dspace-live] is the installed DSpace instance and [dspace-src] is the Duo DSpace source code.
 
 8. Restart tomcat
 

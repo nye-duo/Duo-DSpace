@@ -251,16 +251,23 @@
             
 
             <!-- dc.type.document	(/frida/forskningsresultat/fellesdata/kategori/underkategori/) navn
+            BOK/MONOGRAFI (Academic monograph)
             BOK/ANTOLOGI (Academic anthology)
-BOK/FAGBOK (Scientific book)
-BOKRAPPORTDEL/ANNET (Other)
-BOKRAPPORTDEL/KAPITTEL (Academic chapter/article)
-FOREDRAG/VIT_FOREDRAG (Academic lecture)
-RAPPORT/DRGRADAVH (Doctoral dissertation)
-RAPPORT/RAPPORT (Report)
-TIDSSKRIFTPUBL/ARTIKKEL (Academic article)
-TIDSSKRIFTPUBL/ARTIKKEL_POP (Popular scientific article)
-TIDSSKRIFTPUBL/OVERSIKTSART (Academic literature review) -->
+            BOK/FAGBOK (Scientific book)
+            BOKRAPPORTDEL/ANNET (Other)
+            BOKRAPPORTDEL/KAPITTEL (Academic chapter/article)
+            FOREDRAG/VIT_FOREDRAG (Academic lecture)
+            RAPPORT/DRGRADAVH (Doctoral dissertation)
+            RAPPORT/RAPPORT (Report)
+            TIDSSKRIFTPUBL/ARTIKKEL (Academic article)
+            TIDSSKRIFTPUBL/ARTIKKEL_POP (Popular scientific article)
+            TIDSSKRIFTPUBL/OVERSIKTSART (Academic literature review) -->
+
+            <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'BOK'
+                            and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'MONOGRAFI'">
+                <dim:field mdschema="dc" element="type">Academic monograph</dim:field>
+                <dim:field mdschema="dc" element="type" qualifier="document">Monografi</dim:field>
+            </xsl:if>
 
             <xsl:if test="/frida/forskningsresultat/fellesdata/kategori/hovedkategori/kode = 'BOK'
                             and /frida/forskningsresultat/fellesdata/kategori/underkategori/kode = 'ANTOLOGI'">

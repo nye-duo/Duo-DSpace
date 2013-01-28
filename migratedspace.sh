@@ -1,5 +1,5 @@
-$OLD_DSPACE="/www/tmp/dspace-1.8.2-src-release"
-$NEW_DSPACE="/www/tmp/DSpace"
+OLD_DSPACE="/www/tmp/dspace-1.8.2-src-release"
+NEW_DSPACE="/www/tmp/DSpace"
 
 # copy localised webapp (themes, messages)
 cp -r $OLD_DSPACE/dspace/modules/xmlui/src/main/webapp/* $NEW_DSPACE/dspace/modules/xmlui/src/main/webapp/

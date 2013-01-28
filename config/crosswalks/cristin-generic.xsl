@@ -376,11 +376,16 @@
 
                         <xsl:for-each select="/frida/forskningsresultat/fellesdata/person">
                             <xsl:value-of select="concat(etternavn, string(', '),  fornavn)"/>
-                            <xsl:text> </xsl:text>
+                            <xsl:choose>
+                                <xsl:when test="not(position()=last())"><xsl:text>, </xsl:text></xsl:when>
+                                <xsl:otherwise><xsl:text>. </xsl:text></xsl:otherwise>
+                            </xsl:choose>
                         </xsl:for-each>
 
-                        <xsl:value-of select="/frida/forskningsresultat/fellesdata/tittel"/>
-                        <xsl:text> </xsl:text>
+                        <xsl:if test="/frida/forskningsresultat/fellesdata/tittel">
+                            <xsl:value-of select="/frida/forskningsresultat/fellesdata/tittel"/>
+                            <xsl:text>. </xsl:text>
+                        </xsl:if>
 
                         <xsl:value-of select="tidsskrift/navn"/>
                         <xsl:value-of select="string(' ')"/>
@@ -395,10 +400,21 @@
                             <xsl:value-of select="/frida/forskningsresultat/kategoridata/tidsskriftsartikkel/hefte"/>
                             <xsl:value-of select="string(')')"/>
                         </xsl:if>
-                        <xsl:text>:</xsl:text>
-                        <xsl:value-of select="sideangivelse/sideFra"/>
-                        <xsl:value-of select="string('-')"/>
-                        <xsl:value-of select="sideangivelse/sideTil"/>
+
+                        <xsl:if test="sideangivelse/sideFra or sideangivelse/sideTil">
+                            <xsl:text>:</xsl:text>
+                            <xsl:choose>
+                                <xsl:when test="sideangivelse/sideFra"><xsl:value-of select="sideangivelse/sideFra"/></xsl:when>
+                                <xsl:otherwise><xsl:text>?</xsl:text></xsl:otherwise>
+                            </xsl:choose>
+
+                            <xsl:value-of select="string('-')"/>
+
+                            <xsl:choose>
+                                <xsl:when test="sideangivelse/sideTil"><xsl:value-of select="sideangivelse/sideTil"/></xsl:when>
+                                <xsl:otherwise><xsl:text>?</xsl:text></xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:if>
                     </dim:field>
                 </xsl:for-each>
             </xsl:if>

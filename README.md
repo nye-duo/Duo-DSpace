@@ -183,11 +183,11 @@ Start by following **Preparing the DSpace source** and then choose one of **Bina
 
 ###Preparing the DSpace source
 
-1. Checkout the Duo version of DSpace listed in the **Dependencies** section above
+**1/** Checkout the Duo version of DSpace listed in the **Dependencies** section above
 
-2. Migrate all of your existing localisations for your DSpace installation into this newly checked out version of DSpace (this will include things such as your themes, custom/modified DSpace classes, and configuration)
+**2/** Migrate all of your existing localisations for your DSpace installation into this newly checked out version of DSpace (this will include things such as your themes, custom/modified DSpace classes, and configuration)
 
-3. The Duo Extensions will overwrite any existing messages files and config files for your DSpace, so you should be sure
+**3/** The Duo Extensions will overwrite any existing messages files and config files for your DSpace, so you should be sure
 to merge the provided messages and configs with your existing ones, and place them into the config and deploy directories
 within the Duo Extension codebase before proceeding.
 
@@ -207,11 +207,26 @@ you shoud merge your custom configuration into the files in the directories with
 
 ###Binary Installation (recommended)
 
-1. Customise the addbinarymodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
+**4/** Customise the addbinarymodule.sh and postupdate.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
 
-2. Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+in addbinarymodule.sh, look for the lines:
 
-3. Run the addbinarymodule.sh script to prepare the dspace source to be built with the duo code incorporated.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build.
+    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    MAVEN="mvn"
+
+and in postupdate.sh, look for the lines:
+
+    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    DSPACE="/srv/dspace/dspace-duo"
+
+and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
+
+**5/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+
+
+**6/** Run the addbinarymodule.sh script to prepare the dspace source to be built with the duo code incorporated.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build.
+
+    sh addbinarymodule.sh
 
 Now go on to the **Common Installation Steps**
 
@@ -221,35 +236,70 @@ Now go on to the **Common Installation Steps**
 Since the source installation requires Duo-DSpace to be compiled against a modified version of DSpace, it is necessary to install that modified DSpace into the local maven repository /before/ following the steps below.  This can be done with:
 
     mvn install -Dlicense.skip=true
+    
+in the root of the modified DSpace instance.
 
-in the root of the modified DSPace instance.
+**4/** Customise the addmodule.sh and postupdate.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
 
-1. Customise the addmodule.sh and postupdate.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
+in addmodule.sh, look for the lines:
 
-2. Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    MAVEN="mvn"
 
-3. Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will compile and install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
+and in postupdate.sh, look for the lines:
+
+    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    DSPACE="/srv/dspace/dspace-duo"
+
+and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
+
+**5/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+
+**6/** Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will compile and install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
+
+    sh addmodule.sh
 
 Now go on to the **Common Installation Steps**
 
-
 ###Common Installation Steps
 
-4. Append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for fields required)
+**7/** Append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for fields required)
 
-5. Build and update DSpace as normal
+You can start by just concatenating the two files
 
-6. If you're installing for the first time on this DSpace instance, you should customise and run the postupdate.sh script.  DO NOT RUN THIS SCRIPT ON A DSPACE UPON WHICH IT HAS PREVIOUSLY BEEN RUN.
+    cat [duo-source]/config/dspace.cfg >> [dspace-source]/dspace/config/dspace.cfg
+    
+Note, though, that some of the fields provided by the Duo config file are duplicates of ones which appear in the DSpace configuration, and these need to be used instead of the DSpace configuration value, or need to be merged with any of your existing local configuration as required.
 
-7. Updating DSpace does not update the database schema under normal circumstances, so we need to run the following command to load the schema changes used by the Duo version of DSpace (where [dspace-live] is the installed DSpace instance and [dspace-src] is the Duo DSpace source code):
+The duplicated fields are:
+
+    embargo.field.terms
+    embargo.field.lift
+    plugin.single.org.dspace.embargo.EmbargoLifter
+    event.dispatcher.default.consumers
+    plugin.named.org.dspace.content.crosswalk.IngestionCrosswalk
+
+**8/** Build and install DSpace as normal.  You may find the DSpace install documentation useful: [https://wiki.duraspace.org/display/DSPACE/Installation](https://wiki.duraspace.org/display/DSPACE/Installation)
+
+**9/** If you're installing the extensions for the first time on this DSpace instance, you should run your customised postupdate.sh script.
+
+    sh postupdate.sh
+
+**DO NOT RUN THIS SCRIPT ON A DSPACE UPON WHICH IT HAS PREVIOUSLY BEEN RUN** - it makes changes to the database schema and loads metadata registries, and re-runs may damage your installation.  It also copies over the updated configurations to your live DSpace.
+
+**NOTE**: this script enables the XML workflow, so if your DSpace already has that enabled, you should not run this script.  You should open up the file and comment out the line which enables the XML workflow before running it.
+
+If you find yourself wanting to run parts of this script but not other parts (in particular, metadata registry loading), you can just run the relevant lines from the script.  It is very short and each section is labelled so it is clear what it does.
+
+**10/** Updating DSpace does not update the database schema under normal circumstances, so we need to run the following command to load the schema changes used by the Duo version of DSpace (where [dspace-live] is the installed DSpace instance and [dspace-src] is the Duo DSpace source code):
 
     [dspace-live]/bin/dspace dsrun org.dspace.storage.rdbms.InitializeDatabase [dspace-src]/dspace/etc/postgres/database_schema_duo.sql
 
-8. Restart tomcat
+**11/** Restart tomcat
 
-9. Set up the cron job for lifting embargoes, which will need to use the command:
+**12/** Set up the cron job for lifting embargoes, which will need to use the command:
 
-	./dspace embargo-lifter
+	[dspace-live]/dspace embargo-lifter
 
 
 Setting up a Cristin Workflow

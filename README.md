@@ -28,9 +28,13 @@ The build of some parts of the system won't work properly with a Maven version p
 
 ###BagIt
 
-This library depends on the related BagIt library, which must be installed as per the instructions here:
+This library depends on the related BagIt library, which must be downloaded and compiled as per the instructions here:
 
 [https://github.com/nye-duo/BagItLibrary](https://github.com/nye-duo/BagItLibrary)
+
+To use this in the build you should, once you have successfully compiled the library, install it into your local maven repository
+
+    mvn install
 
 ###DSpace
 
@@ -73,11 +77,26 @@ Fresh Installation
 
 ###Binary Installation (recommended)
 
-1. Customise the addbinarymodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
+**1/** Customise the addbinarymodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
 
-2. Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+in addbinarymodule.sh, look for the lines:
 
-3. Run the addbinarymodule.sh script to prepare the dspace source to be built with the duo code incorporated.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build.
+    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    MAVEN="mvn"
+
+and in postinstall.sh, look for the lines:
+
+    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    DSPACE="/srv/dspace/dspace-duo"
+
+and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
+
+**2/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+
+
+**3/** Run the addbinarymodule.sh script to prepare the dspace source to be built with the duo code incorporated.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build.
+
+    sh addbinarymodule.sh
 
 Now go on to the **Common Installation Steps**
 
@@ -90,28 +109,70 @@ Since the source installation requires Duo-DSpace to be compiled against a modif
     
 in the root of the modified DSpace instance.
 
-1. Customise the addmodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
+**1/** Customise the addmodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
 
-2. Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+in addmodule.sh, look for the lines:
 
-3. Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will compile and install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
+    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    MAVEN="mvn"
+
+and in postinstall.sh, look for the lines:
+
+    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    DSPACE="/srv/dspace/dspace-duo"
+
+and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
+
+**2/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+
+**3/** Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will compile and install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
+
+    sh addmodule.sh
 
 Now go on to the **Common Installation Steps**
 
 
 ###Common Installation Steps
 
-4. Append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for fields required)
+**4/** Append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for fields required)
 
-5. Build and install DSpace as normal
+You can start by just concatenating the two files
 
-6. If you're installing for the first time on this DSpace instance, you should customise and run the postinstall.sh script.  DO NOT RUN THIS SCRIPT ON A DSPACE UPON WHICH IT HAS PREVIOUSLY BEEN RUN.
+    cat [duo-source]/config/dspace.cfg >> [dspace-source]/dspace/config/dspace.cfg
+    
+Note, though, that some of the fields provided by the Duo config file are duplicates of ones which appear in the DSpace configuration, and these need to be used instead of the DSpace configuration value, or need to be merged with any of your existing local configuration as required.
 
-7. Restart tomcat
+The duplicated fields are:
 
-8. Set up the cron job for lifting embargoes, which will need to use the command:
+    embargo.field.terms
+    embargo.field.lift
+    plugin.single.org.dspace.embargo.EmbargoLifter
+    event.dispatcher.default.consumers
+    plugin.named.org.dspace.content.crosswalk.IngestionCrosswalk
 
-	./dspace embargo-lifter
+**5/** Build and install DSpace as normal.  You may find the DSpace install documentation useful: [https://wiki.duraspace.org/display/DSPACE/Installation](https://wiki.duraspace.org/display/DSPACE/Installation)
+
+At this stage, do not worry about starting tomcat, we will do that once the rest of the installation steps below have been carried out.  You should, though, be sure to point the tomcat webapps directory at the DSpace webapps directory.  For example:
+
+    ln -s [tomcat]/webapps [dspace-live]/webapps
+
+**6/** If you're installing for the first time on this DSpace instance, you should run your customised postinstall.sh script.  
+
+    sh postinstall.sh
+
+**DO NOT RUN THIS SCRIPT ON A DSPACE UPON WHICH IT HAS PREVIOUSLY BEEN RUN** - it makes changes to the database schema and loads metadata registries, and re-runs may damage your installation.
+
+If you find yourself wanting to run parts of this script but not other parts (in particular, metadata registry loading), you can just run the relevant lines from the script.  It is very short and each section is labelled so it is clear what it does.
+
+**7/** Start tomcat
+
+    [tomcat]/bin/catalina.sh start
+
+Once tomcat has started, you should be able to access your DSpace instance, at - for example: [http://localhost:8080/xmlui](http://localhost:8080/xmlui)
+
+**8/** Set up the cron job for lifting embargoes, which will need to use the command:
+
+	[dspace]/bin/dspace embargo-lifter
 
 Update existing DSpace
 ----------------------

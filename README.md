@@ -301,7 +301,6 @@ If you find yourself wanting to run parts of this script but not other parts (in
 
 	[dspace-live]/dspace embargo-lifter
 
-
 Setting up a Cristin Workflow
 -----------------------------
 
@@ -315,6 +314,21 @@ And add a name-map reference in the heading section of the file, mapping your co
 
 For this change to take effect, you will need to restart tomcat.
 
+Running the De-Duplication Task
+-------------------------------
+
+Under specific circumstances more than one item with the same Cristin ID can be created in DSpace.  This happens when an item has been harvested from Cristin and subsequently archived, and then a new version of that item (whose files have changed) becomes available in Cristin.  When DSpace harvests the new version of the item, it will not update the existing archived version, but will instead create a new version in the archive which will have the same Cristin ID.
+
+In order to check for duplicate Cristin IDs, we can use a command-line script which will output a human readable summary of any duplicate identifiers, for case-by-case analysis by the administrator.
+
+    [dspace]/bin/dspace dsrun no.uio.duo.DeduplicateCristinIds
+
+This will output something like:
+
+    Cristin ID 12345 is shared by items: 123456789/23 (ID: 876), 123456789/98 (ID: 900)
+    Cristin ID 56789 is shared by items: 123456789/120 (ID: 1145), 123456789/177 (ID: 1367)
+
+and so on.
 
 Manual Installation on running DSpace (only if you know what you're doing)
 --------------------------------------------------------------------------

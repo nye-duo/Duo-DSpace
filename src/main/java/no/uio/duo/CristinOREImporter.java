@@ -42,6 +42,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+/**
+ * Importer which implements both the standard DSpace IngestionCrosswalk and the
+ * more advanced OAIConfigurableCrosswalk.  This crosswalk is first configured with
+ * parameters from the OAI harvester, and then run over the item retrieved from
+ * the OAI-PMH feed
+ */
 public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCrosswalk
 {
     /** log4j category */
@@ -63,12 +69,31 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
 
     private boolean updateBitstreams = true;
 
+    /**
+     * Configure this crosswalk with the properties from the OAI-PMH harvester
+     *
+     * This looks for a property called "update_bitstreams" and uses that to determine
+     * during the actual ingest whether to deal with the item's bitstreams as well as
+     * its metadata
+     *
+     * @param props
+     */
     public void configure(Properties props)
     {
         this.updateBitstreams = (Boolean) props.get("update_bitstreams");
     }
 
-
+    /**
+     * Ingest the metadata in the element list into the DSpace item
+     *
+     * @param context
+     * @param dso
+     * @param metadata
+     * @throws CrosswalkException
+     * @throws IOException
+     * @throws SQLException
+     * @throws AuthorizeException
+     */
 	public void ingest(Context context, DSpaceObject dso, List<Element> metadata)
             throws CrosswalkException, IOException, SQLException, AuthorizeException
     {
@@ -88,6 +113,17 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
 		}
 	}
 
+    /**
+     * Ingest the metadata held in the root element into the DSpace object
+     *
+     * @param context
+     * @param dso
+     * @param root
+     * @throws CrosswalkException
+     * @throws IOException
+     * @throws SQLException
+     * @throws AuthorizeException
+     */
 	public void ingest(Context context, DSpaceObject dso, Element root)
             throws CrosswalkException, IOException, SQLException, AuthorizeException
     {
@@ -480,6 +516,18 @@ public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCr
         return null;
     }
 
+    /**
+     * Update the item's metadata from the provided bitstream.  The bitstream should be
+     * the Cristin metadata file.
+     *
+     * @param context
+     * @param item
+     * @param bitstream
+     * @throws AuthorizeException
+     * @throws IOException
+     * @throws SQLException
+     * @throws CrosswalkException
+     */
     public void addMetadataFromBitstream(Context context, Item item, Bitstream bitstream)
             throws AuthorizeException, IOException, SQLException, CrosswalkException
     {

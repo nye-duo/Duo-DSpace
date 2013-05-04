@@ -1,5 +1,8 @@
 package no.uio.duo;
 
+/**
+ * Entity class to represent a bitstream being retrieved from Cristin
+ */
 public class IncomingBitstream
 {
     private String url;

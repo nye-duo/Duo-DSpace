@@ -18,8 +18,24 @@ import org.jdom.input.SAXBuilder;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * Class for providing utilities for Metadata management in the Duo module
+ *
+ */
 public class MetadataManager
 {
+    /**
+     * Add metadata from the provided bitstream to the provided item.  Metadata must
+     * be an FS formatted metadata document
+     *
+     * @param context
+     * @param item
+     * @param bitstream
+     * @throws AuthorizeException
+     * @throws IOException
+     * @throws SQLException
+     * @throws DuoException
+     */
     public void addMetadataFromBitstream(Context context, Item item, Bitstream bitstream)
             throws AuthorizeException, IOException, SQLException, DuoException
     {
@@ -98,12 +114,29 @@ public class MetadataManager
         }
     }
 
+    /**
+     * Remove all of the authority controlled metadata from the item, using the swordv2-server
+     * configuration
+     *
+     * @param context
+     * @param item
+     * @throws DuoException
+     */
     public void removeAuthorityMetadata(Context context, Item item)
             throws DuoException
     {
         this.removeAuthorityMetadata(context, item, "swordv2-server", "metadata.replaceable");
     }
 
+    /**
+     * Remove all of the metadata from the item based on the configuration in the specified module
+     *
+     * @param context
+     * @param item
+     * @param module
+     * @param config
+     * @throws DuoException
+     */
     public void removeAuthorityMetadata(Context context, Item item, String module, String config)
             throws DuoException
     {
@@ -120,6 +153,14 @@ public class MetadataManager
         }
     }
 
+    /**
+     * Make a DCValue object out of the string representation (e.g. dc.title.alternative)
+     *
+     * @param field
+     * @param value
+     * @return
+     * @throws DuoException
+     */
     public DCValue makeDCValue(String field, String value)
             throws DuoException
     {

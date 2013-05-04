@@ -38,6 +38,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * Class to provide file and bundle management utilities for the Duo module
+ *
+ */
 public class FileManager
 {
     /** log4j category */
@@ -56,7 +60,15 @@ public class FileManager
         Namespace.getNamespace("dcterms", "http://purl.org/dc/terms/");
     private static final Namespace DS_NS =
     	Namespace.getNamespace("ds","http://www.dspace.org/objectModel/");
-    
+
+    /**
+     * Get a list of all of the bitstreams in the named bundle in the provided item
+     *
+     * @param item
+     * @param bundleName
+     * @return
+     * @throws SQLException
+     */
     public List<Bitstream> getExistingBitstreams(Item item, String bundleName)
             throws SQLException
     {
@@ -73,12 +85,33 @@ public class FileManager
         return bss;
     }
 
+    /**
+     * List all of the bitstreams which appear in the given bundle in the ORE description
+     * of the item provided by Cristin.  This will include the metadata bitstream
+     *
+     *
+     * @param doc   ORE root xml element
+     * @param bundleName
+     * @return
+     * @throws IOException
+     */
     public List<IncomingBitstream> listBitstreamsInBundle(Document doc, String bundleName)
             throws IOException
     {
         return this.listBitstreamsInBundle(doc, bundleName, true);
     }
 
+    /**
+     * List all of the bitstreams which appear in the given bundle in the ORE description
+     * of the item provided by Cristin.  Pass in the omitMetadata flag to include or exclude
+     * the metadata bitstream.
+     *
+     * @param doc   ORE root xml element
+     * @param bundleName
+     * @param omitMetadata
+     * @return
+     * @throws IOException
+     */
     public List<IncomingBitstream> listBitstreamsInBundle(Document doc, String bundleName, boolean omitMetadata)
             throws IOException
     {
@@ -202,6 +235,12 @@ public class FileManager
         }
     }
 
+    /**
+     * Does the URL extracted from the Cristin ORE document refer to a metadata bitstream?
+     *
+     * @param url
+     * @return
+     */
     public boolean isMetadataBitstream(String url)
     {
         // https://w3utv-dspace01.uio.no/dspace/xmlui/bitstream/handle/123456789/982/cristin-12087.xml?sequence=2
@@ -213,6 +252,14 @@ public class FileManager
         return false;
     }
 
+    /**
+     * Get the name of the bundle for the given link in the given document
+     *
+     * @param doc
+     * @param link
+     * @return
+     * @throws IOException
+     */
     public String getIncomingBundleName(Document doc, Element link)
             throws IOException
     {
@@ -238,6 +285,13 @@ public class FileManager
         return null;
     }
 
+    /**
+     * List all of the bitstream elements in the given ORE document
+     *
+     * @param doc
+     * @return
+     * @throws IOException
+     */
     public List<Element> listBitstreams(Document doc)
             throws IOException
     {
@@ -262,6 +316,12 @@ public class FileManager
         return aggregatedResources;
     }
 
+    /**
+     * is the given element from an ORE description of a DSpace items a metadata bitstream?
+     *
+     * @param desc
+     * @return
+     */
     public boolean isMetadataBitstream(Element desc)
     {
         // https://w3utv-dspace01.uio.no/dspace/xmlui/bitstream/handle/123456789/982/cristin-12087.xml?sequence=2
@@ -281,6 +341,14 @@ public class FileManager
         return false;
     }
 
+    /**
+     * Get an input stream which will allow us to read the bits from this remote URL
+     *
+     * @param href
+     * @return
+     * @throws MalformedURLException
+     * @throws IOException
+     */
     public InputStream getInputStream(String href)
             throws MalformedURLException, IOException
     {
@@ -313,6 +381,21 @@ public class FileManager
         return in;
     }
 
+    /**
+     * Ingest the bitstream from the given remote url with the given properties
+     *
+     * @param context
+     * @param href  Remote URL from which to retrieve the bitstream
+     * @param bsName    Name to give the bitstream in DSpace
+     * @param mimeString    Mimetype to give the bitstream in DSpace
+     * @param targetBundle  Target bundle to store the bitstream in
+     * @return
+     * @throws MalformedURLException
+     * @throws IOException
+     * @throws CrosswalkException
+     * @throws AuthorizeException
+     * @throws SQLException
+     */
     public Bitstream ingestBitstream(Context context, String href, String bsName, String mimeString, Bundle targetBundle)
             throws MalformedURLException, IOException, CrosswalkException, AuthorizeException, SQLException
     {
@@ -346,6 +429,14 @@ public class FileManager
         return bitstream;
     }
 
+    /**
+     * Get the ordering parameter of the given bitstream
+     *
+     * @param context
+     * @param bitstream
+     * @return
+     * @throws SQLException
+     */
     public int getBitstreamOrder(Context context, Bitstream bitstream)
             throws SQLException
     {
@@ -362,8 +453,14 @@ public class FileManager
         return -1;
     }
 
-    /*
-        Does the incoming bitstream exactly match (i.e. the checksum) of an existing bitstream
+    /**
+     * Does the incoming bitstream exactly match one of the provided list of bitstreams.
+     *
+     * Match is determined by equivalency of checksums
+     *
+     * @param ib
+     * @param existingBitstreams
+     * @return
      */
     public boolean bitstreamInstanceAlreadyExists(IncomingBitstream ib, List<Bitstream> existingBitstreams)
     {
@@ -380,6 +477,14 @@ public class FileManager
         return false;
     }
 
+    /**
+     * Is the name of the incoming bitstream the same as the name of any of the list of existing bitstreams
+     * provided
+     *
+     * @param ib
+     * @param existingBitstreams
+     * @return
+     */
     public boolean bitstreamNameAlreadyExists(IncomingBitstream ib, List<Bitstream> existingBitstreams)
     {
         for (Bitstream bs : existingBitstreams)
@@ -395,6 +500,17 @@ public class FileManager
         return false;
     }
 
+    /**
+     * Find a matching bitstream in the array of bitstreams if one exists.
+     *
+     * NOTE: in an ideal world this would use checksum mapping, but checksums are not
+     * routinely available in the incoming bitstreams.  So matching is done with the
+     * much weaker condition of matching filename.
+     *
+     * @param ib
+     * @param bitstreams
+     * @return  the matching bitstream if one is found, or null if none is
+     */
     public Bitstream findBitstream(IncomingBitstream ib, Bitstream[] bitstreams)
     {
         for (Bitstream bs : bitstreams)
@@ -410,6 +526,13 @@ public class FileManager
         return null;
     }
 
+    /**
+     * Is the incoming bitstream a new bitstream?
+     *
+     * @param ib
+     * @param existingBitstreams
+     * @return
+     */
     public boolean isNewBitstream(IncomingBitstream ib, List<Bitstream> existingBitstreams)
     {
         for (Bitstream bs : existingBitstreams)
@@ -425,9 +548,12 @@ public class FileManager
         return true;
     }
 
-    /*
-        a bitstream is incoming if either the name or the checksum of an existing
-         bitstream match an incoming bitstream
+    /**
+     * Does the DSpace bitstream match one of the incoming bitstreams?
+     *
+     * @param bitstream
+     * @param ibs
+     * @return
      */
     public boolean bitstreamIsIncoming(Bitstream bitstream, List<IncomingBitstream> ibs)
     {
@@ -448,6 +574,16 @@ public class FileManager
         return false;
     }
 
+    /**
+     * Resequence the item's bitstreams in the named bundle so that they match the
+     * sequencing of the incoming bitstreams
+     *
+     * @param item
+     * @param bundleName
+     * @param ibs
+     * @throws SQLException
+     * @throws AuthorizeException
+     */
     public void sequenceBitstreams(Item item, String bundleName, List<IncomingBitstream> ibs)
             throws SQLException, AuthorizeException
     {

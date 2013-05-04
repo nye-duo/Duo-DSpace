@@ -19,6 +19,10 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Processing action to handle the assignment of an item to multiple collections
+ *
+ */
 public class XmlUICollectionAssignment extends ProcessingAction
 {
     @Override

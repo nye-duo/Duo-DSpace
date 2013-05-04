@@ -16,8 +16,29 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class to manage item access policies (and bundles and bitstreams in those items)
+ *
+ * The Default policies that Duo items have are as follows:
+ *
+ * ORIGINAL - Publicly readable
+ * LICENSE - Publicly readable
+ * METADATA - Administrator only
+ * SECONDARY - Publicly readable
+ * SECONDARY_CLOSED - Administrator only
+ * SWORD - Administrator only
+ *
+ */
 public class DuoPolicyManager
 {
+    /**
+     * Apply the default access policies to an item (see class documentation for details)
+     *
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     */
     public void setDefaultPolicies(Context context, Item item)
             throws SQLException, AuthorizeException
     {

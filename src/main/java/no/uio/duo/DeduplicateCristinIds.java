@@ -16,6 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Command line script to detect when two cristin IDs are present in the dataset and
+ * to output a human readable list of the matches.
+ */
 public class DeduplicateCristinIds
 {
     /*
@@ -39,6 +43,12 @@ public class DeduplicateCristinIds
     // The log4j logger for this class
     private static Logger log = Logger.getLogger(DeduplicateCristinIds.class);
 
+    /**
+     * Run this script.  No arguments are required
+     *
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args)
             throws Exception
     {
@@ -48,6 +58,13 @@ public class DeduplicateCristinIds
         System.out.println(report);
     }
 
+    /**
+     * Take the result map of duplicate items and convert them into something human readable
+     *
+     * @param duplicates    a map of Cristin IDs to DSpace Item IDs
+     * @return
+     * @throws SQLException
+     */
     public String reportOn(Map<String, List<Integer>> duplicates)
             throws SQLException
     {
@@ -72,6 +89,13 @@ public class DeduplicateCristinIds
         return sb.toString();
     }
 
+    /**
+     * Detect the duplicates in the dataset
+     *
+     * @return
+     * @throws IOException
+     * @throws DuoException
+     */
     public Map<String, List<Integer>> detect()
             throws IOException, DuoException
     {

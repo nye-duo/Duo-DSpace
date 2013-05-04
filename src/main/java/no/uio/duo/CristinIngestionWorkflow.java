@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * Implementation of the Harveter's IngestionWorkflow, providing hooks
+ * for the OAI-PMH harvesting features
+ */
 public class CristinIngestionWorkflow implements IngestionWorkflow
 {
     private boolean allowUpdateBitstreams = true;
@@ -50,6 +54,27 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         Namespace.getNamespace("ds","http://www.dspace.org/objectModel/");
 
 
+    /**
+     * Carry out any activities required prior to updating an item, and return the item
+     * which will ultimately be updated.
+     *
+     * This will do the following things:
+     *
+     * - if the item is archived and the incoming documents are different, it will create
+     *  a new version of the item in the workspace
+     * - otherwise it will return the passed item unchanged
+     *
+     * @param context
+     * @param item
+     * @param targetCollection
+     * @param harvestedItem
+     * @param descMD
+     * @param oreREM
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     * @throws AuthorizeException
+     */
     public Item preUpdate(Context context, Item item, Collection targetCollection, HarvestedItem harvestedItem, List<Element> descMD, Element oreREM)
         throws SQLException, IOException, AuthorizeException
     {
@@ -89,6 +114,22 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         }
     }
 
+    /**
+     * After an item has been updated, this method will be run to finish up.
+     *
+     * This will carry out the following actions:
+     *
+     * - it will determine if the item's unit codes have changed, and alert
+     *  the administrator if they have
+     * - if the item is in the workspace, it will trigger the workflow
+     * - if the item is in the workflow, it will restart the workflow from the start
+     *
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws IOException
+     * @throws AuthorizeException
+     */
     public void postUpdate(Context context, Item item)
             throws SQLException, IOException, AuthorizeException
     {
@@ -106,7 +147,19 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         // if the item is in the archive, leave it where it is
     }
 
-    // move a newly created item into the workflow
+    /**
+     * After creating an item fresh, this method will be run by the Harvester
+     *
+     * This will trigger the workflow on the item in the workspace
+     *
+     * @param context
+     * @param wsi
+     * @param handle
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     * @throws AuthorizeException
+     */
     public Item postCreate(Context context, WorkspaceItem wsi, String handle)
             throws SQLException, IOException, AuthorizeException
     {
@@ -117,6 +170,15 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
         return wsi.getItem();
     }
 
+    /**
+     * The Harvester will call this method to determine whether it should update the
+     * bitstreams on an item during update
+     *
+     * @param context
+     * @param item
+     * @param hi
+     * @return
+     */
     public boolean updateBitstreams(Context context, Item item, HarvestedItem hi)
     {
         // we already know whether we allow the bitstreams to be updated

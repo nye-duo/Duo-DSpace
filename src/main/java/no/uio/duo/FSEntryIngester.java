@@ -32,12 +32,40 @@ import java.util.List;
  */
 public class FSEntryIngester implements SwordEntryIngester
 {
+    /**
+     * Ingest the metadata in the deposit into the supplied DSpace object (Item or Collection)
+     *
+     * @param context
+     * @param deposit
+     * @param dso
+     * @param verboseDescription
+     * @return
+     * @throws DSpaceSwordException
+     * @throws SwordError
+     * @throws SwordAuthException
+     * @throws SwordServerException
+     */
     public DepositResult ingest(Context context, Deposit deposit, DSpaceObject dso, VerboseDescription verboseDescription)
             throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
     {
         return this.ingest(context, deposit, dso, verboseDescription, null, false);
     }
 
+    /**
+     * Ingest the metadata in the deposit into the supplied DSpace object (Item or Collection)
+     *
+     * @param context
+     * @param deposit
+     * @param dso
+     * @param verboseDescription
+     * @param result
+     * @param replace
+     * @return
+     * @throws DSpaceSwordException
+     * @throws SwordError
+     * @throws SwordAuthException
+     * @throws SwordServerException
+     */
     public DepositResult ingest(Context context, Deposit deposit, DSpaceObject dso, VerboseDescription verboseDescription, DepositResult result, boolean replace)
             throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
     {
@@ -52,6 +80,21 @@ public class FSEntryIngester implements SwordEntryIngester
         return null;
     }
 
+    /**
+     * Replace the passed item with the metadata content of the deposit.
+     *
+     * @param context
+     * @param deposit
+     * @param item
+     * @param verboseDescription
+     * @param result
+     * @param replace
+     * @return
+     * @throws DSpaceSwordException
+     * @throws SwordError
+     * @throws SwordAuthException
+     * @throws SwordServerException
+     */
     public DepositResult ingestToItem(Context context, Deposit deposit, Item item, VerboseDescription verboseDescription, DepositResult result, boolean replace)
                 throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
     {
@@ -100,6 +143,22 @@ public class FSEntryIngester implements SwordEntryIngester
         }
     }
 
+    /**
+     * Attempt to create a new item with a metadata only record
+     *
+     * The StudentWeb/FS integration does not permit this, so a call to this method will always throw an exception
+     *
+     * @param context
+     * @param deposit
+     * @param collection
+     * @param verboseDescription
+     * @param result
+     * @return
+     * @throws DSpaceSwordException
+     * @throws SwordError
+     * @throws SwordAuthException
+     * @throws SwordServerException
+     */
     public DepositResult ingestToCollection(Context context, Deposit deposit, Collection collection, VerboseDescription verboseDescription, DepositResult result)
                 throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
     {

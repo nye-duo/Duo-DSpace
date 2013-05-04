@@ -23,8 +23,24 @@ import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * Implementation of the SwordEntryDisseminator which can provide the embedded metadata
+ * for StudentWeb alongside a Dublin Core version of the metadata
+ */
 public class DuoEntryDisseminator extends SimpleDCEntryDisseminator implements SwordEntryDisseminator
 {
+    /**
+     * Create a DepositReceipt object containing the standard DC metadata as required
+     * by sword and also the embedded native StudentWeb metadata format
+     *
+     * @param context
+     * @param item
+     * @param depositReceipt
+     * @return
+     * @throws DSpaceSwordException
+     * @throws SwordError
+     * @throws SwordServerException
+     */
     public DepositReceipt disseminate(Context context, Item item, DepositReceipt depositReceipt)
             throws DSpaceSwordException, SwordError, SwordServerException
     {

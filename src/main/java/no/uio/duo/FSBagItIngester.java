@@ -38,9 +38,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-
+/**
+ * Sword Content Ingester to deal with the BagIt format used by the StudentWeb/FS
+ * integration
+ */
 public class FSBagItIngester extends AbstractSwordContentIngester
 {
+    /**
+     * ingest the given Deposit object into the given DSpace object (an Item or a Collection).  Verbose messages can be written
+     * to the verboseDescription object
+     *
+     * @param context
+     * @param deposit
+     * @param dso
+     * @param verboseDescription
+     * @return
+     * @throws DSpaceSwordException
+     * @throws SwordError
+     * @throws SwordAuthException
+     * @throws SwordServerException
+     */
     @Override
     public DepositResult ingest(Context context, Deposit deposit, DSpaceObject dso, VerboseDescription verboseDescription)
             throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
@@ -48,6 +65,22 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         return this.ingest(context, deposit, dso, verboseDescription, null);
     }
 
+    /**
+     * ingest the given Deposit object into the given DSpace object (an Item or a Collection).  Verbose messages can be written
+     * to the verboseDescription object.  This method allows you to re-use an existing DepositResult object if one
+     * is already in use (this could be because a metadata deposit has already taken place)
+     *
+     * @param context
+     * @param deposit
+     * @param dso
+     * @param verboseDescription
+     * @param result
+     * @return
+     * @throws DSpaceSwordException
+     * @throws SwordError
+     * @throws SwordAuthException
+     * @throws SwordServerException
+     */
     @Override
     public DepositResult ingest(Context context, Deposit deposit, DSpaceObject dso, VerboseDescription verboseDescription, DepositResult result)
             throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
@@ -63,6 +96,23 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         return null;
     }
 
+    /**
+     * Ingest the given deposit into the provided collection.
+     *
+     * If the DepositResult parameter is not null, any Item contained therein will be used as the target
+     * of the deposit.  Otherwise a new item will be created in the Collection.
+     *
+     * @param context
+     * @param deposit
+     * @param collection
+     * @param verboseDescription
+     * @param result
+     * @return
+     * @throws DSpaceSwordException
+     * @throws SwordError
+     * @throws SwordAuthException
+     * @throws SwordServerException
+     */
     public DepositResult ingestToCollection(Context context, Deposit deposit, Collection collection, VerboseDescription verboseDescription, DepositResult result)
             throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
     {
@@ -113,7 +163,23 @@ public class FSBagItIngester extends AbstractSwordContentIngester
         }
     }
 
-    // supports replace only, is not additive
+    /**
+     * Replace the passed item with the content of the deposit.
+     *
+     * NOTE: there is no versioning here, or any clever merging, all of the existing bundles in the item will
+     * be emptied and their contents replaced with the new deposit
+     *
+     * @param context
+     * @param deposit
+     * @param item
+     * @param verboseDescription
+     * @param result
+     * @return
+     * @throws DSpaceSwordException
+     * @throws SwordError
+     * @throws SwordAuthException
+     * @throws SwordServerException
+     */
     public DepositResult ingestToItem(Context context, Deposit deposit, Item item, VerboseDescription verboseDescription, DepositResult result)
     			throws DSpaceSwordException, SwordError, SwordAuthException, SwordServerException
     {

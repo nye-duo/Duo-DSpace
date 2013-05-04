@@ -23,14 +23,42 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Event consumer for Duo which responds to Item Installs.
+ */
 public class DuoInstallConsumer implements Consumer
 {
+    /**
+     * Initialise the install consumer.  Does nothing.
+     * @throws Exception
+     */
     public void initialize() throws Exception { }
 
+    /**
+     * End the consumer.  Does nothing.
+     *
+     * @param context
+     * @throws Exception
+     */
     public void end(Context context) throws Exception { }
 
+    /**
+     * Finish the consumer.  Does nothing.
+     *
+     * @param context
+     * @throws Exception
+     */
     public void finish(Context context) throws Exception { }
 
+    /**
+     * Consume an Install event.  If the item is being installed and it is not
+     * embargoed then we want to set the item's policies.  See {@link DuoPolicyManager}
+     * for details
+     *
+     * @param context
+     * @param event
+     * @throws Exception
+     */
     public void consume(Context context, Event event) throws Exception
     {
         Item item = (Item) event.getSubject(context);

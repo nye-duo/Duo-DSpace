@@ -40,6 +40,11 @@ import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+/**
+ * Original demonstrator class for ingesting BagIt files.  Do not use.
+ *
+ */
+@Deprecated
 public class FSPackager implements SwordContentIngester
 {
     public DepositResult ingest(Context context, Deposit deposit, DSpaceObject dso,

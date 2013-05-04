@@ -26,6 +26,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Stack;
 
+/**
+ * XMLUI Action to provide a Collection assignment workflow stage
+ *
+ */
 public class XmlUICollectionAssignmentUI extends AbstractXMLUIAction
 {
     @Override

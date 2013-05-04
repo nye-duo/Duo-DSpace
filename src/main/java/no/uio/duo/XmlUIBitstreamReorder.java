@@ -20,6 +20,11 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Processing action to handle the change of bitstream orders in the
+ * customisable workflow
+ *
+ */
 public class XmlUIBitstreamReorder extends ProcessingAction
 {
     @Override
@@ -29,6 +34,19 @@ public class XmlUIBitstreamReorder extends ProcessingAction
         // do nothing
     }
 
+    /**
+     * Execute a bitstream reorder
+     *
+     * @param context
+     * @param wfi
+     * @param step
+     * @param request
+     * @return
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     * @throws WorkflowException
+     */
     @Override
     public ActionResult execute(Context context, XmlWorkflowItem wfi, Step step, HttpServletRequest request)
             throws SQLException, AuthorizeException, IOException, WorkflowException

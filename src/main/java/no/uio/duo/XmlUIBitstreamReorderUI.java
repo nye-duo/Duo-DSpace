@@ -32,6 +32,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+/**
+ * XMLUI Action to provide a bitstream reorder UI
+ *
+ */
 public class XmlUIBitstreamReorderUI extends AbstractXMLUIAction
 {
     /** Language strings */

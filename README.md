@@ -91,7 +91,7 @@ and in postinstall.sh, look for the lines:
 
 and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
 
-**2/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+**2/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.  You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
 
 **3/** Run the addbinarymodule.sh script to prepare the dspace source to be built with the duo code incorporated.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build.
@@ -123,7 +123,7 @@ and in postinstall.sh, look for the lines:
 
 and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
 
-**2/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+**2/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.  You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
 **3/** Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will compile and install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
 
@@ -149,6 +149,8 @@ The duplicated fields are:
     plugin.single.org.dspace.embargo.EmbargoLifter
     event.dispatcher.default.consumers
     plugin.named.org.dspace.content.crosswalk.IngestionCrosswalk
+
+You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
 **5/** Build and install DSpace as normal.  You may find the DSpace install documentation useful: [https://wiki.duraspace.org/display/DSPACE/Installation](https://wiki.duraspace.org/display/DSPACE/Installation)
 
@@ -204,6 +206,7 @@ you shoud merge your custom configuration into the files in the directories with
 
 (At the University of Oslo, this can be partially automated by customising and running the migratedspace.sh script provided)
 
+You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
 ###Binary Installation (recommended)
 
@@ -221,7 +224,7 @@ and in postupdate.sh, look for the lines:
 
 and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
 
-**5/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+**5/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.  You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
 
 **6/** Run the addbinarymodule.sh script to prepare the dspace source to be built with the duo code incorporated.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build.
@@ -253,7 +256,7 @@ and in postupdate.sh, look for the lines:
 
 and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
 
-**5/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.
+**5/** Go through the *.cfg files in the config and config/modules directories and update any values which are relevant to your installation environment.  You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
 **6/** Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will compile and install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
 
@@ -278,6 +281,8 @@ The duplicated fields are:
     plugin.single.org.dspace.embargo.EmbargoLifter
     event.dispatcher.default.consumers
     plugin.named.org.dspace.content.crosswalk.IngestionCrosswalk
+
+You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
 **8/** Build and install DSpace as normal.  You may find the DSpace install documentation useful: [https://wiki.duraspace.org/display/DSPACE/Installation](https://wiki.duraspace.org/display/DSPACE/Installation)
 
@@ -343,7 +348,7 @@ Manual Installation on running DSpace (only if you know what you're doing)
 
 3. Deploy to installed DSpace: Copy the duo-1.0.jar and its dependencies to the DSpace swordv2 webapp's WEB-INF/lib directory, and the DSpace lib directory (ensuring not to overwrite any existing .jar files in the DSpace lib directory)
 
-4. Deploy the config: copy all the config files provided (except dspace.cfg), including xsl crosswalks (you might want to update the configs with localised values)
+4. Deploy the config: copy all the config files provided (except dspace.cfg), including xsl crosswalks (you might want to update the configs with localised values).  You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
 5. Update the DSpace config: add the values in the dspace.cfg file into the main DSpace config file
 

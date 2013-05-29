@@ -33,6 +33,15 @@ import java.sql.SQLException;
  *
  * <p>The output of this disseminator is used by StudentWeb to retrieve previously deposited
  * metadata for display to the user during updates to the metadata via the web forms.</p>
+ *
+ * <p><strong>Configuration</strong></p>
+ *
+ * <p>Use this class to replace the default EntryDisseminator in the modules/swordv2-server.cfg
+ * file</p>
+ *
+ * <pre>
+ *     plugin.single.org.dspace.sword2.SwordEntryDisseminator = no.uio.duo.DuoEntryDisseminator
+ * </pre>
  */
 public class DuoEntryDisseminator extends SimpleDCEntryDisseminator implements SwordEntryDisseminator
 {

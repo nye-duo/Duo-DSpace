@@ -14,6 +14,15 @@ import java.sql.SQLException;
  *
  * <p>This is basically a wrapper around a call to the DuoPolicyManager, which
  * sets the default policies on an item, in accordance with the Duo requirements.</p>
+ *
+ * <p><strong>Configuration</strong></p>
+ *
+ * <p>Use this class to replace the Default DSpace EmbargoLifter implementation as
+ * a single plugin in dspace.cfg:</p>
+ *
+ * <pre>
+ *     plugin.single.org.dspace.embargo.EmbargoLifter = no.uio.duo.DuoEmbargoLifter
+ * </pre>
  */
 public class DuoEmbargoLifter implements EmbargoLifter
 {

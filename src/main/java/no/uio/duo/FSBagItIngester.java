@@ -55,6 +55,19 @@ import java.util.TreeMap;
  * </ul>
  *
  * <p>The importer also preserves the sequencing of bitstreams as indicated in the package</p>
+ *
+ * <p><strong>Configuration</strong></p>
+ *
+ * <p>Add this in the modules/swordv2-server.cfg file as a named plugin implementing the SwordContentIngester
+ * interface.  It should be configured to respond to the package identifier for this format: http://duo.uio.no/terms/package/FSBagIt</p>
+ *
+ * <pre>
+ * plugin.named.org.dspace.sword2.SwordContentIngester = \
+    org.dspace.sword2.SimpleZipContentIngester = http://purl.org/net/sword/package/SimpleZip, \
+    org.dspace.sword2.SwordMETSIngester = http://purl.org/net/sword/package/METSDSpaceSIP, \
+    org.dspace.sword2.BinaryContentIngester = http://purl.org/net/sword/package/Binary, \
+    no.uio.duo.FSBagItIngester = http://duo.uio.no/terms/package/FSBagIt
+ * </pre>
  */
 public class FSBagItIngester extends AbstractSwordContentIngester
 {

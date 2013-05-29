@@ -52,6 +52,26 @@ import java.util.Set;
  * class, with specific features to handle items coming from Cristin.  It will ingest
  * all of the referenced bitstreams, and then identify the metadata bitstream (of the
  * form cristin-nnnnn.xml) and apply the configured crosswalk to it.</p>
+ *
+ * <p><strong>Configuration</strong></p>
+ *
+ * <p>Configure this in dspace.cfg as a named plugin implementation of the IngestionCrosswalk
+ * interface, with the name "cristin_ore":</p>
+ *
+ * <pre>
+ * plugin.named.org.dspace.content.crosswalk.IngestionCrosswalk = \
+     org.dspace.content.crosswalk.AIPDIMCrosswalkx = DIM, \
+     org.dspace.content.crosswalk.AIPTechMDCrosswalk = AIP-TECHMD, \
+     org.dspace.content.crosswalk.PREMISCrosswalk = PREMIS, \
+     org.dspace.content.crosswalk.OREIngestionCrosswalk = ore, \
+     org.dspace.content.crosswalk.NullIngestionCrosswalk = NIL, \
+     org.dspace.content.crosswalk.OAIDCIngestionCrosswalk = dc, \
+     org.dspace.content.crosswalk.DIMIngestionCrosswalk = dim, \
+     org.dspace.content.crosswalk.METSRightsCrosswalk = METSRIGHTS, \
+     org.dspace.content.crosswalk.RoleCrosswalk = DSPACE-ROLES, \
+     no.uio.duo.CristinOAIDCCrosswalk = cristin_dc, \
+     no.uio.duo.CristinOREImporter = cristin_ore
+ * </pre>
  */
 public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCrosswalk
 {

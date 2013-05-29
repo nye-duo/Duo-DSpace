@@ -27,7 +27,16 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 /**
- * XMLUI Action to provide a Collection assignment workflow stage
+ * <p>XMLUI Action to provide a Collection assignment workflow stage</p>
+ *
+ * <p><strong>Configuration</strong></p>
+ *
+ * <p>In the spring/xmlui/workflow-actions-xmlui.xml definitions file, add a new bean:</p>
+ *
+ * <pre>
+ *     &lt;bean id="assignmentaction_xmlui" class="no.uio.duo.XmlUICollectionAssignmentUI" scope="singleton"/&gt;
+ * </pre>
+ *
  *
  */
 public class XmlUICollectionAssignmentUI extends AbstractXMLUIAction

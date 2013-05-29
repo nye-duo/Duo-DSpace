@@ -40,6 +40,15 @@ import java.util.List;
  *
  * <p>All other metadata should be provided in a BagIt package with the normal deposit process.
  * See the {@link FSBagItIngester} for more information.</p>
+ *
+ * <p><strong>Configuration</strong></p>
+ *
+ * <p>In the modules/swordv2-server.cfg file replace the default SwordEntryIngester with this
+ * class</p>
+ *
+ * <pre>
+ * plugin.single.org.dspace.sword2.SwordEntryIngester = no.uio.duo.FSEntryIngester
+ * </pre>
  */
 public class FSEntryIngester implements SwordEntryIngester
 {

@@ -26,6 +26,13 @@ import java.util.Map;
  * full list of the collections in the reposiory, and options to check/un-check those
  * collections to which the item should be mapped.</p>
  *
+ * <p><strong>Configuration</strong></p>
+ *
+ * <p>In the spring/api/workflow-actions.xml definition file add a new bean for this class:</p>
+ *
+ * <pre>
+ *     &lt;bean id="assignmentactionAPI" class="no.uio.duo.XmlUICollectionAssignment" scope="prototype"/&gt;
+ * </pre>
  */
 public class XmlUICollectionAssignment extends ProcessingAction
 {

@@ -28,6 +28,14 @@ import java.util.Map;
  * offering javascript based re-sequencing of bitstreams, and the option to move bitstreams
  * between bundles, and to finally save the result.</p>
  *
+ * <p><strong>Configuration</strong></p>
+ *
+ * <p>In the spring/api/workflow-actions.xml definition file add a new bean for this class:</p>
+ *
+ * <pre>
+ *     &lt;bean id="bitstreamactionAPI" class="no.uio.duo.XmlUIBitstreamReorder" scope="prototype"/&gt;
+ * </pre>
+ *
  */
 public class XmlUIBitstreamReorder extends ProcessingAction
 {

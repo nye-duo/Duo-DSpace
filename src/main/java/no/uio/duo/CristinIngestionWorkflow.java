@@ -41,6 +41,16 @@ import java.util.TreeMap;
  * <p>If an updated item comes in, the preUpdate method will determine (based on
  * the Cristin workflow requirements) whether a clone of the item being updated is
  * necessary, and if so will handle that process.</p>
+ *
+ * <p><strong>Configuration</strong></p>
+ *
+ * <p>Configure this in the dspace.cfg file as a named plugin of the IngestionWorkflow
+ * interface:</p>
+ *
+ * <pre>
+ * plugin.named.org.dspace.harvest.IngestionWorkflow = \
+        no.uio.duo.CristinIngestionWorkflow = cristin
+ * </pre>
  */
 public class CristinIngestionWorkflow implements IngestionWorkflow
 {

@@ -35,6 +35,14 @@ import java.util.ArrayList;
 /**
  * XMLUI Action to provide a bitstream reorder UI
  *
+ * <p><strong>Configuration</strong></p>
+ *
+ * <p>In the spring/xmlui/workflow-actions-xmlui.xml definitions file, add a new bean:</p>
+ *
+ * <pre>
+ *     &lt;bean id="bitstreamaction_xmlui" class="no.uio.duo.XmlUIBitstreamReorderUI" scope="singleton"/&gt;
+ * </pre>
+ *
  */
 public class XmlUIBitstreamReorderUI extends AbstractXMLUIAction
 {

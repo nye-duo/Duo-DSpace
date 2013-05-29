@@ -24,9 +24,15 @@ import java.util.Map;
  * and building a map of item ids to Cristin IDs, thus determining quickly if there are
  * any duplicates</p>
  *
+ * <p><strong>Execution</strong></p>
+ *
  * <p>The script can be run from the command line using the dsrun argument of the dspace
  * script, and does not require any further command line arguments.  The output is a
  * human-readable report of those Cristin IDs which are shared by more than one item.</p>
+ *
+ * <pre>
+ *     [dspace]/bin/dspace dsrun no.uio.duo.DeduplicateCristinIds
+ * </pre>
  */
 public class DeduplicateCristinIds
 {

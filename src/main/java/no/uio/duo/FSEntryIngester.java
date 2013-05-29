@@ -27,8 +27,19 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * This takes the FS metadata as embedded in an atom entry and adds it to
- * an existing object
+ * <p>Implementation of the SwordEntryIngester interface which takes the FS metadata as embedded in an
+ * atom entry and adds it to an existing object</p>
+ *
+ * <p>This can deal with only the administrative metadata which may come from StudentWeb:</p>
+ *
+ * <ul>
+ *     <li>grade</li>
+ *     <li>embargo end date</li>
+ *     <li>embargo type</li>
+ * </ul>
+ *
+ * <p>All other metadata should be provided in a BagIt package with the normal deposit process.
+ * See the {@link FSBagItIngester} for more information.</p>
  */
 public class FSEntryIngester implements SwordEntryIngester
 {

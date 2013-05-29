@@ -31,8 +31,16 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Implementation of the Harveter's IngestionWorkflow, providing hooks
- * for the OAI-PMH harvesting features
+ * <p>Implementation of the Harveter's IngestionWorkflow, providing hooks
+ * for the OAI-PMH harvesting features.</p>
+ *
+ * <p>Provides implementations for preUpdate, postUpdate and postCreate.</p>
+ *
+ * <p>If a new item comes in the postCreate method will just start the workflow.</p>
+ *
+ * <p>If an updated item comes in, the preUpdate method will determine (based on
+ * the Cristin workflow requirements) whether a clone of the item being updated is
+ * necessary, and if so will handle that process.</p>
  */
 public class CristinIngestionWorkflow implements IngestionWorkflow
 {

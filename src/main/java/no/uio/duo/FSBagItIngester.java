@@ -39,8 +39,22 @@ import java.util.List;
 import java.util.TreeMap;
 
 /**
- * Sword Content Ingester to deal with the BagIt format used by the StudentWeb/FS
- * integration
+ * <p>Sword Content Ingester to deal with the BagIt format used by the StudentWeb/FS
+ * integration</p>
+ *
+ * <p>This utilises the BagIt Library developed for the StudentWeb integration, to allow
+ * us to unpack and allocate the bitstreams and metadata into the appropriate parts of the
+ * DSpace item.  The structure of the DSpace item is as per the requirements documentation:</p>
+ *
+ * <ul>
+ *     <li>Metadata file -&gt; METADATA bundle</li>
+ *     <li>Primary files -&gt; ORIGINAL bundle</li>
+ *     <li>Secondary files (open access) -&gt; SECONDARY bundle</li>
+ *     <li>Secondary files (closed access) -&gt; SECONDARY_CLOSED bundle</li>
+ *     <li>Licence file -&gt; LICENSE bundle</li>
+ * </ul>
+ *
+ * <p>The importer also preserves the sequencing of bitstreams as indicated in the package</p>
  */
 public class FSBagItIngester extends AbstractSwordContentIngester
 {

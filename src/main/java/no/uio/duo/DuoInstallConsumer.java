@@ -24,7 +24,11 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Event consumer for Duo which responds to Item Installs.
+ * <p>Event consumer for Duo which responds to Item Installs.</p>
+ *
+ * <p>This consumer will first determine if an item has embargo metadata attached to it.  If not
+ * it will apply the default access policies to the item as per the Duo requirements.  To do this
+ * it delegates to the DuoPolicyManager.</p>
  */
 public class DuoInstallConsumer implements Consumer
 {

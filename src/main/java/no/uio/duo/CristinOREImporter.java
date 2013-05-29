@@ -43,10 +43,15 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Importer which implements both the standard DSpace IngestionCrosswalk and the
+ * <p>Importer which implements both the standard DSpace IngestionCrosswalk and the
  * more advanced OAIConfigurableCrosswalk.  This crosswalk is first configured with
  * parameters from the OAI harvester, and then run over the item retrieved from
- * the OAI-PMH feed
+ * the OAI-PMH feed</p>
+ *
+ * <p>This is effectively a clone with extensions of the standard DSpace ORE Importer
+ * class, with specific features to handle items coming from Cristin.  It will ingest
+ * all of the referenced bitstreams, and then identify the metadata bitstream (of the
+ * form cristin-nnnnn.xml) and apply the configured crosswalk to it.</p>
  */
 public class CristinOREImporter implements IngestionCrosswalk, OAIConfigurableCrosswalk
 {

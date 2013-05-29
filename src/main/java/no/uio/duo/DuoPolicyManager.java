@@ -17,16 +17,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class to manage item access policies (and bundles and bitstreams in those items)
+ * <p>Class to manage item access policies (and bundles and bitstreams in those items)</p>
  *
- * The Default policies that Duo items have are as follows:
+ * <p>The Default policies that Duo items have are as follows:</p>
  *
- * ORIGINAL - Publicly readable
- * LICENSE - Publicly readable
- * METADATA - Administrator only
- * SECONDARY - Publicly readable
- * SECONDARY_CLOSED - Administrator only
- * SWORD - Administrator only
+ * <ul>
+ * <li>ORIGINAL - Publicly readable</li>
+ * <li>LICENSE - Publicly readable</li>
+ * <li>METADATA - Administrator only</li>
+ * <li>SECONDARY - Publicly readable</li>
+ * <li>SECONDARY_CLOSED - Administrator only</li>
+ * <li>SWORD - Administrator only</li>
+ * </ul>
  *
  */
 public class DuoPolicyManager

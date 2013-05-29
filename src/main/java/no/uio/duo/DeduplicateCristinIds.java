@@ -17,8 +17,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Command line script to detect when two cristin IDs are present in the dataset and
- * to output a human readable list of the matches.
+ * <p>Command line script to detect when two cristin IDs are present in the dataset and
+ * to output a human readable list of the matches.</p>
+ *
+ * <p>This works by querying the metadata table in DSpace for the Cristin IDs of items,
+ * and building a map of item ids to Cristin IDs, thus determining quickly if there are
+ * any duplicates</p>
+ *
+ * <p>The script can be run from the command line using the dsrun argument of the dspace
+ * script, and does not require any further command line arguments.  The output is a
+ * human-readable report of those Cristin IDs which are shared by more than one item.</p>
  */
 public class DeduplicateCristinIds
 {

@@ -20,7 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Processing action to handle the assignment of an item to multiple collections
+ * <p>Processing action to handle the assignment of an item to multiple collections</p>
+ *
+ * <p>This presents the user (via the related {@link XmlUICollectionAssignmentUI}) with a
+ * full list of the collections in the reposiory, and options to check/un-check those
+ * collections to which the item should be mapped.</p>
  *
  */
 public class XmlUICollectionAssignment extends ProcessingAction

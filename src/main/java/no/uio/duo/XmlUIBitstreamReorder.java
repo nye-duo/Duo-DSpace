@@ -21,8 +21,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Processing action to handle the change of bitstream orders in the
- * customisable workflow
+ * <p>Processing action to handle the change of bitstream orders in the
+ * customisable workflow</p>
+ *
+ * <p>This presents to the user (via the related {@link XmlUIBitstreamReorderUI}) a page
+ * offering javascript based re-sequencing of bitstreams, and the option to move bitstreams
+ * between bundles, and to finally save the result.</p>
  *
  */
 public class XmlUIBitstreamReorder extends ProcessingAction

@@ -24,8 +24,15 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 /**
- * Implementation of the SwordEntryDisseminator which can provide the embedded metadata
- * for StudentWeb alongside a Dublin Core version of the metadata
+ * <p>Implementation of the SwordEntryDisseminator which can provide the embedded metadata
+ * for StudentWeb alongside a Dublin Core version of the metadata</p>
+ *
+ * <p>They key difference between this and the standard SimpleDCEntryDisseminator provided
+ * with the SWORDv2 module is that this supports both the DC dissemination and the StudentWeb
+ * metadata dissemination in one entry document.</p>
+ *
+ * <p>The output of this disseminator is used by StudentWeb to retrieve previously deposited
+ * metadata for display to the user during updates to the metadata via the web forms.</p>
  */
 public class DuoEntryDisseminator extends SimpleDCEntryDisseminator implements SwordEntryDisseminator
 {

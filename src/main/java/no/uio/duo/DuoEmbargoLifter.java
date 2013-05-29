@@ -9,8 +9,11 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 /**
- * Implemetation of the EmbargoLifter, which ensures that Duo polices
- * are set as required
+ * <p>Implemetation of the EmbargoLifter, which ensures that Duo polices
+ * are set as required</p>
+ *
+ * <p>This is basically a wrapper around a call to the DuoPolicyManager, which
+ * sets the default policies on an item, in accordance with the Duo requirements.</p>
  */
 public class DuoEmbargoLifter implements EmbargoLifter
 {

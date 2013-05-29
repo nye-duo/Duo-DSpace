@@ -59,7 +59,7 @@
                     <dc-element>uid</dc-element>
                     <dc-qualifier></dc-qualifier>
                     <repeatable>false</repeatable>
-                    <label>Title</label>
+                    <label>UID</label>
                     <input-type>onebox</input-type>
                     <hint>Enter the UID.</hint>
                     <required>You must enter a UID.</required>

@@ -317,7 +317,15 @@ And add a name-map reference in the heading section of the file, mapping your co
 
 	<name-map collection="123456789/4404" workflow="cristin"/>
 
-For this change to take effect, you will need to restart tomcat.
+Then edit the file
+
+    [dspace]/config/input-forms.xml
+
+And add a name-map reference in the "form-map" section of the file, mapping your collection's handle to the "cristin" metadata form, for example:
+
+    <name-map collection-handle="123456789/4404" form-name="cristin" />
+
+For these changes to take effect, you will need to restart tomcat.
 
 Running the De-Duplication Task
 -------------------------------

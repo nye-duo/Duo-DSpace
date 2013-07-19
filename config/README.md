@@ -45,6 +45,7 @@ Additions and modifications to the main, standard dspace.cfg file.  To deploy th
 * embargo.field.terms
 * embargo.field.lift
 * plugin.single.org.dspace.embargo.EmbargoLifter
+* event.dispatcher.default.class
 * event.dispatcher.default.consumers
 * plugin.named.org.dspace.content.crosswalk.IngestionCrosswalk
 

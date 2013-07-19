@@ -147,6 +147,7 @@ The duplicated fields are:
     embargo.field.terms
     embargo.field.lift
     plugin.single.org.dspace.embargo.EmbargoLifter
+    event.dispatcher.default.class
     event.dispatcher.default.consumers
     plugin.named.org.dspace.content.crosswalk.IngestionCrosswalk
 

@@ -79,6 +79,14 @@ public class DuoInstallConsumer implements Consumer
     {
         Item item = (Item) event.getSubject(context);
 
+        // check to see if the item has a StudentWeb grade of "fail"
+        if (this.isFail(context, item))
+        {
+            // if so, withdraw the item
+            item.withdraw();
+            return;
+        }
+
         // we mustn't set the policies if the item is embargoed; these will have already
         // been removed, and should stay that way
         if (this.isEmbargoed(context, item))
@@ -132,5 +140,18 @@ public class DuoInstallConsumer implements Consumer
         return true;
     }
 
+    private boolean isFail(Context context, Item item)
+    {
+        String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
+        DCValue[] dcvs = item.getMetadata(gradeField);
+        for (DCValue dcv : dcvs)
+        {
+            if ("fail".equals(dcv.value.trim()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

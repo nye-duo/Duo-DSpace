@@ -28,6 +28,8 @@ In order to successfully deploy the Duo extensions to DSpace, you will need all 
 
 **modules/swordv2-server.cfg** - Enhanced SWORDv2 configuration, containing the specific values required by the Duo extensions.
 
+**modules/urn.cfg** - Configuration for the URN Generator command line script
+
 **modules/workflow.cfg** - Configuration for the DSpace workflow, which just turns on the XML workflow required by Duo.
 
 **registres/cristin-metadata.xml** - Metadata registry of fields required by the Cristin metadata schema.
@@ -168,6 +170,23 @@ than on request by an administrator)
     admin.eperson = richard
 
 This can be the administrators email address or netid.
+
+##urn.cfg
+
+This provides the configuration for the URN Generator command line script.  This script connects to the National Library's
+API for generating URNs for repository items.
+
+The most important configuration options are your institutional username and password:
+
+    idservice.username = username
+    idservice.password = password
+
+You can then also specify the fields in which URNs and full-text file/bitstream links are stored:
+
+    urn.field = dc.identifier.urn
+    fulltext.field = dc.identifier.freetext
+
+See the config file itself for more details and configuration options
 
 ##spring/api/workflow-actions.xml
 

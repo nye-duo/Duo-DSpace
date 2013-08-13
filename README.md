@@ -38,7 +38,11 @@ To use this in the build you should, once you have successfully compiled the lib
 
 #### IdService Client
 
-mvn install:install-file -Dfile=idservice-client.jar -DpomFile=pom.xml
+In order to generate URNs for items in the repository using the National Library's API, we need to include the client library which will allow us to connect to it
+
+It is bundled here for your convenience.  Install it into your local maven repository with:
+
+    mvn install:install-file -Dfile=lib/idservice-client/idservice-client.jar -DpomFile=lib/idservice-client/pom.xml
 
 ###DSpace
 
@@ -347,6 +351,20 @@ This will output something like:
     Cristin ID 56789 is shared by items: 123456789/120 (ID: 1145), 123456789/177 (ID: 1367)
 
 and so on.
+
+Running the URN Generator
+-------------------------
+
+In order to register the items in the repository with the National Library's URN service, and to add the bitstream urls to the item metadata in DSpace, you should regularly run the URNGenerator
+
+To generate the URNs for all items that do not have one, and to add the bitstream URLs to those items, run the command without arguments:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.DeduplicateCristinIds
+
+In order to force the regeneration of all bitstream URLs you can run the command with the -f argument.  This will still generate URNs for all items that do not already have one:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.DeduplicateCristinIds -f
+
 
 Manual Installation on running DSpace (only if you know what you're doing)
 --------------------------------------------------------------------------

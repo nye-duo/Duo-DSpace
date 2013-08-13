@@ -13,6 +13,7 @@ mkdir $OUT
 # copy the code into the output directory
 cp pom.xml $OUT
 cp target/duo-1.0.jar $OUT
+cp -r lib $OUT
 
 # copy all the supporting material into the output directory
 cp -r config $OUT

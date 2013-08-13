@@ -1,7 +1,6 @@
 .idea/
 duo.iml
 target/
-lib/
 duo.iws
 duo.ipr
 *.iml

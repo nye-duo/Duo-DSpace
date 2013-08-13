@@ -36,6 +36,10 @@ To use this in the build you should, once you have successfully compiled the lib
 
     mvn install
 
+#### IdService Client
+
+mvn install:install-file -Dfile=idservice-client.jar -DpomFile=pom.xml
+
 ###DSpace
 
 It is designed to be installed into the Duo version of DSpace here:

@@ -181,10 +181,15 @@ The most important configuration options are your institutional username and pas
     idservice.username = username
     idservice.password = password
 
+You must then specify the URN series that you wish to generate identifiers within.  Using URN:NBN:no is equivalent to
+not using a series for your institution, and is the default.
+
+    idservice.series = URN:NBN:no
+
 You can then also specify the fields in which URNs and full-text file/bitstream links are stored:
 
     urn.field = dc.identifier.urn
-    fulltext.field = dc.identifier.freetext
+    fulltext.field = dc.identifier.fulltext
 
 See the config file itself for more details and configuration options
 

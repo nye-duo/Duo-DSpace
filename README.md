@@ -357,13 +357,18 @@ Running the URN Generator
 
 In order to register the items in the repository with the National Library's URN service, and to add the bitstream urls to the item metadata in DSpace, you should regularly run the URNGenerator
 
-To generate the URNs for all items that do not have one, and to add the bitstream URLs to those items, run the command without arguments:
+To generate the URNs for all items that do not have one, and to add the bitstream URLs to those items, run the command with only the -e argument (specifying the username of the user the operation should run as - recommended to be an administrator):
 
-    [dspace]/bin/dspace dsrun no.uio.duo.DeduplicateCristinIds
+    [dspace]/bin/dspace dsrun no.uio.duo.URNGenerator -e [username]
 
 In order to force the regeneration of all bitstream URLs you can run the command with the -f argument.  This will still generate URNs for all items that do not already have one:
 
-    [dspace]/bin/dspace dsrun no.uio.duo.DeduplicateCristinIds -f
+    [dspace]/bin/dspace dsrun no.uio.duo.URNGenerator -f -e [username]
+
+In order to force the regeneration of all item URLs and to update the URN registry with those URLs where they have changed since last time, use the -a option:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.URNGenerator -a -e [username]
+
 
 
 Manual Installation on running DSpace (only if you know what you're doing)

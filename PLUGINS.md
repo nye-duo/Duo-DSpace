@@ -150,7 +150,7 @@ These plugins handle two aspects of the StudentWeb integration:
 
 It is **recommended** that all of these plugins be deployed if integrating Duo with StudentWeb.  If your use case does not require incoming items to be embargoed by their grade, then you may omit the *DuoInstallConsumer* and the *DuoEmbargoLifter*.  Nonetheless, it is *recommended* that you always use the *DSpace18FixedEventDispatcher*, as this fixes a critical bug in the standard DSpace event dispatcher.
 
-Note also that the content handling plugins (*DuoEntryDisseminator*, *FSBagItIngester*, and *FSEntryIngester*)are not strictly dependent on eachother but it is **strongly recommended** that they be deployed together, as they are designed to work as a coherent whole.
+Note also that the content handling plugins ( *DuoEntryDisseminator*, *FSBagItIngester*, and *FSEntryIngester* ) are not strictly dependent on each other but it is **strongly recommended** that they be deployed together, as they are designed to work as a coherent whole.
 
 ## no.uio.duo.DSpace18FixedDispatcher 
 **Interface**: org.dspace.event.Dispatcher

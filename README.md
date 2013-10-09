@@ -369,6 +369,9 @@ In order to force the regeneration of all item URLs and to update the URN regist
 
     [dspace]/bin/dspace dsrun no.uio.duo.URNGenerator -a -e [username]
 
+The URN generator can be run on the whole archive, or it can be run on a single item as identified by its handle:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.URNGenerator -h 12345678/100 -a -e [username]
 
 
 Manual Installation on running DSpace (only if you know what you're doing)

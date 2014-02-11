@@ -24,12 +24,18 @@
 		-->
 
     <!-- keys used by Cristin -->
+    <message key="xmlui.XMLWorkflow.cristin.assignment">Assign Collections</message>
     <message key="xmlui.XMLWorkflow.cristin.assignment.claimaction">Assign Collections</message>
     <message key="xmlui.XMLWorkflow.cristin.assignment.assignmentaction">Assign Collections</message>
+
+    <message key="xmlui.XMLWorkflow.cristin.editstep">Accept/Reject/Edit</message>
     <message key="xmlui.XMLWorkflow.cristin.editstep.claimaction">Accept/Reject/Edit</message>
     <message key="xmlui.XMLWorkflow.cristin.editstep.editaction">Accept/Reject/Edit</message>
+
+    <message key="xmlui.XMLWorkflow.cristin.bitstreamstep">Organise Bitstreams</message>
     <message key="xmlui.XMLWorkflow.cristin.bitstreamstep.claimaction">Organise Bitstreams</message>
     <message key="xmlui.XMLWorkflow.cristin.bitstreamstep.bitstreamaction">Organise Bitstreams</message>
+
 
     <message key="xmlui.XMLWorkflow.cristin.XmlUIBitstreamsReorderUI.head">Organise Item's Bitstreams</message>
 

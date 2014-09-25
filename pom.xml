@@ -7,7 +7,7 @@
     <groupId>no.uio</groupId>
     <artifactId>duo</artifactId>
     <packaging>jar</packaging>
-    <version>1.0</version>
+    <version>2.0</version>
 
     <build>
 		<plugins>
@@ -27,18 +27,21 @@
 		<dependency>
 			<groupId>org.dspace</groupId>
 			<artifactId>dspace-api</artifactId>
-			<version>1.8.2</version>
+			<version>4.2</version>
 		</dependency>
         <dependency>
             <groupId>org.dspace</groupId>
             <artifactId>dspace-swordv2</artifactId>
-            <version>1.8.2</version>
+            <version>4.2</version>
+            <type>jar</type>
             <classifier>classes</classifier>
         </dependency>
         <dependency>
             <groupId>org.dspace</groupId>
-            <artifactId>dspace-xmlui-api</artifactId>
-            <version>1.8.2</version>
+            <artifactId>dspace-xmlui</artifactId>
+            <version>4.2</version>
+            <type>jar</type>
+            <classifier>classes</classifier>
         </dependency>
         <dependency>
             <groupId>no.uio.duo</groupId>

@@ -118,7 +118,7 @@ public class DuoInstallConsumer implements Consumer
         // if the embargo date is in the past, then the item isn't embargoed
         try
         {
-            DCDate embargoDate = EmbargoManager.getEmbargoDate(context, item);
+            DCDate embargoDate = EmbargoManager.getEmbargoTermsAsDate(context, item);
             if ((new Date()).getTime() > embargoDate.toDate().getTime())
             {
                 return false;

@@ -222,7 +222,7 @@ public class CristinIngestionWorkflow implements IngestionWorkflow
     private void sendEmail(Item item, List<String> before, List<String> after)
             throws IOException
     {
-        Email email = ConfigurationManager.getEmail(I18nUtil.getEmailFilename(I18nUtil.getDefaultLocale(), "unitcodes"));
+        Email email = Email.getEmail(I18nUtil.getEmailFilename(I18nUtil.getDefaultLocale(), "unitcodes"));
         String to = ConfigurationManager.getProperty("mail.admin");
         email.addRecipient(to);
 

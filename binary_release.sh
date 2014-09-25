@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OUT="./dspace-duo-1.0"
+OUT="./dspace-duo-2.0"
 MAVEN="mvn"
 
 # compile the library
@@ -12,7 +12,7 @@ mkdir $OUT
 
 # copy the code into the output directory
 cp pom.xml $OUT
-cp target/duo-1.0.jar $OUT
+cp target/duo-2.0.jar $OUT
 cp -r lib $OUT
 
 # copy all the supporting material into the output directory
@@ -24,5 +24,5 @@ cp addbinarymodule.sh $OUT
 cp README.md $OUT
 cp migratedspace.sh $OUT
 
-tar -zcvf dspace-duo-1.0.tar.gz $OUT
-mv dspace-duo-1.0.tar.gz release
+tar -zcvf dspace-duo-2.0.tar.gz $OUT
+mv dspace-duo-2.0.tar.gz release

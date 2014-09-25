@@ -1,0 +1,297 @@
+<?xml version="1.0"?>
+
+<dspace-dc-types>
+
+    <dspace-header>
+        <title>FS Incoming Metadata Registry</title>
+    </dspace-header>
+
+    <!-- schemas used -->
+
+    <dc-schema>
+        <name>dc</name>
+        <namespace>http://dublincore.org/documents/dcmi-terms/</namespace>
+    </dc-schema>
+
+    <dc-schema>
+        <name>fs</name>
+        <namespace>http://fs.uio.no/</namespace>
+    </dc-schema>
+
+    <!-- dc metadata elements required -->
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>coverage</element>
+        <qualifier>spatial</qualifier>
+        <scope_note>Spatial characteristics of content.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>coverage</element>
+        <qualifier>temporal</qualifier>
+        <scope_note>Temporal characteristics of content.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>creator</element>
+        <qualifier>author</qualifier>
+        <scope_note></scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>date</element>
+        <!-- unqualified -->
+        <scope_note>Use qualified form if possible.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>date</element>
+        <qualifier>available</qualifier>
+        <scope_note>Date or date range item became available to the public.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>date</element>
+        <qualifier>copyright</qualifier>
+        <scope_note>Date of copyright.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>date</element>
+        <qualifier>created</qualifier>
+        <scope_note>Date of creation or manufacture of intellectual content if different from date.issued.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>date</element>
+        <qualifier>embargoenddate</qualifier>
+        <scope_note>Date embargo should be lifted</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>date</element>
+        <qualifier>issued</qualifier>
+        <scope_note>Date of publication or distribution.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>date</element>
+        <qualifier>submitted</qualifier>
+        <scope_note>date item was submitted</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>date</element>
+        <qualifier>updated</qualifier>
+        <scope_note>date item was updated</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>description</element>
+        <qualifier>abstract</qualifier>
+        <scope_note>Abstract or summary.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>description</element>
+        <qualifier>provenance</qualifier>
+        <scope_note>The history of custody of the item since its creation, including any changes successive custodians made to it.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>format</element>
+        <qualifier>extent</qualifier>
+        <scope_note>Size or duration.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>format</element>
+        <qualifier>medium</qualifier>
+        <scope_note>Physical medium.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>format</element>
+        <qualifier>mimetype</qualifier>
+        <scope_note>Registered MIME type identifiers.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>uri</qualifier>
+        <scope_note>Uniform Resource Identifier</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>language</element>
+        <qualifier>iso</qualifier>
+        <scope_note>Current ISO standard for language of intellectual content, including country codes (e.g. "en_US").</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>rights</element>
+        <qualifier>terms</qualifier>
+        <scope_note>Rights information</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>subject</element>
+        <qualifier>ddc</qualifier>
+        <scope_note>Dewey Decimal Classification Number</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>subject</element>
+        <qualifier>humord</qualifier>
+        <scope_note>Humord</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>subject</element>
+        <qualifier>mesh</qualifier>
+        <scope_note>Medical Subject Headings</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>subject</element>
+        <qualifier>nsi</qualifier>
+        <scope_note>NSI</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>subject</element>
+        <qualifier>udc</qualifier>
+        <scope_note>UDC</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>subject</element>
+        <!-- unqualified -->
+        <scope_note>Uncontrolled index term.</scope_note>
+    </dc-type>
+
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>title</element>
+        <!-- unqualified -->
+        <scope_note>Title statement/title proper.</scope_note>
+    </dc-type>
+
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>title</element>
+        <qualifier>alternative</qualifier>
+        <scope_note>Varying (or substitute) form of title proper appearing in item,
+            e.g. abbreviation or translation</scope_note>
+    </dc-type>
+
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>type</element>
+        <!-- unqualified -->
+        <scope_note>Nature or genre of content.</scope_note>
+    </dc-type>
+
+    <!-- fs metadata -->
+
+    <dc-type>
+        <schema>fs</schema>
+        <element>studentnumber</element>
+        <scope_note>Student number</scope_note>
+    </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>uid</element>
+            <scope_note>User id at the institution</scope_note>
+        </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>foedselsnummer</element>
+            <scope_note>social security number</scope_note>
+        </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>postaladdress</element>
+            <scope_note>Postal address</scope_note>
+        </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>email</element>
+            <scope_note>Email address</scope_note>
+        </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>telephonenumber</element>
+            <scope_note>telephone number</scope_note>
+        </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>subjectcode</element>
+            <scope_note>FS subject code</scope_note>
+        </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>subjecttitle</element>
+            <scope_note>FS Subject title</scope_note>
+        </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>grade</element>
+            <scope_note>Grade (pass/fail)</scope_note>
+        </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>unitcode</element>
+            <scope_note>student's unit code</scope_note>
+        </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>unitname</element>
+            <scope_note>Student's unit name</scope_note>
+        </dc-type>
+
+    <dc-type>
+            <schema>fs</schema>
+            <element>embargotype</element>
+            <scope_note>Embargo type (one of a fixed list in FS)</scope_note>
+        </dc-type>
+
+</dspace-dc-types>

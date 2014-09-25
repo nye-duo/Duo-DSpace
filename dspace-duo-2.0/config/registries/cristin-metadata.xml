@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+
+<dspace-dc-types>
+
+    <dspace-header>
+        <title>Cristin Incoming Metadata Registry</title>
+    </dspace-header>
+
+    <!-- schemas used -->
+
+    <dc-schema>
+        <name>dc</name>
+        <namespace>http://dublincore.org/documents/dcmi-terms/</namespace>
+    </dc-schema>
+
+    <dc-schema>
+        <name>cristin</name>
+        <namespace>http://www.cristin.no</namespace>
+    </dc-schema>
+
+    <!-- dc metadata elements required -->
+
+    <dc-type>
+        <schema>cristin</schema>
+        <element>unitcode</element>
+        <scope_note>Unit Code for primary author</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>cristin</schema>
+        <element>unitname</element>
+        <scope_note>Unit Name for primary author</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>cristin</schema>
+        <element>ispublished</element>
+        <scope_note>Is the item published (true/false)</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>cristin</schema>
+        <element>fulltext</element>
+        <!-- unqualified -->
+        <scope_note>full text type</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>cristin</schema>
+        <element>qualitycode</element>
+        <scope_note>quality code for the published item</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>creator</element>
+        <qualifier>author</qualifier>
+        <scope_note>Author of the item</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>date</element>
+        <qualifier>created</qualifier>
+        <scope_note>Date of creation or manufacture of intellectual content if different from date.issued.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>date</element>
+        <qualifier>issued</qualifier>
+        <scope_note>Date of publication or distribution.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>description</element>
+        <qualifier>abstract</qualifier>
+        <scope_note>Abstract or summary.</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>cristin</qualifier>
+        <scope_note>Cristn ID for an item</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>bibliographiccitation</qualifier>
+        <scope_note>Formatted citation</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>jtitle</qualifier>
+        <scope_note>Journal title</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>volume</qualifier>
+        <scope_note>Journal volume</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>issue</qualifier>
+        <scope_note>Journal issue number</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>startpage</qualifier>
+        <scope_note>Start page in journal</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>endpage</qualifier>
+        <scope_note>End page in journal</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>pagecount</qualifier>
+        <scope_note>page count</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>isbn</qualifier>
+        <scope_note>ISBN</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>issn</qualifier>
+        <scope_note>ISSN</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>doi</qualifier>
+        <scope_note>DOI</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>identifier</element>
+        <qualifier>urn</qualifier>
+        <scope_note>National URN</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>language</element>
+        <scope_note>language of intellectual content</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>publisher</element>
+        <scope_note>Publisher of the item</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>relation</element>
+        <qualifier>ispartof</qualifier>
+        <scope_note>is part of a series</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>relation</element>
+        <qualifier>ispartofseries</qualifier>
+        <scope_note>is part of a series</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>subject</element>
+        <qualifier>nvi</qualifier>
+        <scope_note>Norwegian science index</scope_note>
+    </dc-type>
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>title</element>
+        <!-- unqualified -->
+        <scope_note>Title statement/title proper.</scope_note>
+    </dc-type>
+
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>title</element>
+        <qualifier>alternative</qualifier>
+        <scope_note>Varying (or substitute) form of title proper appearing in item,
+            e.g. abbreviation or translation</scope_note>
+    </dc-type>
+
+
+    <dc-type>
+        <schema>dc</schema>
+        <element>type</element>
+        <qualifier>document</qualifier>
+        <scope_note>Nature or genre of content.</scope_note>
+    </dc-type>
+
+</dspace-dc-types>

@@ -19,6 +19,7 @@ import java.util.List;
  * go obsolete when Duo upgrades to that version; hence the ridiculous class
  * name :)
  */
+@Deprecated
 public class DSpace18FixedDispatcher extends Dispatcher
 {
 

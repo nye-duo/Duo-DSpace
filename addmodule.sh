@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DSPACE_SRC="/Users/richard/tmp/DSpace"
+DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
 MAVEN="mvn"
 
 # copy the relevant contents of the root config file
@@ -28,11 +28,10 @@ cp config/spring/xmlui/* $DSPACE_SRC/dspace/config/spring/xmlui/
 #cp deploy/messages.xml $DSPACE_SRC/dspace/modules/xmlui/overlays/org.dspace.dspace-xmlui-lang-1.8.0.2/i18n/
 mkdir -p $DSPACE_SRC/dspace/modules/xmlui/src/main/webapp/i18n/
 cp deploy/messages.xml $DSPACE_SRC/dspace/modules/xmlui/src/main/webapp/i18n/
-# The original messages file is here - probably the above allows it to be overridden
-# cp deploy/messages.xml $DSPACE_SRC/dspace-xmlui/src/main/webapp/i18n/
 
 # copy the javascript for the workflow
-cp deploy/bitstream-reorder-workflow.js $DSPACE_SRC/dspace-xmlui/src/main/webapp/static/js/
+mkdir -p $DSPACE_SRC/dspace/modules/xmlui/src/main/webapp/static/js/
+cp deploy/bitstream-reorder-workflow.js $DSPACE_SRC/dspace/modules/xmlui/src/main/webapp/static/js/
 
 # build and install the module
 $MAVEN install

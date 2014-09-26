@@ -83,13 +83,13 @@ Fresh Installation
 
 in addbinarymodule.sh, look for the lines:
 
-    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
     MAVEN="mvn"
 
 and in postinstall.sh, look for the lines:
 
-    DSPACE_SRC="/Users/richard/tmp/DSpace"
-    DSPACE="/srv/dspace/dspace-duo"
+    DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
+    DSPACE="/srv/duo/dspace-duo-test"
 
 and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
 
@@ -115,13 +115,13 @@ in the root of the modified DSpace instance.
 
 in addmodule.sh, look for the lines:
 
-    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
     MAVEN="mvn"
 
 and in postinstall.sh, look for the lines:
 
-    DSPACE_SRC="/Users/richard/tmp/DSpace"
-    DSPACE="/srv/dspace/dspace-duo"
+    DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
+    DSPACE="/srv/duo/dspace-duo-test"
 
 and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
 
@@ -149,13 +149,12 @@ The duplicated fields are:
     embargo.field.terms
     embargo.field.lift
     plugin.single.org.dspace.embargo.EmbargoLifter
-    event.dispatcher.default.class
     event.dispatcher.default.consumers
     plugin.named.org.dspace.content.crosswalk.IngestionCrosswalk
 
 You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
-**5/** Build and install DSpace as normal.  You may find the DSpace install documentation useful: [https://wiki.duraspace.org/display/DSPACE/Installation](https://wiki.duraspace.org/display/DSPACE/Installation)
+**5/** Build and install DSpace as normal.  You may find the DSpace install documentation useful: [https://wiki.duraspace.org/display/DSDOC4x/Installing+DSpace](https://wiki.duraspace.org/display/DSDOC4x/Installing+DSpace)
 
 At this stage, do not worry about starting tomcat, we will do that once the rest of the installation steps below have been carried out.  You should, though, be sure to point the tomcat webapps directory at the DSpace webapps directory.  For example:
 
@@ -217,13 +216,13 @@ You can find detailed documentation about the configuration options here: [https
 
 in addbinarymodule.sh, look for the lines:
 
-    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
     MAVEN="mvn"
 
 and in postupdate.sh, look for the lines:
 
-    DSPACE_SRC="/Users/richard/tmp/DSpace"
-    DSPACE="/srv/dspace/dspace-duo"
+    DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
+    DSPACE="/srv/duo/dspace-duo-test"
 
 and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
 
@@ -249,13 +248,13 @@ in the root of the modified DSpace instance.
 
 in addmodule.sh, look for the lines:
 
-    DSPACE_SRC="/Users/richard/tmp/DSpace"
+    DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
     MAVEN="mvn"
 
 and in postupdate.sh, look for the lines:
 
-    DSPACE_SRC="/Users/richard/tmp/DSpace"
-    DSPACE="/srv/dspace/dspace-duo"
+    DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
+    DSPACE="/srv/duo/dspace-duo-test"
 
 and update these with the paths to your DSPACE_SRC, your DSPACE install directory, and your MAVEN executable with any additional command line arguments you want it to use.
 

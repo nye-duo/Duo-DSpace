@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DSPACE_SRC="/Users/richard/tmp/DSpace"
-DSPACE="/srv/dspace/dspace-duo"
+DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
+DSPACE="/srv/duo/dspace-duo-test"
 
 # migrate to the configurable workflow
 $DSPACE/bin/dspace dsrun org.dspace.storage.rdbms.InitializeDatabase $DSPACE_SRC/dspace/etc/postgres/xmlworkflow/workflow_migration.sql

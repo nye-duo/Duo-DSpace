@@ -67,7 +67,7 @@ You will also need to check this code library out of GitHub, which you can do wi
 
 Or you can download the binary version from:
 
-**FIXME: need to produce the binary release before this link will work**
+**FIXME: need to produce the binary release and merge to master before this link will work**
 
 [https://github.com/nye-duo/Duo-DSpace/blob/master/release/dspace-duo-2.0.tar.gz](https://github.com/nye-duo/Duo-DSpace/blob/master/release/dspace-duo-2.0.tar.gz)
 
@@ -158,7 +158,11 @@ You can find detailed documentation about the configuration options here: [https
 
 At this stage, do not worry about starting tomcat, we will do that once the rest of the installation steps below have been carried out.  You should, though, be sure to point the tomcat webapps directory at the DSpace webapps directory.  For example:
 
-    ln -s [tomcat]/webapps [dspace-live]/webapps
+This can be done with a symlink (if your tomcat will allow it):
+
+    ln -s [dspace-live]/webapps [tomcat]/webapps
+
+otherwise, you must copy the webapps directory into your tomcat working directory, as normal.
 
 **6/** If you're installing for the first time on this DSpace instance, you should run your customised postinstall.sh script.  
 
@@ -177,6 +181,8 @@ Once tomcat has started, you should be able to access your DSpace instance, at -
 **8/** Set up the cron job for lifting embargoes, which will need to use the command:
 
 	[dspace]/bin/dspace embargo-lifter
+
+**9/** Set up the Cristin Workflow, as per the section further down this document
 
 Update existing DSpace
 ----------------------
@@ -204,9 +210,9 @@ The Duo Extension messages file can be found in the sub-directory:
     deploy
 
 During installation, the files in these two directories will overwrite any files in the DSpace source directories, so
-you shoud merge your custom configuration into the files in the directories within this package.
+you should merge your custom configuration into the files in the directories within this package.
 
-(At the University of Oslo, this can be partially automated by customising and running the migratedspace.sh script provided)
+**NOTE: the following may no longer be true:** (At the University of Oslo, this can be partially automated by customising and running the migratedspace.sh script provided)
 
 You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
@@ -378,7 +384,7 @@ Manual Installation on running DSpace (only if you know what you're doing)
 
     mvn dependency:copy-dependencies
 
-3. Deploy to installed DSpace: Copy the duo-1.0.jar and its dependencies to the DSpace swordv2 webapp's WEB-INF/lib directory, and the DSpace lib directory (ensuring not to overwrite any existing .jar files in the DSpace lib directory)
+3. Deploy to installed DSpace: Copy the duo-2.0.jar and its dependencies to the DSpace swordv2 webapp's WEB-INF/lib directory, and the DSpace lib directory (ensuring not to overwrite any existing .jar files in the DSpace lib directory)
 
 4. Deploy the config: copy all the config files provided (except dspace.cfg), including xsl crosswalks (you might want to update the configs with localised values).  You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
@@ -401,3 +407,5 @@ Manual Installation on running DSpace (only if you know what you're doing)
 10. Set up the cron job for lifting embargoes, which will need to use the command:
 
 	./dspace embargo-lifter
+
+11. Sort out the configuration for the Cristin Workflow, as described above

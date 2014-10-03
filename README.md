@@ -15,6 +15,8 @@ If you are installing a fresh DSpace, you can safely follow the sections **Fresh
 
 If you are installing on an existing DSpace instance, you should follow the section **Update existing DSpace**
 
+If you are upgrading from Duo 1.8.2 to Duo 4.2, you should follow the section **Upgrading from 1.8.2 to 4.2**
+
 Dependencies
 ------------
 
@@ -313,6 +315,75 @@ If you find yourself wanting to run parts of this script but not other parts (in
 **12/** Set up the cron job for lifting embargoes, which will need to use the command:
 
 	[dspace-live]/dspace embargo-lifter
+
+
+Upgrading from 1.8.2 to 4.2
+---------------------------
+
+This section takes you through the process of upgrading an existing Duo 1.8.2 to Duo 4.2.  The upgrade is based heavily on the DSpace documentation for the upgrade path, which can be found here:
+
+* [From 1.8.x to 3.x](https://wiki.duraspace.org/display/DSDOC4x/Upgrading+From+1.8.x+to+3.x)
+* [From 3.x to 4.x](https://wiki.duraspace.org/display/DSDOC4x/Upgrading+From+3.x+to+4.x)
+
+**1/** Back up the existing database, assetstore and configuration:
+
+Database:
+
+    pg_dump -U [database-user] -f [backup-file-location] [database-name]
+
+Assetstore: Backup the directory ([dspace]/assetstore by default, and any other assetstores configured in the [dspace]/config/dspace.cfg "assetstore.dir" and "assetstore.dir.#" settings)
+
+Configuration: Backup the entire directory content of [dspace]/config.
+
+**2/** Ensure the **Dependencies** listed above are met (upgrades are required to Java and Maven, at least)
+
+**3/** Build the modified Duo DSpace 4.2 with the Duo extensions installed: up to and including step **7** of the instructions above to **Update Existing DSpace**
+
+**4/** Build DSpace as normal with:
+
+    mvn clean package
+
+**5/** Stop tomcat.
+
+If you are running Tomcat 6, then this will be the last time we use it - when you start DSpace up again later you should be using Tomcat 7+.
+
+**6/** Update DSpace.  The following commands will deploy the new code to the existing installation directory, backing up what was there previously.
+
+    cd [dspace-source]/dspace/target/dspace-4.2-build.dir
+    ant update
+
+**7/** Update the database schema.
+
+    psql -U [dspace-dbms-user] [database] -f [dspace-source]/dspace/etc/postgres/database_schema_18-3.sql
+    psql -U [dspace-dbms-user] [database] -f [dspace-source]/dspace/etc/postgres/database_schema_3-4.sql
+
+*Note: in some cases this seems to create the new database tables as a different user to the ones created by the original install.  If this causes problems, database tables can be re-set to the correct owner with:*
+
+    ALTER TABLE [table] OWNER TO [correct owner]
+
+**8/** Initialise the Lucene Index
+
+    [dspace-live]/bin/dspace index-lucene-init
+
+**9/** Deploy the webapps and start tocmat.  Be sure at this stage to move to Tomcat 7+.
+
+    cp -R [dspace]/webapps/* [tomcat]/webapps/
+    [tomcat]/bin/catalina.sh start
+
+**10/** Optimise the solr index for this version of DSpace:
+
+    wget http://localhost:8080/solr/oai/update?optimize=true
+    wget http://localhost:8080/solr/search/update?optimize=true
+    wget http://localhost:8080/solr/statistics/update?optimize=true
+
+*Note: wget will create files on the local disk called update?optimize=true, update?optimize=true.1 and update?optimize=true.2 - these can safely be deleted*
+
+**11/** Populate the Solr indices:
+
+    [dspace-live]/bin/dspace index-discovery -f
+    [dspace-live]/bin/dspace oai import
+
+
 
 Setting up a Cristin Workflow
 -----------------------------

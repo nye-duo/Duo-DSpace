@@ -58,9 +58,7 @@ It is designed to be installed into the Duo version of DSpace here:
 This can be obtained with the following commands:
 
     git clone https://github.com/nye-duo/DSpace.git
-    git checkout duo
-
-**FIXME: this will change when we have finished the upgrade**
+    git checkout duo42
 
 This will be the source of your ultimate DSpace installation
 
@@ -71,8 +69,6 @@ You will also need to check this code library out of GitHub, which you can do wi
     git clone https://github.com/nye-duo/Duo-DSpace.git
 
 Or you can download the binary version from:
-
-**FIXME: need to produce the binary release and merge to master before this link will work**
 
 [https://github.com/nye-duo/Duo-DSpace/blob/master/release/dspace-duo-2.0.tar.gz](https://github.com/nye-duo/Duo-DSpace/blob/master/release/dspace-duo-2.0.tar.gz)
 

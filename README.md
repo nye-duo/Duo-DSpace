@@ -1,10 +1,13 @@
-DUO Extensions for DSpace
-=========================
+DUO Extensions for DSpace 1.8.2
+===============================
 
 This module contains plugins, extensions, and configuration for a DSpace implementation which will
 
 1. Support SWORDv2 deposit from StudentWeb
 2. Support harvesting content directly from CRISTIN
+
+Note that this is a *legacy* version of the main Duo functionality, built for use only on DSpace 1.8.2 (though YMMV with other versions of DSpace).  If you are looking for formal support for DSpace 4.2 see the master branch.
+
 
 How to use this documentation
 -----------------------------

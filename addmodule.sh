@@ -3,29 +3,35 @@
 DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
 MAVEN="mvn"
 
+# copy everything except the readme and the dspace.cfg extension
+shopt -s extglob
+cd config
+cp -r !(dspace.cfg|README.md) $DSPACE_SRC/dspace/config
+cd ..
+
+# NOTE: the following lines are all superseded by the above line, and could be removed in the long run ...
 # copy the relevant contents of the root config file
-cp config/input-forms.xml $DSPACE_SRC/dspace/config
-cp config/workflow.xml $DSPACE_SRC/dspace/config
-cp config/xmlui.xconf $DSPACE_SRC/dspace/config
+#cp config/input-forms.xml $DSPACE_SRC/dspace/config
+#cp config/workflow.xml $DSPACE_SRC/dspace/config
+#cp config/xmlui.xconf $DSPACE_SRC/dspace/config
 
 # copy the crosswalks
-cp config/crosswalks/* $DSPACE_SRC/dspace/config/crosswalks/
+#cp -r config/crosswalks/* $DSPACE_SRC/dspace/config/crosswalks/
 
 # copy the module configuration
-cp config/modules/* $DSPACE_SRC/dspace/config/modules/
+#cp -r config/modules/* $DSPACE_SRC/dspace/config/modules/
 
 # copy the registries
-cp config/registries/* $DSPACE_SRC/dspace/config/registries
+#cp -r config/registries/* $DSPACE_SRC/dspace/config/registries/
 
 # copy the emails
-cp config/emails/* $DSPACE_SRC/dspace/config/emails
+#cp -r config/emails/* $DSPACE_SRC/dspace/config/emails/
 
 # copy the spring configuration for workflows
-cp config/spring/api/* $DSPACE_SRC/dspace/config/spring/api/
-cp config/spring/xmlui/* $DSPACE_SRC/dspace/config/spring/xmlui/
+#cp -r config/spring/api/* $DSPACE_SRC/dspace/config/spring/api/
+#cp -r config/spring/xmlui/* $DSPACE_SRC/dspace/config/spring/xmlui/
 
 # copy the customised messages file
-#cp deploy/messages.xml $DSPACE_SRC/dspace/modules/xmlui/overlays/org.dspace.dspace-xmlui-lang-1.8.0.2/i18n/
 mkdir -p $DSPACE_SRC/dspace/modules/xmlui/src/main/webapp/i18n/
 cp deploy/messages.xml $DSPACE_SRC/dspace/modules/xmlui/src/main/webapp/i18n/
 

@@ -37,6 +37,12 @@ This library depends on the related BagIt library, which must be downloaded and 
 
 [https://github.com/nye-duo/BagItLibrary](https://github.com/nye-duo/BagItLibrary)
 
+You can do this quickly with:
+
+    git clone https://github.com/nye-duo/BagItLibrary.git
+    cd BagItLibrary
+    mvn clean package
+
 To use this in the build you should, once you have successfully compiled the library, install it into your local maven repository
 
     mvn install
@@ -99,7 +105,9 @@ and update these with the paths to your DSPACE_SRC, your DSPACE install director
 
 **3/** Run the addbinarymodule.sh script to prepare the dspace source to be built with the duo code incorporated.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build.
 
-    sh addbinarymodule.sh
+    bash addbinarymodule.sh
+
+Note that you **must** use bash to execute this file, or it will cause an error.
 
 Now go on to the **Common Installation Steps**
 
@@ -130,7 +138,9 @@ and update these with the paths to your DSPACE_SRC, your DSPACE install director
 
 **3/** Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will compile and install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
 
-    sh addmodule.sh
+    bash addmodule.sh
+
+Note that you **must** use bash to execute this file, or it will cause an error.
 
 Now go on to the **Common Installation Steps**
 
@@ -210,8 +220,8 @@ The Duo Extension messages file can be found in the sub-directory:
 
     deploy
 
-During installation, the files in these two directories will overwrite any files in the DSpace source directories, so
-you should merge your custom configuration into the files in the directories within this package.
+During installation, the files in these two directories will overwrite any files in the DSpace source directories (with the exception of dspace.cfg, which will not be copied), so
+you should merge your all your custom configuration into the files in the directories within this package.
 
 **NOTE: the following may no longer be true:** (At the University of Oslo, this can be partially automated by customising and running the migratedspace.sh script provided)
 
@@ -238,7 +248,9 @@ and update these with the paths to your DSPACE_SRC, your DSPACE install director
 
 **6/** Run the addbinarymodule.sh script to prepare the dspace source to be built with the duo code incorporated.  This will install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build.
 
-    sh addbinarymodule.sh
+    bash addbinarymodule.sh
+
+Note that you **must** use bash to execute this file, or it will cause an error.
 
 Now go on to the **Common Installation Steps**
 
@@ -269,7 +281,9 @@ and update these with the paths to your DSPACE_SRC, your DSPACE install director
 
 **6/** Run the addmodule.sh script to prepare the dspace source to be built with the duo code.  This will compile and install the duo code library into your local maven repository and prepare DSpace to incorporate it during the build
 
-    sh addmodule.sh
+    bash addmodule.sh
+
+Note that you **must** use bash to execute this file, or it will cause an error.
 
 Now go on to the **Common Installation Steps**
 

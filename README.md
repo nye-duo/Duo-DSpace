@@ -56,7 +56,7 @@ It is designed to be installed into the Duo version of DSpace here:
 This can be obtained with the following commands:
 
     git clone https://github.com/nye-duo/DSpace.git
-    git checkout duo
+    git checkout duo18
 
 This will be the source of your ultimate DSpace installation
 

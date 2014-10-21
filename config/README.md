@@ -20,8 +20,6 @@ In order to successfully deploy the Duo extensions to DSpace, you will need all 
 
 **modules/cristin.cfg** - Configuration specific to the Cristin ingest.
 
-**modules/curate.cfg** - deprecated, do not use.
-
 **modules/oai.cfg** - Enhanced OAI harvester configuration.  See the detailed documentation below for more details.
 
 **modules/studentweb.cfg** - Configuration specific to the StudentWeb ingest.
@@ -32,7 +30,7 @@ In order to successfully deploy the Duo extensions to DSpace, you will need all 
 
 **modules/workflow.cfg** - Configuration for the DSpace workflow, which just turns on the XML workflow required by Duo.
 
-**registres/cristin-metadata.xml** - Metadata registry of fields required by the Cristin metadata schema.
+**registries/cristin-metadata.xml** - Metadata registry of fields required by the Cristin metadata schema.
 
 **registries/fs-metadata.xml** - Metadata registry of fields reqiured by the StudentWeb/FS metadata schema.
 
@@ -47,7 +45,6 @@ Additions and modifications to the main, standard dspace.cfg file.  To deploy th
 * embargo.field.terms
 * embargo.field.lift
 * plugin.single.org.dspace.embargo.EmbargoLifter
-* event.dispatcher.default.class
 * event.dispatcher.default.consumers
 * plugin.named.org.dspace.content.crosswalk.IngestionCrosswalk
 

@@ -42,15 +42,6 @@
         </dim:field>
     </xsl:template>
 
-    <!-- Foedselsnummer -->
-    <!--
-    <xsl:template match="/fs:metadata/fs:foedselsnummer">
-        <dim:field mdschema="fs" element="foedselsnummer">
-            <xsl:value-of select="normalize-space(.)"/>
-        </dim:field>
-    </xsl:template>
-    -->
-
     <!-- postal address -->
     <!--
     <xsl:template match="/fs:metadata/fs:postalAddress">

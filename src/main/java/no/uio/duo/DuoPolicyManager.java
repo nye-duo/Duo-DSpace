@@ -50,7 +50,8 @@ public class DuoPolicyManager
             swordBundle = "SWORD";
         }
         this.setReadPolicies(context, item, DuoConstants.ORIGINAL_BUNDLE, DuoConstants.ANON_GROUP, true);
-        this.setReadPolicies(context, item, DuoConstants.LICENSE_BUNDLE, DuoConstants.ANON_GROUP, true);
+        // no longer working with licences
+        // this.setReadPolicies(context, item, DuoConstants.LICENSE_BUNDLE, DuoConstants.ANON_GROUP, true);
         this.setReadPolicies(context, item, DuoConstants.METADATA_BUNDLE, DuoConstants.ADMIN_GROUP, false);
         this.setReadPolicies(context, item, DuoConstants.SECONDARY_BUNDLE, DuoConstants.ANON_GROUP, true);
         this.setReadPolicies(context, item, DuoConstants.SECONDARY_RESTRICTED_BUNDLE, DuoConstants.ADMIN_GROUP, false);

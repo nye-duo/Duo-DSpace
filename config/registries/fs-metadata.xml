@@ -236,12 +236,6 @@
 
     <dc-type>
             <schema>fs</schema>
-            <element>foedselsnummer</element>
-            <scope_note>social security number</scope_note>
-        </dc-type>
-
-    <dc-type>
-            <schema>fs</schema>
             <element>postaladdress</element>
             <scope_note>Postal address</scope_note>
         </dc-type>

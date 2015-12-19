@@ -229,21 +229,21 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             // SECONDARY - for all Secondary files which have access privileges "open"
             // SECONDARY_RESTRICTED - for all Secondary files which have access privileges "closed"
             // METADATA - for the metadata.xml file
-            // LICENSE - for the licence file (note the US spelling)
+            // LICENSE - for the licence file (note the US spelling) (Deprecated - we're not doing this any more)
             //
             // we can prepare these bundles up-front
             Bundle original = this.getBundle(context, item, DuoConstants.ORIGINAL_BUNDLE);
             Bundle secondary = this.getBundle(context, item, DuoConstants.SECONDARY_BUNDLE);
             Bundle secondaryRestricted = this.getBundle(context, item, DuoConstants.SECONDARY_RESTRICTED_BUNDLE);
             Bundle metadata = this.getBundle(context, item, DuoConstants.METADATA_BUNDLE);
-            Bundle license = this.getBundle(context, item, DuoConstants.LICENSE_BUNDLE);
+            // Bundle license = this.getBundle(context, item, DuoConstants.LICENSE_BUNDLE);
 
             // empty all of the bundles (no versioning)
             this.emptyBundle(original);
             this.emptyBundle(secondary);
             this.emptyBundle(secondaryRestricted);
             this.emptyBundle(metadata);
-            this.emptyBundle(license);
+            // this.emptyBundle(license);
 
             // populate each bundle from the bag
 
@@ -268,9 +268,11 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             derivedResources.add(mdBs);
 
             // finally the LICENCE
+            /*
             BaggedItem licenceFile = bag.getLicenceFile();
             Bitstream lbs = this.writeToBundle(context, license, licenceFile);
             derivedResources.add(lbs);
+            */
 
             // now we can crosswalk in the metadata
             if (deposit.isMetadataRelevant())

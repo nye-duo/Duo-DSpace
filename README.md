@@ -76,7 +76,7 @@ You will also need to check this code library out of GitHub, which you can do wi
 
 Or you can download the binary version from:
 
-[https://github.com/nye-duo/Duo-DSpace/blob/master/release/dspace-duo-2.0.tar.gz](https://github.com/nye-duo/Duo-DSpace/blob/master/release/dspace-duo-2.0.tar.gz)
+[https://github.com/nye-duo/Duo-DSpace/blob/master/release/dspace-duo-2.0.1.tar.gz](https://github.com/nye-duo/Duo-DSpace/blob/master/release/dspace-duo-2.0.1tar.gz)
 
 You can then carry on with your preferred installation process below
 
@@ -468,7 +468,7 @@ Manual Installation on running DSpace (only if you know what you're doing)
 
     mvn dependency:copy-dependencies
 
-3. Deploy to installed DSpace: Copy the duo-2.0.jar and its dependencies to the DSpace swordv2 webapp's WEB-INF/lib directory, and the DSpace lib directory (ensuring not to overwrite any existing .jar files in the DSpace lib directory)
+3. Deploy to installed DSpace: Copy the duo-2.0.1.jar and its dependencies to the DSpace swordv2 webapp's WEB-INF/lib directory, and the DSpace lib directory (ensuring not to overwrite any existing .jar files in the DSpace lib directory)
 
 4. Deploy the config: copy all the config files provided (except dspace.cfg), including xsl crosswalks (you might want to update the configs with localised values).  You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 

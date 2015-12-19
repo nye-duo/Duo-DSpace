@@ -2,6 +2,7 @@
 
 DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
 MAVEN="mvn"
+VERSION="2.0.1"
 
 # copy everything except the readme and the dspace.cfg extension
 shopt -s extglob
@@ -40,7 +41,7 @@ mkdir -p $DSPACE_SRC/dspace/modules/xmlui/src/main/webapp/static/js/
 cp deploy/bitstream-reorder-workflow.js $DSPACE_SRC/dspace/modules/xmlui/src/main/webapp/static/js/
 
 # install the module
-$MAVEN install:install-file -Dfile=duo-2.0.jar -DpomFile=pom.xml
+$MAVEN install:install-file -Dfile=duo-$VERSION.jar -DpomFile=pom.xml
 
 # send the poms over to incorporate the dependency
 # this one makes sure that the dependency ends up in the DSpace lib directory

@@ -22,6 +22,7 @@ import org.dspace.workflow.WorkflowItem;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -264,14 +265,21 @@ public class NumberChecker
                          (mime != null && NumberChecker.MIMETYPES.contains(mime))
                    )
                 {
-                    if (this.checkBitstream(bitstream))
+                    String hdl = item.getHandle();
+                    if (hdl == null)
                     {
-                        String hdl = item.getHandle();
-                        if (hdl == null)
+                        hdl = "no handle available";
+                    }
+                    try
+                    {
+                        if (this.checkBitstream(bitstream))
                         {
-                            hdl = "no handle available";
+                            System.out.println("WARNING: item id " + Integer.toString(item.getID()) + " (" + hdl + "), bundle " + bundle.getName() + ", bitstream '" + bitstream.getName() + "' contains the text 'foedselsnummer'");
                         }
-                        System.out.println("WARNING: item id " + Integer.toString(item.getID()) + " (" + hdl + "), bundle " + bundle.getName() + ", bitstream '" + bitstream.getName() + "' contains the text 'foedselsnummer'");
+                    }
+                    catch (FileNotFoundException fnf)
+                    {
+                        System.out.println("ERROR: item id " + Integer.toString(item.getID()) + " (" + hdl + "), bundle " + bundle.getName() + ", bitstream '" + bitstream.getName() + "' does not refer to a valid file on disk");
                     }
                 }
             }
@@ -285,6 +293,7 @@ public class NumberChecker
         {
             System.out.println("Checking bitstream " + Integer.toString(bitstream.getID()) + " - " + bitstream.getName());
         }
+        
         InputStream is = bitstream.retrieve();
         StringWriter writer = new StringWriter();
         IOUtils.copy(is, writer, "utf-8");

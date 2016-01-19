@@ -6,18 +6,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 import org.dspace.authorize.AuthorizeException;
-import org.dspace.content.Bitstream;
-import org.dspace.content.BitstreamFormat;
-import org.dspace.content.Bundle;
-import org.dspace.content.Collection;
-import org.dspace.content.Community;
-import org.dspace.content.DSpaceObject;
-import org.dspace.content.Item;
-import org.dspace.content.ItemIterator;
-import org.dspace.content.WorkspaceItem;
+import org.dspace.content.*;
 import org.dspace.core.Context;
 import org.dspace.handle.HandleManager;
 import org.dspace.workflow.WorkflowItem;
+import org.dspace.xmlworkflow.storedcomponents.XmlWorkflowItem;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -128,6 +121,10 @@ public class NumberChecker
                 {
                     nc.doWorkspaceItem(wsid);
                 }
+                else
+                {
+                    System.out.println("NO ACTION TAKEN: You specified an item scope but no handle (-h), workflow id (-f) or workspace id (-w)");
+                }
             }
             else if ("collection".equals(scope))
             {
@@ -139,7 +136,7 @@ public class NumberChecker
             }
             else
             {
-                System.out.println("NO ACTION TAKEN: Specify a scope (-s) and a handle (-h) or to run on all of DSpace (-d)");
+                System.out.println("NO ACTION TAKEN: Specify a scope (-s) and a handle/item id (-h/-f/-w) or to run on all of DSpace (-d)");
             }
         }
     }
@@ -226,12 +223,20 @@ public class NumberChecker
             this.doItem(item);
         }
 
-        // do all the items in the collection's workflow
+        // do all the items in the collection's workflow (both normal and XML)
         WorkflowItem[] wfis = WorkflowItem.findByCollection(this.context, collection);
         for (int i = 0; i < wfis.length; i++)
         {
             WorkflowItem wfi = wfis[i];
             Item item = wfi.getItem();
+            this.doItem(item);
+        }
+
+        XmlWorkflowItem[] xwfis = XmlWorkflowItem.findByCollection(this.context, collection);
+        for (int i = 0; i < xwfis.length; i++)
+        {
+            XmlWorkflowItem xwfi = xwfis[i];
+            Item item = xwfi.getItem();
             this.doItem(item);
         }
 
@@ -259,7 +264,12 @@ public class NumberChecker
     public void doWorkflowItem(int wfid)
             throws SQLException, Exception
     {
-        WorkflowItem wfi = WorkflowItem.find(this.context, wfid);
+        InProgressSubmission wfi = null;
+        wfi = WorkflowItem.find(this.context, wfid);
+        if (wfi == null)
+        {
+            wfi = XmlWorkflowItem.find(this.context, wfid);
+        }
         if (wfi == null)
         {
             throw new Exception(Integer.toString(wfid) + " does not resolve to a workflow item");

@@ -17,6 +17,12 @@ If you want to run the script on an individual item, collection or community, yo
 
 Where -s is the scope (item, collection or community) and -h is the handle in DSpace.
 
+If you want to run this on a workspace or a workflow item, you can do so using its workspace id (-w) or workflow id (-f)
+
+    [dspace]/bin/dspace dsrun no.uio.duo.NumberCleanup -s item -w 23
+
+    [dspace]/bin/dspace dsrun no.uio.duo.NumberCleanup -s item -f 55
+
 Remember to run
 
     [dspace]/bin/dspace cleanup
@@ -42,3 +48,9 @@ If you want to run the script on an individual item, collection or community, yo
     [dspace]/bin/dspace dsrun no.uio.duo.NumberChecker -s community -h 123456789/1
 
 Where -s is the scope (item, collection or community) and -h is the handle in DSpace.
+
+If you want to run this on a workspace or a workflow item, you can do so using its workspace id (-w) or workflow id (-f)
+
+    [dspace]/bin/dspace dsrun no.uio.duo.NumberChecker -s item -w 23
+
+    [dspace]/bin/dspace dsrun no.uio.duo.NumberChecker -s item -f 55

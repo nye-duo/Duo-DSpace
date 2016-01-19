@@ -64,18 +64,36 @@ public class NumberChecker
         options.addOption("h", "handle", true, "item/collection/community handle");
         options.addOption("d", "dspace", false, "Run on entire DSpace");
         options.addOption("v", "verbose", false, "Output verbose check logging, which may obscure warnings");
+        options.addOption("f", "workflow", true, "Workflow ID to check");
+        options.addOption("w", "workspace", true, "Workspace ID to check");
 
         CommandLine line = parser.parse(options, args);
 
         String scope = null;
         String handle = null;
+        int wfid = -1;
+        int wsid = -1;
         boolean doAll = false;
         boolean verbose = false;
 
-        if (line.hasOption("s") && line.hasOption("h"))
+        if (line.hasOption("s"))
         {
             scope = line.getOptionValue("s");
+        }
+
+        if (line.hasOption("h"))
+        {
             handle = line.getOptionValue("h");
+        }
+
+        if (line.hasOption("f"))
+        {
+            wfid = Integer.parseInt(line.getOptionValue("f"));
+        }
+
+        if (line.hasOption("w"))
+        {
+            wsid = Integer.parseInt(line.getOptionValue("w"));
         }
 
         if (line.hasOption("d"))
@@ -98,7 +116,18 @@ public class NumberChecker
         {
             if ("item".equals(scope))
             {
-                nc.doItem(handle);
+                if (handle != null)
+                {
+                    nc.doItem(handle);
+                }
+                else if (wfid != -1)
+                {
+                    nc.doWorkflowItem(wfid);
+                }
+                else if (wsid != -1)
+                {
+                    nc.doWorkspaceItem(wsid);
+                }
             }
             else if ("collection".equals(scope))
             {
@@ -225,6 +254,28 @@ public class NumberChecker
             throw new Exception(handle + " does not resolve to an Item");
         }
         this.doItem((Item) dso);
+    }
+
+    public void doWorkflowItem(int wfid)
+            throws SQLException, Exception
+    {
+        WorkflowItem wfi = WorkflowItem.find(this.context, wfid);
+        if (wfi == null)
+        {
+            throw new Exception(Integer.toString(wfid) + " does not resolve to a workflow item");
+        }
+        this.doItem(wfi.getItem());
+    }
+
+    public void doWorkspaceItem(int wsid)
+            throws SQLException, Exception
+    {
+        WorkspaceItem wsi = WorkspaceItem.find(this.context, wsid);
+        if (wsi == null)
+        {
+            throw new Exception(Integer.toString(wsid) + " does not resolve to a workspace item");
+        }
+        this.doItem(wsi.getItem());
     }
 
     public void doItem(Item item)

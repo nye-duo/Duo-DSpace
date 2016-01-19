@@ -7,17 +7,11 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.xml.serialize.XMLSerializer;
 import org.apache.xpath.XPathAPI;
 import org.dspace.authorize.AuthorizeException;
-import org.dspace.content.Bitstream;
-import org.dspace.content.Bundle;
-import org.dspace.content.Collection;
-import org.dspace.content.Community;
-import org.dspace.content.DSpaceObject;
-import org.dspace.content.Item;
-import org.dspace.content.ItemIterator;
-import org.dspace.content.WorkspaceItem;
+import org.dspace.content.*;
 import org.dspace.core.Context;
 import org.dspace.handle.HandleManager;
 import org.dspace.workflow.WorkflowItem;
+import org.dspace.xmlworkflow.storedcomponents.XmlWorkflowItem;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -26,10 +20,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.sql.SQLException;
 
 public class NumberCleanup
@@ -52,25 +43,43 @@ public class NumberCleanup
         options.addOption("s", "scope", true, "item|collection|community");
         options.addOption("h", "handle", true, "item/collection/community handle");
         options.addOption("d", "dspace", false, "Run on entire DSpace");
+        options.addOption("f", "workflow", true, "Workflow ID to check");
+        options.addOption("w", "workspace", true, "Workspace ID to check");
 
         CommandLine line = parser.parse(options, args);
 
         String scope = null;
         String handle = null;
+        int wfid = -1;
+        int wsid = -1;
         boolean doAll = false;
 
-        NumberCleanup nc = new NumberCleanup();
-
-        if (line.hasOption("s") && line.hasOption("h"))
+        if (line.hasOption("s"))
         {
             scope = line.getOptionValue("s");
+        }
+
+        if (line.hasOption("h"))
+        {
             handle = line.getOptionValue("h");
+        }
+
+        if (line.hasOption("f"))
+        {
+            wfid = Integer.parseInt(line.getOptionValue("f"));
+        }
+
+        if (line.hasOption("w"))
+        {
+            wsid = Integer.parseInt(line.getOptionValue("w"));
         }
 
         if (line.hasOption("d"))
         {
             doAll = true;
         }
+
+        NumberCleanup nc = new NumberCleanup();
 
         if (doAll)
         {
@@ -80,7 +89,22 @@ public class NumberCleanup
         {
             if ("item".equals(scope))
             {
-                nc.doItem(handle);
+                if (handle != null)
+                {
+                    nc.doItem(handle);
+                }
+                else if (wfid != -1)
+                {
+                    nc.doWorkflowItem(wfid);
+                }
+                else if (wsid != -1)
+                {
+                    nc.doWorkspaceItem(wsid);
+                }
+                else
+                {
+                    System.out.println("NO ACTION TAKEN: You specified an item scope but no handle (-h), workflow id (-f) or workspace id (-w)");
+                }
             }
             else if ("collection".equals(scope))
             {
@@ -169,12 +193,20 @@ public class NumberCleanup
             this.doItem(item);
         }
 
-        // do all the items in the collection's workflow
+        // do all the items in the collection's workflow (both normal and XML)
         WorkflowItem[] wfis = WorkflowItem.findByCollection(this.context, collection);
         for (int i = 0; i < wfis.length; i++)
         {
             WorkflowItem wfi = wfis[i];
             Item item = wfi.getItem();
+            this.doItem(item);
+        }
+
+        XmlWorkflowItem[] xwfis = XmlWorkflowItem.findByCollection(this.context, collection);
+        for (int i = 0; i < xwfis.length; i++)
+        {
+            XmlWorkflowItem xwfi = xwfis[i];
+            Item item = xwfi.getItem();
             this.doItem(item);
         }
 
@@ -197,6 +229,33 @@ public class NumberCleanup
             throw new Exception(handle + " does not resolve to an Item");
         }
         this.doItem((Item) dso);
+    }
+
+    public void doWorkflowItem(int wfid)
+            throws SQLException, Exception
+    {
+        InProgressSubmission wfi = null;
+        wfi = WorkflowItem.find(this.context, wfid);
+        if (wfi == null)
+        {
+            wfi = XmlWorkflowItem.find(this.context, wfid);
+        }
+        if (wfi == null)
+        {
+            throw new Exception(Integer.toString(wfid) + " does not resolve to a workflow item");
+        }
+        this.doItem(wfi.getItem());
+    }
+
+    public void doWorkspaceItem(int wsid)
+            throws SQLException, Exception
+    {
+        WorkspaceItem wsi = WorkspaceItem.find(this.context, wsid);
+        if (wsi == null)
+        {
+            throw new Exception(Integer.toString(wsid) + " does not resolve to a workspace item");
+        }
+        this.doItem(wsi.getItem());
     }
 
     public void doItem(Item item)
@@ -236,6 +295,10 @@ public class NumberCleanup
             Bitstream bs = mdb.getBitstreamByName("metadata.xml");
             if (bs != null) {
                 InputStream newmd = this.cleanMetadata(bs);
+                if (newmd == null)
+                {
+                    continue;
+                }
                 Bitstream nbs = mdb.createBitstream(newmd);
 
                 nbs.setDescription(bs.getDescription());
@@ -256,8 +319,18 @@ public class NumberCleanup
             throws ParserConfigurationException, IOException, SQLException, AuthorizeException, SAXException, TransformerException
     {
         // load the bitstream up as an xml document
+        InputStream bis = null;
+        try
+        {
+            bis = bitstream.retrieve();
+        }
+        catch (FileNotFoundException fnf)
+        {
+            System.out.println("WARNING: bitstream id " + Integer.toString(bitstream.getID()) + " '" + bitstream.getName() + "' does not refer to a valid file on disk");
+            return null;
+        }
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        org.w3c.dom.Document document = builder.parse(bitstream.retrieve());
+        org.w3c.dom.Document document = builder.parse(bis);
 
         // get the node(s) containing the foedselsnummer
         NodeList nummers = XPathAPI.selectNodeList(document, "/metadata/foedselsnummer", document);

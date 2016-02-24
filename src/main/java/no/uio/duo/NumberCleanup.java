@@ -269,6 +269,7 @@ public class NumberCleanup
         {
             Bundle bundle = license[i];
             item.removeBundle(bundle);
+            System.out.println("Removed LICENSE bundle from Item " + Integer.toString(item.getID()));
         }
 
         // now remove the deposit.zip file from the sword bundle
@@ -276,15 +277,20 @@ public class NumberCleanup
         for (int i = 0; i < sword.length; i++)
         {
             Bundle bundle = sword[i];
-            Bitstream bs = bundle.getBitstreamByName("deposit.zip");
-            if (bs != null)
+            Bitstream[] bss = bundle.getBitstreams();
+            for (Bitstream bs : bss)
             {
-                bundle.removeBitstream(bs);
-                bundle.update();
-
-                if (bundle.getBitstreams().length == 0) {
-                    item.removeBundle(bundle);
+                if ("deposit.zip".equals(bs.getName()))
+                {
+                    bundle.removeBitstream(bs);
+                    bundle.update();
+                    System.out.println("Removed deposit.zip from SWORD bundle in Item " + Integer.toString(item.getID()));
                 }
+            }
+            if (bundle.getBitstreams().length == 0)
+            {
+                item.removeBundle(bundle);
+                System.out.println("Removed empty SWORD bundle from Item " + Integer.toString(item.getID()));
             }
         }
 
@@ -292,22 +298,27 @@ public class NumberCleanup
         Bundle[] mdbs = item.getBundles("METADATA");
         for (int i = 0; i < mdbs.length; i++) {
             Bundle mdb = mdbs[i];
-            Bitstream bs = mdb.getBitstreamByName("metadata.xml");
-            if (bs != null) {
-                InputStream newmd = this.cleanMetadata(bs);
-                if (newmd == null)
+            Bitstream[] bss = mdb.getBitstreams();
+            for (Bitstream bs : bss)
+            {
+                if ("metadata.xml".equals(bs.getName()))
                 {
-                    continue;
+                    InputStream newmd = this.cleanMetadata(bs);
+                    if (newmd == null)
+                    {
+                        continue;
+                    }
+                    Bitstream nbs = mdb.createBitstream(newmd);
+
+                    nbs.setDescription(bs.getDescription());
+                    nbs.setName(bs.getName());
+                    nbs.setFormat(bs.getFormat());
+                    nbs.update();
+
+                    mdb.removeBitstream(bs);
+                    mdb.update();
+                    System.out.println("Cleaned metadata.xml file in METADATA bundle in Item " + Integer.toString(item.getID()));
                 }
-                Bitstream nbs = mdb.createBitstream(newmd);
-
-                nbs.setDescription(bs.getDescription());
-                nbs.setName(bs.getName());
-                nbs.setFormat(bs.getFormat());
-                nbs.update();
-
-                mdb.removeBitstream(bs);
-                mdb.update();
             }
         }
 

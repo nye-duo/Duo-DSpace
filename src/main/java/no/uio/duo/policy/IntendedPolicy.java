@@ -2,7 +2,7 @@ package no.uio.duo.policy;
 
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.authorize.ResourcePolicy;
-import org.dspace.content.Item;
+import org.dspace.content.Bitstream;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.eperson.Group;
@@ -15,8 +15,14 @@ public class IntendedPolicy
     private Date embargo = null;
     private ResourcePolicy existing = null;
     private boolean satisfied = false;
+    private boolean permanent = false;
 
     public IntendedPolicy() {}
+
+    public IntendedPolicy(boolean permanent)
+    {
+        this.permanent = permanent;
+    }
 
     public IntendedPolicy(Date embargo)
     {
@@ -61,6 +67,14 @@ public class IntendedPolicy
 
             return ed && act && gid;
         }
+        else if (!this.permanent)
+        {
+            boolean ed = policy.getStartDate() == null;
+            boolean act = policy.getAction() == Constants.READ;
+            boolean gid = policy.getGroupID() == 0;
+
+            return ed && act && gid;
+        }
         else
         {
             // permanent embargo - no policy is a permanent embargo, so always return false
@@ -78,25 +92,34 @@ public class IntendedPolicy
         return this.satisfied;
     }
 
-    public ResourcePolicy makePolicy(Context context, Item item)
+    public ResourcePolicy makePolicy(Context context, Bitstream bitstream)
             throws SQLException, AuthorizeException
     {
+        // if there's an existing policy to keep, just return that
         if (this.existing != null)
         {
             return this.existing;
         }
+
+        // otherwise create the base policy
         ResourcePolicy rp = ResourcePolicy.create(context);
         rp.setAction(Constants.READ);
         rp.setGroup(Group.find(context, 0));
-        rp.setResource(item);
+        rp.setResource(bitstream);
         rp.setResourceType(Constants.BITSTREAM);
 
+        // now set the start date
         if (this.embargo != null)
         {
+            // if an embargo period is specified, set the start date
             rp.setStartDate(this.embargo);
-        } else {
+        }
+        else if (this.permanent)
+        {
+            // if the record is flagged as permanent embargo, set the future start date
             rp.setStartDate(this.getPermanentEmbargoDate());
         }
+        // otherwise there is no need to set a start date
 
         return rp;
     }

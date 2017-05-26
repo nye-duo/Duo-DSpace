@@ -1,6 +1,5 @@
 package no.uio.duo.policy;
 
-import org.apache.log4j.lf5.util.Resource;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.authorize.AuthorizeManager;
 import org.dspace.authorize.ResourcePolicy;
@@ -11,7 +10,8 @@ import org.dspace.content.Item;
 import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
-import org.dspace.embargo.EmbargoManager;
+import org.dspace.core.PluginManager;
+import org.dspace.embargo.EmbargoSetter;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -43,7 +43,7 @@ public class PolicyPatternManager
                 this.removePolicies(removePolicies);
                 if (!intendedPolicy.isSatisfied())
                 {
-                    ResourcePolicy policy = intendedPolicy.makePolicy(context, item);
+                    ResourcePolicy policy = intendedPolicy.makePolicy(context, cb.getBitstream());
                     policy.update();
                 }
             }
@@ -70,18 +70,18 @@ public class PolicyPatternManager
 
             if ("ORIGINAL".equals(cb.getBundle().getName()))
             {
-                if (embargoDate != null)
+                if (embargoDate == null)
                 {
-                    // if there is no embargo date in the metadata, apply an Anon READ active from today
-                    IntendedPolicy intended = new IntendedPolicy(new Date());
-                    ResourcePolicy policy = intended.makePolicy(context, item);
+                    // if there is no embargo date in the metadata, apply an unbound Anon READ
+                    IntendedPolicy intended = new IntendedPolicy(false);
+                    ResourcePolicy policy = intended.makePolicy(context, cb.getBitstream());
                     policy.update();
                 }
                 else
                 {
                     // if there is an embargo date in the metadata, apply an Anon READ active from that date
-                    IntendedPolicy intended = new IntendedPolicy((embargoDate));
-                    ResourcePolicy policy = intended.makePolicy(context, item);
+                    IntendedPolicy intended = new IntendedPolicy(embargoDate);
+                    ResourcePolicy policy = intended.makePolicy(context, cb.getBitstream());
                     policy.update();
                 }
 
@@ -114,7 +114,11 @@ public class PolicyPatternManager
         }
 
         // then generate a java Date object
-        DCDate embargoDate = EmbargoManager.getEmbargoTermsAsDate(context, item);
+        // we can't use this, as it validates the date of the embargo, which we don't want
+        // DCDate embargoDate = EmbargoManager.getEmbargoTermsAsDate(context, item);
+
+        EmbargoSetter setter = (EmbargoSetter) PluginManager.getSinglePlugin(EmbargoSetter.class);
+        DCDate embargoDate = setter.parseTerms(context, item, embargoes[0].value);
         return embargoDate.toDate();
     }
 
@@ -153,7 +157,7 @@ public class PolicyPatternManager
 
             // if the policy end date has passed
             Date end = policy.getEndDate();
-            if (end.before(now))
+            if (end != null && end.before(now))
             {
                 idxs.add(i);
                 unwanted.add(policy);
@@ -189,7 +193,7 @@ public class PolicyPatternManager
             if (anonRead == null)
             {
                 // no embargo date in metadata, and no anonymous read policy - permanent embargo
-                intended = new IntendedPolicy();
+                intended = new IntendedPolicy(true);
             }
             else
             {
@@ -202,12 +206,26 @@ public class PolicyPatternManager
             if (anonRead == null)
             {
                 // embargo is in the past, and no anonymous read policy - permanent embargo
-                intended = new IntendedPolicy();
+                intended = new IntendedPolicy(true);
             }
             else
             {
-                // embargo is in the past, and an existing anonymous read policy - keep the existing policy
-                intended = new IntendedPolicy(anonRead);
+                Date start = anonRead.getStartDate();
+                if (start == null)
+                {
+                    // embargo is in the past, and an existing unbound anon read policy - keep the existing policy
+                    intended = new IntendedPolicy(anonRead);
+                }
+                else if (start.before(now))
+                {
+                    // embargo is in the past, and an existing anon read policy starting in the past - a fresh unbound anon read policy
+                    intended = new IntendedPolicy(false);
+                }
+                else
+                {
+                    // embargo is in the past, and an existing anon read policy starting in the future - keep the existing policy
+                    intended = new IntendedPolicy(anonRead);
+                }
             }
         }
         else if (embargo.after(now))

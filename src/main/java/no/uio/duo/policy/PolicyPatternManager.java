@@ -200,8 +200,27 @@ public class PolicyPatternManager
             }
             else
             {
-                // no embargo date in metadata, and an existing anonymous read policy - keep the existing policy
-                intended = new IntendedPolicy(anonRead);
+                Date start = anonRead.getStartDate();
+                if (start == null)
+                {
+                    // no embargo date in metadata, and an existing unbound anonymous read policy - keep the existing policy
+                    intended = new IntendedPolicy(anonRead);
+                }
+                else if (start.before(now))
+                {
+                    // no embargo date, and existing anonymous read in the past - new unbound anon read policy
+                    intended = new IntendedPolicy(false);
+                }
+                else if (start.equals(now))
+                {
+                    // no embargo date, and existing anonymous read for today - new unbound anon read policy
+                    intended = new IntendedPolicy(false);
+                }
+                else if (start.after(now))
+                {
+                    // no embargo date in metadata, and an existing future anonymous read policy - keep the existing policy
+                    intended = new IntendedPolicy(anonRead);
+                }
             }
         }
         else if (embargo.before(now))   // embargo in the past

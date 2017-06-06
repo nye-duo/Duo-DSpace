@@ -94,6 +94,11 @@ public class LivePolicyTest
     private List<Map<String, String>> failures = new ArrayList<Map<String, String>>();
     private String outPath;
 
+    private Date past = new Date(0);
+    private Date now = new Date();
+    private Date nearFuture = new Date(3153600000000L);
+    private Date farFuture = new Date(31535996400000L);     // has to be set to this specific date, because of rounding oddities in the java Date library
+
     public LivePolicyTest(String epersonEmail, String bitstreamPath, String baseUrl, String matrixPath, String outPath)
             throws Exception
     {
@@ -295,18 +300,27 @@ public class LivePolicyTest
         if ("past".equals(embargoDate))
         {
             // set to the start of the unix epoch
-            ed = sdf.format(new Date(0));
+            ed = sdf.format(this.past);
         }
         else if ("present".equals(embargoDate))
         {
             // set to today
-            ed = sdf.format(new Date());
+            ed = sdf.format(this.now);
         }
         else if ("future".equals(embargoDate))
         {
             // set in the far future (around 2970 or something)
-            long millis = 31536000000000L;
-            ed = sdf.format(new Date(millis));
+            ed = sdf.format(this.farFuture);
+        }
+        else if ("near_future".equals(embargoDate))
+        {
+            // set in the near future (around 2170 or something)
+            ed = sdf.format(this.nearFuture);
+        }
+        else if ("far_future".equals(embargoDate))
+        {
+            // set in the far future (around 2970 or something)
+            ed = sdf.format(this.farFuture);
         }
         else if ("none".equals(embargoDate))
         {
@@ -347,18 +361,27 @@ public class LivePolicyTest
         if ("past".equals(anonRead))
         {
             // set the start date to the start of the unix epoch
-            rsd = new Date(0);
+            rsd = this.past;
         }
         else if ("present".equals(anonRead))
         {
             // set the start date to today
-            rsd = new Date();
+            rsd = this.now;
         }
         else if ("future".equals(anonRead))
         {
             // set in the far future (around 2970 or something)
-            long millis = 31536000000000L;
-            rsd = new Date(millis);
+            rsd = this.farFuture;
+        }
+        else if ("near_future".equals(anonRead))
+        {
+            // set in the near future (around 2170 or something)
+            rsd = this.nearFuture;
+        }
+        else if ("far_future".equals(anonRead))
+        {
+            // set in the far future (around 2970 or something)
+            rsd = this.farFuture;
         }
         else if ("unbound".equals(anonRead))
         {
@@ -444,7 +467,7 @@ public class LivePolicyTest
                     {
                         return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle does not have a start date, but it should be in the past";
                     }
-                    else if (!start.before(new Date()))
+                    else if (!start.before(this.now))
                     {
                         return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date which is not in the past, but it should be";
                     }
@@ -455,7 +478,7 @@ public class LivePolicyTest
                     {
                         return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle does not have a start date, but it should be in the present";
                     }
-                    else if (!start.equals(new Date()))
+                    else if (!start.equals(this.now))
                     {
                         return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date, but it is not in the present";
                     }
@@ -466,9 +489,39 @@ public class LivePolicyTest
                     {
                         return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle does not have a start date, but it should be in the future";
                     }
-                    else if (!start.after(new Date()))
+                    else if (!start.after(this.now))
                     {
                         return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date, but it should be in the future";
+                    }
+                }
+                else if ("near_future".equals(anonRead))
+                {
+                    if (start == null)
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle does not have a start date, but it should be in the future";
+                    }
+                    else if (!start.after(this.now))
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date, but it should be in the future";
+                    }
+                    else if (!start.equals(this.nearFuture))
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date in the far future (" + start.getTime() + "), but it should be in the near future (" + this.nearFuture.getTime() + ")";
+                    }
+                }
+                else if ("far_future".equals(anonRead))
+                {
+                    if (start == null)
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle does not have a start date, but it should be in the future";
+                    }
+                    else if (!start.after(this.now))
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date, but it should be in the future";
+                    }
+                    else if (!start.equals(this.farFuture))
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date in the near future (" + start.getTime() + "), but it should be in the far future (" + this.farFuture.getTime() + ")";
                     }
                 }
                 else if ("unbound".equals(anonRead))

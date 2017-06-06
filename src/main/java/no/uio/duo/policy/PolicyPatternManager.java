@@ -191,7 +191,7 @@ public class PolicyPatternManager
         IntendedPolicy intended = null;
 
         Date now = new Date();
-        if (embargo == null)
+        if (embargo == null)    // no embargo
         {
             if (anonRead == null)
             {
@@ -204,7 +204,7 @@ public class PolicyPatternManager
                 intended = new IntendedPolicy(anonRead);
             }
         }
-        else if (embargo.before(now))
+        else if (embargo.before(now))   // embargo in the past
         {
             if (anonRead == null)
             {
@@ -226,12 +226,12 @@ public class PolicyPatternManager
                 }
                 else
                 {
-                    // embargo is in the past, and an existing anon read policy starting in the future - keep the existing policy
+                    // embargo is in the past, and an existing anon read policy starting today or in the future - keep the existing policy
                     intended = new IntendedPolicy(anonRead);
                 }
             }
         }
-        else if (embargo.after(now))
+        else if (embargo.after(now))    // embargo in the future
         {
             if (anonRead == null)
             {
@@ -258,7 +258,7 @@ public class PolicyPatternManager
                 }
             }
         }
-        else
+        else                // embargo is today
         {
             if (anonRead == null)
             {

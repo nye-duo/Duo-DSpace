@@ -105,6 +105,7 @@ public class LivePolicyTest
         System.out.println("===========================================");
 
         this.test1PastPastAdmin();
+        this.test2PastPresentAdmin();
 
         System.out.println("===========================================");
         System.out.println("== All Tests complete                    ==");
@@ -126,13 +127,73 @@ public class LivePolicyTest
     public void test1PastPastAdmin()
         throws Exception
     {
-        System.out.println("-- Running test test1PastPastAdmin");
+        this.runTest(
+                "test1PastPastAdmin",   // name of the test
+                "past",                 // embargo in the past
+                "past",                 // anon READ start in past
+                true,                   // admin READ present
+                "existing",             // type of item to apply to
+                "unbound"               // resulting anon READ
+        );
+    }
 
-        Item reference = this.makeItem("past", "past", true);
-        Item actOn = this.makeItem("past", "past", true);
+    /**
+     * Embargo Date: past
+     * Anon READ: present
+     * Admin READ: present
+     */
+    public void test2PastPresentAdmin()
+            throws Exception
+    {
+        this.runTest(
+                "test2PastPresentAdmin",   // name of the test
+                "past",                 // embargo in the past
+                "present",                 // anon READ start in present
+                true,                   // admin READ present
+                "existing",             // type of item to apply to
+                "present"               // resulting anon READ
+        );
+    }
 
-        this.policyManager.applyToExistingItem(actOn, this.context);
-        String error = this.checkItem(actOn, "unbound");
+    /////////////////////////////////////////////////
+    // test running infrastructure
+
+    private void runTest(String name, String embargoDate, String anonRead, boolean adminRead, String type, String anonReadResult)
+            throws Exception
+    {
+        this.testStart(name);
+
+        // prep the reference and action item
+        Item reference = this.makeItem(embargoDate, anonRead, adminRead);
+        Item actOn = this.makeItem(embargoDate, anonRead, adminRead);
+
+        // run the operation
+        if ("existing".equals(type))
+        {
+            this.policyManager.applyToExistingItem(actOn, this.context);
+        }
+        else if ("new".equals(type))
+        {
+            this.policyManager.applyToNewItem(actOn, this.context);
+        }
+
+        // check the item for appropriate policies
+        this.checkAndPrint(actOn, anonReadResult);
+
+        this.record(reference, actOn);
+
+        this.testEnd(name);
+    }
+
+    private void testStart(String name)
+    {
+        System.out.println("-- Running test " + name);
+    }
+
+    private void checkAndPrint(Item item, String anonRead)
+            throws Exception
+    {
+        String error = this.checkItem(item, anonRead);
         if (error != null)
         {
             System.out.println("ASSERTION ERROR");
@@ -142,14 +203,21 @@ public class LivePolicyTest
         {
             System.out.println("Automated checks passed");
         }
+    }
 
-        this.context.commit();
-
+    private void record(Item reference, Item actOn)
+    {
         Map<String, String> compare = new HashMap<String, String>();
         compare.put(reference.getHandle(), actOn.getHandle());
         this.checkList.add(compare);
+    }
 
-        System.out.println("-- Finished test test1PastPastAdmin");
+    private void testEnd(String name)
+            throws Exception
+    {
+        // commit the context, and record the references to the before and after items
+        this.context.commit();
+        System.out.println("-- Finished test " + name);
         System.out.println("\n");
     }
 
@@ -201,10 +269,26 @@ public class LivePolicyTest
 
         // set the embargo date
         String ed = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
         if ("past".equals(embargoDate))
         {
-            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+            // set to the start of the unix epoch
             ed = sdf.format(new Date(0));
+        }
+        else if ("present".equals(embargoDate))
+        {
+            // set to today
+            ed = sdf.format(new Date());
+        }
+        else if ("future".equals(embargoDate))
+        {
+            // set in the far future (around 2970 or something)
+            long millis = 31536000000000L;
+            ed = sdf.format(new Date(millis));
+        }
+        else if ("none".equals(embargoDate))
+        {
+            // don't set an embargo date
         }
 
         if (ed != null)
@@ -237,12 +321,34 @@ public class LivePolicyTest
 
         // create an anonymous read policy
         Date rsd = null;
+        boolean unbound = false;
         if ("past".equals(anonRead))
         {
+            // set the start date to the start of the unix epoch
             rsd = new Date(0);
         }
+        else if ("present".equals(anonRead))
+        {
+            // set the start date to today
+            rsd = new Date();
+        }
+        else if ("future".equals(anonRead))
+        {
+            // set in the far future (around 2970 or something)
+            long millis = 31536000000000L;
+            rsd = new Date(millis);
+        }
+        else if ("unbound".equals(anonRead))
+        {
+            // don't set a date, just leave it unbound
+            unbound = true;
+        }
+        else if ("none".equals(anonRead))
+        {
+            // don't set an anonymous read policy
+        }
 
-        if (rsd != null)
+        if (rsd != null || unbound)
         {
             BitstreamIterator bsi = new BitstreamIterator(item);
             while (bsi.hasNext())
@@ -254,7 +360,10 @@ public class LivePolicyTest
                 rp.setGroup(Group.find(context, 0));
                 rp.setResource(bitstream);
                 rp.setResourceType(Constants.BITSTREAM);
-                rp.setStartDate(rsd);
+                if (rsd != null)
+                {
+                    rp.setStartDate(rsd);
+                }
                 rp.update();
             }
         }
@@ -306,10 +415,51 @@ public class LivePolicyTest
                 ResourcePolicy policy = existing.get(0);
                 Date start = policy.getStartDate();
 
-                // if we expect an unbound READ, but we have one with a start date, this is wrong
-                if (start != null && "unbound".equals(anonRead))
+                // go through all possible anonRead states and evaluate the policy against them
+                if ("past".equals(anonRead))
                 {
-                    return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date, when it should be unbound";
+                    if (start == null)
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle does not have a start date, but it should be in the past";
+                    }
+                    else if (!start.before(new Date()))
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date which is not in the past, but it should be";
+                    }
+                }
+                else if ("present".equals(anonRead))
+                {
+                    if (start == null)
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle does not have a start date, but it should be in the present";
+                    }
+                    else if (!start.equals(new Date()))
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date, but it is not in the present";
+                    }
+                }
+                else if ("future".equals(anonRead))
+                {
+                    if (start == null)
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle does not have a start date, but it should be in the future";
+                    }
+                    else if (!start.after(new Date()))
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date, but it should be in the future";
+                    }
+                }
+                else if ("unbound".equals(anonRead))
+                {
+                    // if we expect an unbound READ, but we have one with a start date, this is wrong
+                    if (start != null)
+                    {
+                        return "Bitstream " + bitstream.getName() + " in ORIGINAL bundle has a start date, when it should be unbound";
+                    }
+                }
+                else if ("none".equals(anonRead))
+                {
+                    // I don't think this happens, cross that bridge when we come to it
                 }
             }
         }

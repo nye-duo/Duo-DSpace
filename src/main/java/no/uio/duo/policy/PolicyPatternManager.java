@@ -3,10 +3,7 @@ package no.uio.duo.policy;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.authorize.AuthorizeManager;
 import org.dspace.authorize.ResourcePolicy;
-import org.dspace.content.DCDate;
-import org.dspace.content.DCValue;
-import org.dspace.content.DSpaceObject;
-import org.dspace.content.Item;
+import org.dspace.content.*;
 import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
@@ -25,6 +22,9 @@ public class PolicyPatternManager
             throws SQLException, AuthorizeException, IOException
     {
         Date embargoDate = this.getEmbargoDate(item, context);
+
+        // first, remove all the bundle policies, we don't need any of them
+        this.removeAllBundlePolicies(context, item);
 
         BitstreamIterator bsi = new BitstreamIterator(item);
         while (bsi.hasNext())
@@ -49,7 +49,7 @@ public class PolicyPatternManager
             }
             else
             {
-                // just remove all the policies, we don't want any policies on other bundle's bitstreams
+                // just remove all the policies, we don't want any policies on other bundles' bitstreams
                 this.removePolicies(removePolicies);
                 this.removePolicies(readPolicies);
             }
@@ -60,6 +60,9 @@ public class PolicyPatternManager
             throws SQLException, AuthorizeException, IOException
     {
         Date embargoDate = this.getEmbargoDate(item, context);
+
+        // first, remove all the bundle policies, we don't need any of them
+        this.removeAllBundlePolicies(context, item);
 
         BitstreamIterator bsi = new BitstreamIterator(item);
         while (bsi.hasNext())
@@ -298,6 +301,18 @@ public class PolicyPatternManager
         }
 
         return remove;
+    }
+
+    private void removeAllBundlePolicies(Context context, Item item)
+            throws SQLException, AuthorizeException
+    {
+        Bundle[] bundles = item.getBundles();
+        for (Bundle bundle : bundles)
+        {
+            List<ResourcePolicy> all = AuthorizeManager.getPolicies(context, bundle);
+            this.removePolicies(all);
+            bundle.update();
+        }
     }
 
     private void removePolicies(List<ResourcePolicy> policies)

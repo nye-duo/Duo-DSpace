@@ -14,7 +14,6 @@ import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.eperson.EPerson;
 import org.dspace.eperson.Group;
-import org.dspace.storage.bitstore.BitstreamStorageManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -271,6 +270,17 @@ public class LivePolicyTest
     private String checkItem(Item item, String anonRead)
             throws Exception
     {
+        // check that there are no bundle policies
+        Bundle[] bundles = item.getBundles();
+        for (Bundle bundle : bundles)
+        {
+            List<ResourcePolicy> all = AuthorizeManager.getPolicies(context, bundle);
+            if (all.size() > 0)
+            {
+                return "Bundle " + bundle.getName() + " has one or more policies";
+            }
+        }
+
         BitstreamIterator bsi = new BitstreamIterator(item);
         while (bsi.hasNext())
         {

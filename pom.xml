@@ -77,6 +77,11 @@
             <artifactId>idservice</artifactId>
             <version>1.0</version>
         </dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.4</version>
+        </dependency>
+    </dependencies>
     
 </project>

@@ -1,0 +1,11 @@
+name,embargo,anon_read,admin_read,item_type,anon_read_result
+1,past,past,yes,existing,unbound
+2,past,present,yes,existing,unbound
+3,past,future,yes,existing,future
+4,past,unbound,yes,existing,unbound
+5,past,none,yes,existing,future
+6,present,past,yes,existing,unbound
+7,present,present,yes,existing,unbound
+8,present,future,yes,existing,future
+9,present,unbound,yes,existing,unbound
+10,present,none,yes,existing,future

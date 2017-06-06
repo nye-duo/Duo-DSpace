@@ -5,6 +5,9 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.dspace.authorize.AuthorizeManager;
 import org.dspace.authorize.ResourcePolicy;
 import org.dspace.content.*;
@@ -15,9 +18,7 @@ import org.dspace.core.Context;
 import org.dspace.eperson.EPerson;
 import org.dspace.eperson.Group;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -41,6 +42,8 @@ public class LivePolicyTest
         options.addOption("e", "eperson", true, "EPerson to do all the submits as");
         options.addOption("b", "bistream", true, "File path to bitstream to use for testing");
         options.addOption("u", "url", true, "Interface base url");
+        options.addOption("m", "matrix", true, "Path to test matrix file");
+        options.addOption("o", "out", true, "Path to file to output manual check results to");
         CommandLine line = parser.parse(options, args);
 
         if (!line.hasOption("e"))
@@ -58,9 +61,26 @@ public class LivePolicyTest
             System.out.println("Please provide an interface base url with the -u option");
             System.exit(0);
         }
+        if (!line.hasOption("m"))
+        {
+            System.out.println("Please provide a path to the test matrix file with the -m option");
+            System.exit(0);
+        }
+        if (!line.hasOption("o"))
+        {
+            System.out.println("Please provide a path to the output file with the -o option");
+            System.exit(0);
+        }
 
-        LivePolicyTest lpt = new LivePolicyTest(line.getOptionValue("e"), line.getOptionValue("b"), line.getOptionValue("u"));
+        LivePolicyTest lpt = new LivePolicyTest(line.getOptionValue("e"), line.getOptionValue("b"), line.getOptionValue("u"), line.getOptionValue("m"), line.getOptionValue("o"));
         lpt.runAll();
+    }
+
+    class CheckReport
+    {
+        public String testName;
+        public String reference;
+        public String changed;
     }
 
     private Context context;
@@ -68,10 +88,13 @@ public class LivePolicyTest
     private EPerson eperson;
     private File bitstream;
     private PolicyPatternManager policyManager;
-    private List<Map<String, String>> checkList = new ArrayList<Map<String, String>>();
+    private List<CheckReport> checkList = new ArrayList<CheckReport>();
     private String baseUrl;
+    private List<CSVRecord> testMatrix;
+    private List<Map<String, String>> failures = new ArrayList<Map<String, String>>();
+    private String outPath;
 
-    public LivePolicyTest(String epersonEmail, String bitstreamPath, String baseUrl)
+    public LivePolicyTest(String epersonEmail, String bitstreamPath, String baseUrl, String matrixPath, String outPath)
             throws Exception
     {
         System.out.println("===========================================");
@@ -80,6 +103,11 @@ public class LivePolicyTest
 
         this.baseUrl = baseUrl;
         this.bitstream = new File(bitstreamPath);
+        this.outPath = outPath;
+
+        Reader in = new FileReader(matrixPath);
+        CSVParser csv = CSVFormat.DEFAULT.withHeader("name", "embargo", "anon_read", "admin_read", "item_type", "anon_read_result").parse(in);
+        this.testMatrix = csv.getRecords();
 
         this.context = new Context();
         this.context.setIgnoreAuthorization(true);
@@ -104,8 +132,25 @@ public class LivePolicyTest
         System.out.println("== Running All Tests                     ==");
         System.out.println("===========================================");
 
-        this.test1PastPastAdmin();
-        this.test2PastPresentAdmin();
+        for (CSVRecord record : this.testMatrix)
+        {
+            // check we're not looking at the header row
+            if (record.get("name").equals("name"))
+            {
+                continue;
+            }
+
+            // otherwise, run the test
+            boolean adminRead = record.get("admin_read").equals("yes");
+            this.runTest(
+                    record.get("name"),
+                    record.get("embargo"),
+                    record.get("anon_read"),
+                    adminRead,
+                    record.get("item_type"),
+                    record.get("anon_read_result")
+            );
+        }
 
         System.out.println("===========================================");
         System.out.println("== All Tests complete                    ==");
@@ -117,42 +162,13 @@ public class LivePolicyTest
         System.out.println("===========================================");
 
         this.outputCheckList();
-    }
 
-    /**
-     * Embargo Date: past
-     * Anon READ: past
-     * Admin READ: present
-     */
-    public void test1PastPastAdmin()
-        throws Exception
-    {
-        this.runTest(
-                "test1PastPastAdmin",   // name of the test
-                "past",                 // embargo in the past
-                "past",                 // anon READ start in past
-                true,                   // admin READ present
-                "existing",             // type of item to apply to
-                "unbound"               // resulting anon READ
-        );
-    }
+        System.out.println("\n\n");
+        System.out.println("===========================================");
+        System.out.println("== Test Failures                         ==");
+        System.out.println("===========================================");
 
-    /**
-     * Embargo Date: past
-     * Anon READ: present
-     * Admin READ: present
-     */
-    public void test2PastPresentAdmin()
-            throws Exception
-    {
-        this.runTest(
-                "test2PastPresentAdmin",   // name of the test
-                "past",                 // embargo in the past
-                "present",                 // anon READ start in present
-                true,                   // admin READ present
-                "existing",             // type of item to apply to
-                "present"               // resulting anon READ
-        );
+        this.outputFailures();
     }
 
     /////////////////////////////////////////////////
@@ -178,9 +194,9 @@ public class LivePolicyTest
         }
 
         // check the item for appropriate policies
-        this.checkAndPrint(actOn, anonReadResult);
+        this.checkAndPrint(name, actOn, anonReadResult);
 
-        this.record(reference, actOn);
+        this.record(name, reference, actOn);
 
         this.testEnd(name);
     }
@@ -190,12 +206,16 @@ public class LivePolicyTest
         System.out.println("-- Running test " + name);
     }
 
-    private void checkAndPrint(Item item, String anonRead)
+    private void checkAndPrint(String testName, Item item, String anonRead)
             throws Exception
     {
         String error = this.checkItem(item, anonRead);
         if (error != null)
         {
+            Map<String, String> errorRecord = new HashMap<String, String>();
+            errorRecord.put(testName, error);
+            this.failures.add(errorRecord);
+
             System.out.println("ASSERTION ERROR");
             System.out.println(error);
         }
@@ -205,11 +225,13 @@ public class LivePolicyTest
         }
     }
 
-    private void record(Item reference, Item actOn)
+    private void record(String name, Item reference, Item actOn)
     {
-        Map<String, String> compare = new HashMap<String, String>();
-        compare.put(reference.getHandle(), actOn.getHandle());
-        this.checkList.add(compare);
+        CheckReport report = new CheckReport();
+        report.testName = name;
+        report.reference = reference.getHandle();
+        report.changed = actOn.getHandle();
+        this.checkList.add(report);
     }
 
     private void testEnd(String name)
@@ -246,7 +268,7 @@ public class LivePolicyTest
     private Item makeItem(String embargoDate, String anonRead, boolean adminRead)
             throws Exception
     {
-        System.out.println("Making test item with Embargo Date :" + embargoDate + "; anon READ: " + anonRead + "; admin READ: " + adminRead);
+        System.out.println("Making test item with Embargo Date:" + embargoDate + "; anon READ: " + anonRead + "; admin READ: " + adminRead);
 
         // make the item in the collection
         WorkspaceItem wsi = WorkspaceItem.create(this.context, this.collection, false);
@@ -501,12 +523,31 @@ public class LivePolicyTest
     }
 
     private void outputCheckList()
+            throws Exception
     {
-        for (Map<String, String> pair : this.checkList)
+        String csv = "Test Name,Reference Item,Affected Item";
+        for (CheckReport report : this.checkList)
+        {
+            String reference = this.baseUrl + "/handle/" + report.reference;
+            String changed = this.baseUrl + "/handle/" + report.changed;
+            String row = report.testName + "," + reference + "," + changed;
+            System.out.println(row);
+            csv += "\n" + row;
+        }
+
+        Writer out = new FileWriter(this.outPath);
+        out.write(csv);
+        out.flush();
+        out.close();
+    }
+
+    private void outputFailures()
+    {
+        for (Map<String, String> pair : this.failures)
         {
             for (String key : pair.keySet())
             {
-                System.out.println(this.baseUrl + "/handle/" + key + "\t\t" + this.baseUrl + "/handle/" + pair.get(key));
+                System.out.println(key + " - " + pair.get(key));
             }
         }
     }

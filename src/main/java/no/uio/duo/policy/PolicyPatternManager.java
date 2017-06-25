@@ -68,8 +68,11 @@ public class PolicyPatternManager
         while (bsi.hasNext())
         {
             ContextualBitstream cb = bsi.next();
+
+            // just remove all the bitstream's policies, we'll apply the correct one later
             List<ResourcePolicy> readPolicies = this.getReadPolicies(context, cb.getBitstream());
-            List<ResourcePolicy> removePolicies = this.filterUnwantedPolicies(readPolicies);
+            this.removePolicies(readPolicies);
+            // List<ResourcePolicy> removePolicies = this.filterUnwantedPolicies(readPolicies);
 
             if ("ORIGINAL".equals(cb.getBundle().getName()))
             {
@@ -82,20 +85,25 @@ public class PolicyPatternManager
                 }
                 else
                 {
-                    // if there is an embargo date in the metadata, apply an Anon READ active from that date
-                    IntendedPolicy intended = new IntendedPolicy(embargoDate);
+                    // if there is an embargo date in the metadata, apply an Anon READ (active from that date, if it is in the future)
+                    IntendedPolicy intended = new IntendedPolicy(false);    // default to unbound anon read
+                    if (embargoDate.after(new Date()))
+                    {
+                        intended = new IntendedPolicy(embargoDate);
+                    }
+
                     ResourcePolicy policy = intended.makePolicy(context, cb.getBitstream());
                     policy.update();
                 }
 
-                this.removePolicies(removePolicies);
+                //this.removePolicies(removePolicies);
             }
-            else
-            {
+            //else
+            //{
                 // just remove all the policies, we don't want any policies on other bundle's bitstreams
-                this.removePolicies(removePolicies);
-                this.removePolicies(readPolicies);
-            }
+                //this.removePolicies(removePolicies);
+            //    this.removePolicies(readPolicies);
+            //}
         }
     }
 

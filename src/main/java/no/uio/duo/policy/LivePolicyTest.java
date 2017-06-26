@@ -111,7 +111,17 @@ public class LivePolicyTest
         this.outPath = outPath;
 
         Reader in = new FileReader(matrixPath);
-        CSVParser csv = CSVFormat.DEFAULT.withHeader("name", "embargo", "anon_read", "admin_read", "item_type", "anon_read_result").parse(in);
+        CSVParser csv = CSVFormat.DEFAULT.withHeader(
+                "name",
+                "embargo",
+                "anon_read_1",
+                "anon_read_2",
+                "admin_read",
+                "item_type",
+                "anon_read_result",
+                "metadata",
+                "notes"
+            ).parse(in);
         this.testMatrix = csv.getRecords();
 
         this.context = new Context();
@@ -150,10 +160,12 @@ public class LivePolicyTest
             this.runTest(
                     record.get("name"),
                     record.get("embargo"),
-                    record.get("anon_read"),
+                    record.get("anon_read_1"),
+                    record.get("anon_read_2"),
                     adminRead,
                     record.get("item_type"),
-                    record.get("anon_read_result")
+                    record.get("anon_read_result"),
+                    record.get("metadata")
             );
         }
 
@@ -179,14 +191,14 @@ public class LivePolicyTest
     /////////////////////////////////////////////////
     // test running infrastructure
 
-    private void runTest(String name, String embargoDate, String anonRead, boolean adminRead, String type, String anonReadResult)
+    private void runTest(String name, String embargoDate, String anonRead1, String anonRead2, boolean adminRead, String type, String anonReadResult, String metadataResult)
             throws Exception
     {
         this.testStart(name);
 
         // prep the reference and action item
-        Item reference = this.makeItem(embargoDate, anonRead, adminRead);
-        Item actOn = this.makeItem(embargoDate, anonRead, adminRead);
+        Item reference = this.makeItem(embargoDate, anonRead1, adminRead);
+        Item actOn = this.makeItem(embargoDate, anonRead1, adminRead);
 
         // run the operation
         if ("existing".equals(type))
@@ -199,7 +211,7 @@ public class LivePolicyTest
         }
 
         // check the item for appropriate policies
-        this.checkAndPrint(name, actOn, anonReadResult);
+        this.checkAndPrint(name, actOn, anonReadResult, metadataResult);
 
         this.record(name, reference, actOn);
 
@@ -211,10 +223,10 @@ public class LivePolicyTest
         System.out.println("-- Running test " + name);
     }
 
-    private void checkAndPrint(String testName, Item item, String anonRead)
+    private void checkAndPrint(String testName, Item item, String anonRead, String metadataResult)
             throws Exception
     {
-        String error = this.checkItem(item, anonRead);
+        String error = this.checkItem(item, anonRead, metadataResult);
         if (error != null)
         {
             Map<String, String> errorRecord = new HashMap<String, String>();
@@ -421,7 +433,7 @@ public class LivePolicyTest
         return item;
     }
 
-    private String checkItem(Item item, String anonRead)
+    private String checkItem(Item item, String anonRead, String metadataResult)
             throws Exception
     {
         // check that there are no bundle policies
@@ -435,6 +447,7 @@ public class LivePolicyTest
             }
         }
 
+        // check all the bundles/bitstreams, and ensure that they have the right policies
         BitstreamIterator bsi = new BitstreamIterator(item);
         while (bsi.hasNext())
         {
@@ -538,6 +551,63 @@ public class LivePolicyTest
                 }
             }
         }
+
+        // check the embargo metadata to see if it matches expectations
+        String liftDateField = ConfigurationManager.getProperty("embargo.field.lift");
+        DCValue[] dcvs = item.getMetadata(liftDateField);
+        String val = null;
+        Date date = null;
+        if (dcvs.length > 0)
+        {
+            val = dcvs[0].value;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        if (val != null)
+        {
+            date = sdf.parse(val);
+        }
+
+        if ("none".equals(metadataResult))
+        {
+            if (val != null)
+            {
+                return "Item should have had no embargo metadata, had: " + val;
+            }
+        }
+        else if ("future".equals(metadataResult))
+        {
+            if (val == null || date == null)
+            {
+                return "Item should have future embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!date.after(this.now))
+            {
+                return "Item should have future embargo metadata, had: " + val;
+            }
+        }
+        else if ("near_future".equals(metadataResult))
+        {
+            if (val == null || date == null)
+            {
+                return "Item should have (near) future embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!date.equals(this.nearFuture))
+            {
+                return "Item should have (near) future embargo metadata, had: " + val;
+            }
+        }
+        else if ("far_future".equals(metadataResult))
+        {
+            if (val == null || date == null)
+            {
+                return "Item should have (far) future embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!date.equals(this.farFuture))
+            {
+                return "Item should have (far) future embargo metadata, had: " + val;
+            }
+        }
+
         return null;
     }
 

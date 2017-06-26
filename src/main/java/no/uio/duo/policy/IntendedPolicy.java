@@ -124,6 +124,23 @@ public class IntendedPolicy
         return rp;
     }
 
+    public Date getStartDate()
+    {
+        if (this.embargo != null)
+        {
+            return this.embargo;
+        }
+        else if (this.permanent)
+        {
+            return this.getPermanentEmbargoDate();
+        }
+        else if (this.existing != null)
+        {
+            return this.existing.getStartDate();
+        }
+        return null;
+    }
+
     private Date getPermanentEmbargoDate()
     {
         // set the date far in the future.  The year 2970 or thereabouts.

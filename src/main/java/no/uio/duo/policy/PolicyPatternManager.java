@@ -1,5 +1,7 @@
 package no.uio.duo.policy;
 
+import no.uio.duo.DuoException;
+import no.uio.duo.MetadataManager;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.authorize.AuthorizeManager;
 import org.dspace.authorize.ResourcePolicy;
@@ -12,16 +14,39 @@ import org.dspace.embargo.EmbargoSetter;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class PolicyPatternManager
 {
+    class EmbargoDateTracker
+    {
+        public List<Date> startDates = new ArrayList<Date>();
+        public boolean unbound = false;
+
+        public void track(IntendedPolicy intendedPolicy)
+        {
+            // record the start dates we see, and whether there is no start date on any policy (i.e. is unbound)
+            Date start = intendedPolicy.getStartDate();
+            System.out.println(start);
+            if (start == null)
+            {
+                this.unbound = true;
+            }
+            else
+            {
+                this.startDates.add(start);
+            }
+        }
+    }
+
     public void applyToExistingItem(Item item, Context context)
             throws SQLException, AuthorizeException, IOException
     {
         Date embargoDate = this.getEmbargoDate(item, context);
+        EmbargoDateTracker tracker = new EmbargoDateTracker();
 
         // first, remove all the bundle policies, we don't need any of them
         this.removeAllBundlePolicies(context, item);
@@ -46,6 +71,9 @@ public class PolicyPatternManager
                     ResourcePolicy policy = intendedPolicy.makePolicy(context, cb.getBitstream());
                     policy.update();
                 }
+
+                // track the policy dates for later use
+                tracker.track(intendedPolicy);
             }
             else
             {
@@ -54,12 +82,16 @@ public class PolicyPatternManager
                 this.removePolicies(readPolicies);
             }
         }
+
+        this.normaliseEmbargoDate(tracker, embargoDate, item, context);
+        item.update();
     }
 
     public void applyToNewItem(Item item, Context context)
             throws SQLException, AuthorizeException, IOException
     {
         Date embargoDate = this.getEmbargoDate(item, context);
+        EmbargoDateTracker tracker = new EmbargoDateTracker();
 
         // first, remove all the bundle policies, we don't need any of them
         this.removeAllBundlePolicies(context, item);
@@ -72,7 +104,6 @@ public class PolicyPatternManager
             // just remove all the bitstream's policies, we'll apply the correct one later
             List<ResourcePolicy> readPolicies = this.getReadPolicies(context, cb.getBitstream());
             this.removePolicies(readPolicies);
-            // List<ResourcePolicy> removePolicies = this.filterUnwantedPolicies(readPolicies);
 
             if ("ORIGINAL".equals(cb.getBundle().getName()))
             {
@@ -82,6 +113,9 @@ public class PolicyPatternManager
                     IntendedPolicy intended = new IntendedPolicy(false);
                     ResourcePolicy policy = intended.makePolicy(context, cb.getBitstream());
                     policy.update();
+
+                    // track the policy dates for later use
+                    tracker.track(intended);
                 }
                 else
                 {
@@ -94,17 +128,71 @@ public class PolicyPatternManager
 
                     ResourcePolicy policy = intended.makePolicy(context, cb.getBitstream());
                     policy.update();
-                }
 
-                //this.removePolicies(removePolicies);
+                    // track the policy dates for later use
+                    tracker.track(intended);
+                }
             }
-            //else
-            //{
-                // just remove all the policies, we don't want any policies on other bundle's bitstreams
-                //this.removePolicies(removePolicies);
-            //    this.removePolicies(readPolicies);
-            //}
         }
+
+        this.normaliseEmbargoDate(tracker, embargoDate, item, context);
+        item.update();
+    }
+
+    private void normaliseEmbargoDate(EmbargoDateTracker tracker, Date embargoDate, Item item, Context context)
+    {
+        // now determine how to set the embargo date in the metadata
+        Date latest = null;
+        if (tracker.startDates.size() > 0)
+        {
+            System.out.println("start dates > 0");
+            // look for the latest start date for a policy
+            for (Date sd : tracker.startDates)
+            {
+                if (latest == null || sd.after(latest))
+                {
+                    latest = sd;
+                }
+            }
+
+            // if the latest start date is in the past, ignore it
+            if (latest != null && latest.before(new Date()))
+            {
+                latest = null;
+            }
+        }
+
+        // if there is no latest start date from the policies (or they are all in the past)
+        // AND
+        // there is not an unbound policy
+        // THEN
+        // just keep the existing embargo date
+        if (latest == null && !tracker.unbound)
+        {
+            System.out.println("latest null, !unbound");
+            latest = embargoDate;
+        }
+
+        // if there is no latest date, then, just remove the embargo metadata
+        if (embargoDate != null && latest == null)
+        {
+            System.out.println("latest null - remove");
+            this.removeEmbargoDate(item, context);
+        }
+        // if the embargo date is not set, but there is a latest date, set the latest date
+        else if (embargoDate == null && latest != null)
+        {
+            System.out.println("embargo null - setting date");
+            this.setEmbargoDate(latest, item, context);
+        }
+        // if the latest start date is after the current embargo metadata, move the metadata forward
+        else if (latest != null && latest.after(embargoDate))
+        {
+            System.out.println("latest later - setting date");
+            this.setEmbargoDate(latest, item, context);
+        }
+        System.out.println("finished setting embargo");
+        // in all other cases, just leave the embargo metadata as-is
     }
 
     private Date getEmbargoDate(Item item, Context context)
@@ -131,6 +219,88 @@ public class PolicyPatternManager
         EmbargoSetter setter = (EmbargoSetter) PluginManager.getSinglePlugin(EmbargoSetter.class);
         DCDate embargoDate = setter.parseTerms(context, item, embargoes[0].value);
         return embargoDate.toDate();
+    }
+
+    private void setEmbargoDate(Date newDate, Item item, Context context)
+    {
+        String liftDateField = ConfigurationManager.getProperty("embargo.field.lift");
+        if (liftDateField == null)
+        {
+            return;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String formatted = sdf.format(newDate);
+
+        MetadataManager mm = new MetadataManager();
+        DCValue dcv;
+        try
+        {
+            dcv = mm.makeDCValue(liftDateField, formatted);
+        }
+        catch (DuoException e)
+        {
+            // TODO just make sure we log this error in configuration
+            return;
+        }
+
+        DCValue[] originals = item.getMetadata(liftDateField);
+        item.clearMetadata(dcv.schema, dcv.element, dcv.qualifier, Item.ANY);
+        item.addMetadata(dcv.schema, dcv.element, dcv.qualifier, null, dcv.value);
+
+        String original = "[no date]";
+        if (originals.length > 0)
+        {
+            original = originals[0].value;
+        }
+
+        String provenance = "Policy pattern application modified embargo date metadata: from '" + original + "' to '" + dcv.value + "'";
+        item.addMetadata("dc", "description", "provenance", null, provenance);
+    }
+
+    private void removeEmbargoDate(Item item, Context context)
+    {
+        String liftDateField = ConfigurationManager.getProperty("embargo.field.lift");
+        if (liftDateField == null)
+        {
+            return;
+        }
+
+        String termsField = ConfigurationManager.getProperty("embargo.field.terms");
+
+        MetadataManager mm = new MetadataManager();
+        DCValue dcv;
+        DCValue terms = null;
+        try
+        {
+            dcv = mm.makeDCValue(liftDateField, "");
+            if (termsField != null)
+            {
+                terms = mm.makeDCValue(termsField, "");
+            }
+        }
+        catch (DuoException e)
+        {
+            // TODO just make sure we log this error in configuration
+            return;
+        }
+
+
+        DCValue[] originals = item.getMetadata(liftDateField);
+        item.clearMetadata(dcv.schema, dcv.element, dcv.qualifier, Item.ANY);
+        if (terms != null)
+        {
+            item.clearMetadata(terms.schema, terms.element, terms.qualifier, Item.ANY);
+        }
+
+        String original = "[no date]";
+        if (originals.length > 0)
+        {
+            original = originals[0].value;
+        }
+
+        String provenance = "Policy pattern application removed embargo date, was: '" + original + "'";
+        item.addMetadata("dc", "description", "provenance", null, provenance);
     }
 
     private List<ResourcePolicy> getReadPolicies(Context context, DSpaceObject dso)

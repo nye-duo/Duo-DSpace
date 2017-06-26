@@ -44,6 +44,7 @@ public class LivePolicyTest
         options.addOption("u", "url", true, "Interface base url");
         options.addOption("m", "matrix", true, "Path to test matrix file");
         options.addOption("o", "out", true, "Path to file to output manual check results to");
+        options.addOption("t", "test", true, "test number or range of numbers to run");
         CommandLine line = parser.parse(options, args);
 
         if (!line.hasOption("e"))
@@ -73,6 +74,19 @@ public class LivePolicyTest
         }
 
         LivePolicyTest lpt = new LivePolicyTest(line.getOptionValue("e"), line.getOptionValue("b"), line.getOptionValue("u"), line.getOptionValue("m"), line.getOptionValue("o"));
+
+        if (line.hasOption("-t"))
+        {
+            String tests = line.getOptionValue("t");
+            String[] bits = tests.split("-");
+            String from = bits[0];
+            String to = bits[0];
+            if (bits.length > 1)
+            {
+                to = bits[1];
+            }
+            lpt.setRange(Integer.parseInt(from), Integer.parseInt(to));
+        }
         lpt.runAll();
     }
 
@@ -81,6 +95,12 @@ public class LivePolicyTest
         public String testName;
         public String reference;
         public String changed;
+    }
+
+    class ItemMakeRecord
+    {
+        public Item item;
+        List<Integer> bitstreamIDs = new ArrayList<Integer>();
     }
 
     private Context context;
@@ -93,6 +113,9 @@ public class LivePolicyTest
     private List<CSVRecord> testMatrix;
     private List<Map<String, String>> failures = new ArrayList<Map<String, String>>();
     private String outPath;
+
+    private int from = -1;
+    private int to = -1;
 
     private Date past = new Date(0);
     private Date now = new Date();
@@ -118,7 +141,8 @@ public class LivePolicyTest
                 "anon_read_2",
                 "admin_read",
                 "item_type",
-                "anon_read_result",
+                "anon_read_1_result",
+                "anon_read_2_result",
                 "metadata",
                 "notes"
             ).parse(in);
@@ -140,6 +164,12 @@ public class LivePolicyTest
         System.out.println("\n\n");
     }
 
+    public void setRange(int from, int to)
+    {
+        this.from = from;
+        this.to = to;
+    }
+
     public void runAll()
             throws Exception
     {
@@ -147,6 +177,7 @@ public class LivePolicyTest
         System.out.println("== Running All Tests                     ==");
         System.out.println("===========================================");
 
+        int idx = 0;
         for (CSVRecord record : this.testMatrix)
         {
             // check we're not looking at the header row
@@ -155,16 +186,43 @@ public class LivePolicyTest
                 continue;
             }
 
+            idx++;
+            if (!((this.from == -1 || idx >= this.from) &&
+                    (this.to == -1 || idx <= this.to)))
+            {
+                continue;
+            }
+
             // otherwise, run the test
             boolean adminRead = record.get("admin_read").equals("yes");
+
+            List<String> anonReads = new ArrayList<String>();
+            if (!"".equals(record.get("anon_read_1")))
+            {
+                anonReads.add(record.get("anon_read_1"));
+            }
+            if (!"".equals(record.get("anon_read_2")))
+            {
+                anonReads.add(record.get("anon_read_2"));
+            }
+
+            List<String> readResults = new ArrayList<String>();
+            if (!"".equals(record.get("anon_read_1_result")))
+            {
+                readResults.add(record.get("anon_read_1_result"));
+            }
+            if (!"".equals(record.get("anon_read_2_result")))
+            {
+                readResults.add(record.get("anon_read_2_result"));
+            }
+
             this.runTest(
                     record.get("name"),
                     record.get("embargo"),
-                    record.get("anon_read_1"),
-                    record.get("anon_read_2"),
+                    anonReads,
                     adminRead,
                     record.get("item_type"),
-                    record.get("anon_read_result"),
+                    readResults,
                     record.get("metadata")
             );
         }
@@ -191,29 +249,36 @@ public class LivePolicyTest
     /////////////////////////////////////////////////
     // test running infrastructure
 
-    private void runTest(String name, String embargoDate, String anonRead1, String anonRead2, boolean adminRead, String type, String anonReadResult, String metadataResult)
+    private void runTest(String name, String embargoDate, List<String> anonReads, boolean adminRead, String type, List<String> anonReadResults, String metadataResult)
             throws Exception
     {
         this.testStart(name);
 
         // prep the reference and action item
-        Item reference = this.makeItem(embargoDate, anonRead1, adminRead);
-        Item actOn = this.makeItem(embargoDate, anonRead1, adminRead);
+        ItemMakeRecord reference = this.makeItem(embargoDate, anonReads, adminRead);
+        ItemMakeRecord actOn = this.makeItem(embargoDate, anonReads, adminRead);
 
         // run the operation
         if ("existing".equals(type))
         {
-            this.policyManager.applyToExistingItem(actOn, this.context);
+            this.policyManager.applyToExistingItem(actOn.item, this.context);
         }
         else if ("new".equals(type))
         {
-            this.policyManager.applyToNewItem(actOn, this.context);
+            this.policyManager.applyToNewItem(actOn.item, this.context);
+        }
+
+        // make a map from bitstream id to expected anonRead results
+        Map<Integer, String> readMap = new HashMap<Integer, String>();
+        for (int i = 0; i < actOn.bitstreamIDs.size(); i++)
+        {
+            readMap.put(actOn.bitstreamIDs.get(i), anonReadResults.get(i));
         }
 
         // check the item for appropriate policies
-        this.checkAndPrint(name, actOn, anonReadResult, metadataResult);
+        this.checkAndPrint(name, actOn.item, readMap, metadataResult);
 
-        this.record(name, reference, actOn);
+        this.record(name, reference.item, actOn.item);
 
         this.testEnd(name);
     }
@@ -223,10 +288,10 @@ public class LivePolicyTest
         System.out.println("-- Running test " + name);
     }
 
-    private void checkAndPrint(String testName, Item item, String anonRead, String metadataResult)
+    private void checkAndPrint(String testName, Item item, Map<Integer, String> anonReadResults, String metadataResult)
             throws Exception
     {
-        String error = this.checkItem(item, anonRead, metadataResult);
+        String error = this.checkItem(item, anonReadResults, metadataResult);
         if (error != null)
         {
             Map<String, String> errorRecord = new HashMap<String, String>();
@@ -282,10 +347,22 @@ public class LivePolicyTest
         return collection;
     }
 
-    private Item makeItem(String embargoDate, String anonRead, boolean adminRead)
+    private ItemMakeRecord makeItem(String embargoDate, List<String> anonReads, boolean adminRead)
             throws Exception
     {
-        System.out.println("Making test item with Embargo Date:" + embargoDate + "; anon READ: " + anonRead + "; admin READ: " + adminRead);
+        // make and print the information string
+        String anonReadOut = "";
+        for (String ar : anonReads)
+        {
+            if (!"".equals(anonReadOut))
+            {
+                anonReadOut += ",";
+            }
+            anonReadOut += ar;
+        }
+        System.out.println("Making test item with Embargo Date:" + embargoDate + "; anon READ: " + anonReadOut + "; admin READ: " + adminRead);
+
+        ItemMakeRecord result = new ItemMakeRecord();
 
         // make the item in the collection
         WorkspaceItem wsi = WorkspaceItem.create(this.context, this.collection, false);
@@ -294,17 +371,6 @@ public class LivePolicyTest
         WorkflowManagerWrapper.startWithoutNotify(this.context, wsi);
         item = Item.find(this.context, item.getID());
         item.addMetadata("dc", "title", null, null, "Item ID " + item.getID());
-
-        // add some bitstreams to the item
-        InputStream originalFile = new FileInputStream(this.bitstream);
-        Bitstream original = item.createSingleBitstream(originalFile, "ORIGINAL");
-        original.setName("originalfile.txt");
-        original.update();
-
-        InputStream adminFile = new FileInputStream(this.bitstream);
-        Bitstream admin = item.createSingleBitstream(adminFile, "ADMIN");
-        admin.setName("adminfile.txt");
-        admin.update();
 
         // set the embargo date
         String ed = null;
@@ -346,6 +412,28 @@ public class LivePolicyTest
             item.addMetadata(dcv.schema, dcv.element, dcv.qualifier, null, ed);
         }
 
+        // add some bitstreams to the item
+        List<Bitstream> originals = new ArrayList<Bitstream>();
+        //
+        // first one or more in the ORIGINAL bundle
+        int idx = 1;
+        for (String ar : anonReads)
+        {
+            InputStream originalFile = new FileInputStream(this.bitstream);
+            Bitstream original = item.createSingleBitstream(originalFile, "ORIGINAL");
+            original.setName("originalfile" + idx++ + ".txt");
+            original.update();
+            originals.add(original);
+
+            result.bitstreamIDs.add(original.getID());
+        }
+
+        // then the ADMIN bundle
+        InputStream adminFile = new FileInputStream(this.bitstream);
+        Bitstream admin = item.createSingleBitstream(adminFile, "ADMIN");
+        admin.setName("adminfile.txt");
+        admin.update();
+
         // clear out any existing resource policies
         this.clearResourcePolicies(item);
 
@@ -357,65 +445,65 @@ public class LivePolicyTest
         irp.setResourceType(Constants.ITEM);
         irp.update();
 
-        if (adminRead)
+        for (int i = 0; i < originals.size(); i++)
         {
-            ResourcePolicy arp = ResourcePolicy.create(this.context);
-            arp.setAction(Constants.READ);
-            arp.setGroup(Group.find(context, 1));
-            arp.setResource(original);
-            arp.setResourceType(Constants.BITSTREAM);
-            arp.update();
-        }
+            Bitstream original = originals.get(i);
+            String anonRead = anonReads.get(i);
 
-        // create an anonymous read policy
-        Date rsd = null;
-        boolean unbound = false;
-        if ("past".equals(anonRead))
-        {
-            // set the start date to the start of the unix epoch
-            rsd = this.past;
-        }
-        else if ("present".equals(anonRead))
-        {
-            // set the start date to today
-            rsd = this.now;
-        }
-        else if ("future".equals(anonRead))
-        {
-            // set in the far future (around 2970 or something)
-            rsd = this.farFuture;
-        }
-        else if ("near_future".equals(anonRead))
-        {
-            // set in the near future (around 2170 or something)
-            rsd = this.nearFuture;
-        }
-        else if ("far_future".equals(anonRead))
-        {
-            // set in the far future (around 2970 or something)
-            rsd = this.farFuture;
-        }
-        else if ("unbound".equals(anonRead))
-        {
-            // don't set a date, just leave it unbound
-            unbound = true;
-        }
-        else if ("none".equals(anonRead))
-        {
-            // don't set an anonymous read policy
-        }
-
-        if (rsd != null || unbound)
-        {
-            BitstreamIterator bsi = new BitstreamIterator(item);
-            while (bsi.hasNext())
+            if (adminRead)
             {
-                Bitstream bitstream = bsi.next().getBitstream();
+                ResourcePolicy arp = ResourcePolicy.create(this.context);
+                arp.setAction(Constants.READ);
+                arp.setGroup(Group.find(context, 1));
+                arp.setResource(original);
+                arp.setResourceType(Constants.BITSTREAM);
+                arp.update();
+            }
 
+            // create the anonymous read policies for each of the bitstreams
+            Date rsd = null;
+            boolean unbound = false;
+            if ("past".equals(anonRead))
+            {
+                // set the start date to the start of the unix epoch
+                rsd = this.past;
+            }
+            else if ("present".equals(anonRead))
+            {
+                // set the start date to today
+                rsd = this.now;
+            }
+            else if ("future".equals(anonRead))
+            {
+                // set in the far future (around 2970 or something)
+                rsd = this.farFuture;
+            }
+            else if ("near_future".equals(anonRead))
+            {
+                // set in the near future (around 2170 or something)
+                rsd = this.nearFuture;
+            }
+            else if ("far_future".equals(anonRead))
+            {
+                // set in the far future (around 2970 or something)
+                rsd = this.farFuture;
+            }
+            else if ("unbound".equals(anonRead))
+            {
+                // don't set a date, just leave it unbound
+                unbound = true;
+            }
+            else if ("none".equals(anonRead))
+            {
+                // don't set an anonymous read policy
+            }
+
+            if (rsd != null || unbound)
+            {
                 ResourcePolicy rp = ResourcePolicy.create(this.context);
                 rp.setAction(Constants.READ);
                 rp.setGroup(Group.find(context, 0));
-                rp.setResource(bitstream);
+                rp.setResource(original);
                 rp.setResourceType(Constants.BITSTREAM);
                 if (rsd != null)
                 {
@@ -430,10 +518,11 @@ public class LivePolicyTest
 
         System.out.println("Created item with id " + item.getID());
 
-        return item;
+        result.item = item;
+        return result;
     }
 
-    private String checkItem(Item item, String anonRead, String metadataResult)
+    private String checkItem(Item item, Map<Integer, String> anonReadResults, String metadataResult)
             throws Exception
     {
         // check that there are no bundle policies
@@ -455,6 +544,7 @@ public class LivePolicyTest
             Bundle bundle = cbs.getBundle();
             Bitstream bitstream = cbs.getBitstream();
             List<ResourcePolicy> existing = AuthorizeManager.getPolicies(this.context, bitstream);
+            String anonRead = anonReadResults.get(bitstream.getID());
 
             if ("ADMIN".equals(bundle.getName()))
             {

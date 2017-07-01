@@ -1,5 +1,6 @@
 package no.uio.duo.policy;
 
+import no.uio.duo.BitstreamIterator;
 import no.uio.duo.WorkflowManagerWrapper;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

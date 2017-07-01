@@ -1,5 +1,6 @@
-package no.uio.duo.policy;
+package no.uio.duo;
 
+import no.uio.duo.policy.ContextualBitstream;
 import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
 import org.dspace.content.Item;

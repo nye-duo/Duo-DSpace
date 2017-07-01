@@ -1,5 +1,6 @@
 package no.uio.duo.policy;
 
+import no.uio.duo.BitstreamIterator;
 import no.uio.duo.DuoException;
 import no.uio.duo.MetadataManager;
 import org.dspace.authorize.AuthorizeException;

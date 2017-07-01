@@ -20,16 +20,10 @@ public class DuoConstants
     public static String ORIGINAL_BUNDLE = "ORIGINAL";
 
     /** Name of the DSpace SECONDARY bundle */
-    public static String SECONDARY_BUNDLE = "SECONDARY";
-
-    /** Name of the DSpace SECONDARY_RESTRICED bundle */
-    public static String SECONDARY_RESTRICTED_BUNDLE = "SECONDARY_CLOSED"; // must be under 16 characters
-
-    /** Name of the DSpace METADATA bundle */
-    public static String METADATA_BUNDLE = "METADATA";
-
-    /** Name of th DSpace LICENSE bundle */
-    public static String LICENSE_BUNDLE = "LICENSE";
+    public static String SECONDARY_BUNDLE = "DUO_2NDRY_CLOSED";
+    
+    /** Name of the Duo Admin bundle */
+    public static String ADMIN_BUNDLE = "DUO_ADMIN";
 
     /** Name of the file where metadata should be stored */
     public static String METADATA_FILE = "metadata.xml";
@@ -39,10 +33,4 @@ public class DuoConstants
 
     /** "closed" access condition for items coming from StudentWeb */
     public static String CLOSED = "closed";
-
-    /** Name of the DSpace administrator group */
-    public static String ADMIN_GROUP = "Administrator";
-
-    /** Name of the DSpace Anonymous group */
-    public static String ANON_GROUP = "Anonymous";
 }

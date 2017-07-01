@@ -66,7 +66,7 @@ public class DuoEntryDisseminator extends SimpleDCEntryDisseminator implements S
             DepositReceipt receipt = super.disseminate(context, item, depositReceipt);
 
             // now include the FS specific metadata
-            Bundle[] bundles = item.getBundles(DuoConstants.METADATA_BUNDLE);
+            Bundle[] bundles = item.getBundles(DuoConstants.ADMIN_BUNDLE);
 
             for (Bundle bundle : bundles)
             {

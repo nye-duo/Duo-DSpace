@@ -47,11 +47,11 @@ import java.util.TreeMap;
  * DSpace item.  The structure of the DSpace item is as per the requirements documentation:</p>
  *
  * <ul>
- *     <li>Metadata file -&gt; METADATA bundle</li>
+ *     <li>Metadata file -&gt; DUO_ADMIN bundle</li>
  *     <li>Primary files -&gt; ORIGINAL bundle</li>
- *     <li>Secondary files (open access) -&gt; SECONDARY bundle</li>
- *     <li>Secondary files (closed access) -&gt; SECONDARY_CLOSED bundle</li>
- *     <li>Licence file -&gt; LICENSE bundle</li>
+ *     <li>Secondary files (open access) -&gt; DUO_2NDRY_CLOSED bundle</li>
+ *     <li>Secondary files (closed access) -&gt; DUO_2NDRY_CLOSED bundle</li>
+ *     <li>Licence file -&gt; not imported</li>
  * </ul>
  *
  * <p>The importer also preserves the sequencing of bitstreams as indicated in the package</p>
@@ -226,28 +226,20 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             // we are going to be unpacking the item to a variety of bundles:
 
             // ORIGINAL - for all Primary files
-            // SECONDARY - for all Secondary files which have access privileges "open"
-            // SECONDARY_RESTRICTED - for all Secondary files which have access privileges "closed"
-            // METADATA - for the metadata.xml file
-            // LICENSE - for the licence file (note the US spelling) (Deprecated - we're not doing this any more)
+            // DUO_2NDRY_CLOSED - for all Secondary files which have access privileges "open"
+            // DUO_ADMIN - for the metadata.xml file
             //
             // we can prepare these bundles up-front
             Bundle original = this.getBundle(context, item, DuoConstants.ORIGINAL_BUNDLE);
             Bundle secondary = this.getBundle(context, item, DuoConstants.SECONDARY_BUNDLE);
-            Bundle secondaryRestricted = this.getBundle(context, item, DuoConstants.SECONDARY_RESTRICTED_BUNDLE);
-            Bundle metadata = this.getBundle(context, item, DuoConstants.METADATA_BUNDLE);
-            // Bundle license = this.getBundle(context, item, DuoConstants.LICENSE_BUNDLE);
+            Bundle admin = this.getBundle(context, item, DuoConstants.ADMIN_BUNDLE);
 
             // empty all of the bundles (no versioning)
             this.emptyBundle(original);
             this.emptyBundle(secondary);
-            this.emptyBundle(secondaryRestricted);
-            this.emptyBundle(metadata);
-            // this.emptyBundle(license);
+            this.emptyBundle(admin);
 
             // populate each bundle from the bag
-
-            // FIXME: we need to ensure that the access privileges on each of the bundles is set correctly
 
             // first the ORIGINAL bundle
             TreeMap<Integer, BaggedItem> sequencedPrimaries = bag.getSequencedFinals();
@@ -257,22 +249,15 @@ public class FSBagItIngester extends AbstractSwordContentIngester
             TreeMap<Integer, BaggedItem> sequencedOpenSecondaries = bag.getSequencedSecondaries(DuoConstants.OPEN);
             this.addInSequence(context, sequencedOpenSecondaries, secondary, derivedResources);
 
-            // now the SECONDARY_RESTRICTED
+            // now the restricted SECONDARY bitstreams
             TreeMap<Integer, BaggedItem> sequencedClosedSecondaries = bag.getSequencedSecondaries(DuoConstants.CLOSED);
-            this.addInSequence(context, sequencedClosedSecondaries, secondaryRestricted, derivedResources);
+            this.addInSequence(context, sequencedClosedSecondaries, secondary, derivedResources);
 
             // now the METADATA
             // Note: this deletes the old metadata file, as we only want one at any one time.
             BaggedItem metadataFile = bag.getMetadataFile();
-            Bitstream mdBs = this.writeToBundle(context, metadata, metadataFile);
+            Bitstream mdBs = this.writeToBundle(context, admin, metadataFile);
             derivedResources.add(mdBs);
-
-            // finally the LICENCE
-            /*
-            BaggedItem licenceFile = bag.getLicenceFile();
-            Bitstream lbs = this.writeToBundle(context, license, licenceFile);
-            derivedResources.add(lbs);
-            */
 
             // now we can crosswalk in the metadata
             if (deposit.isMetadataRelevant())
@@ -285,11 +270,6 @@ public class FSBagItIngester extends AbstractSwordContentIngester
                 // add the metadata from the metadata bitstream
                 mdm.addMetadataFromBitstream(context, item, mdBs);
             }
-
-            // FIXME: we may want to annotate the item's metadata with an identifier so that
-            // it gets properly identified by the event consumer later on (or that might not
-            // be necessary, since DUO has a security profile for bundles which we are
-            // adhering to)
 
             // finally write the item update
             boolean ignore = context.ignoreAuthorization();

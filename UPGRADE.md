@@ -40,3 +40,13 @@ configuration has changed to :
 
 For reasons that are not clear, DSpace refuses to serve FS metadata back to StudentWeb due to a permissions restriction
 unless the StudentWeb user is an administrator account.
+
+
+## Policy Migration
+
+After the new code has been deployed, the following script must be run once, to migrate all the old bundles to the new
+bundles, and to apply the new policy pattern.  This is applied to all items in the repository:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email]
+    
+    

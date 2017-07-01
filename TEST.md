@@ -38,3 +38,9 @@ For example in [dspace]/bin:
 
     ./dspace dsrun no.uio.duo.policy.LivePolicyTest -e richard@cottagelabs.com -b /home/richard/Code/External/Duo-DSpace/TEST.md -u http://localhost:8080/xmlui
     
+
+## Migration
+
+    ./dspace dsrun no.uio.duo.migrate201to30.LiveMigrateTest -e [admin username] -b [path to test bitstream]
+    
+    

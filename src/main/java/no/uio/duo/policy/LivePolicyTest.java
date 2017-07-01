@@ -139,6 +139,7 @@ public class LivePolicyTest
                 "embargo",
                 "anon_read_1",
                 "anon_read_2",
+                "admin_file",
                 "admin_read",
                 "item_type",
                 "anon_read_1_result",
@@ -194,6 +195,7 @@ public class LivePolicyTest
             }
 
             // otherwise, run the test
+            boolean adminFile = record.get("admin_file").equals("yes");
             boolean adminRead = record.get("admin_read").equals("yes");
 
             List<String> anonReads = new ArrayList<String>();
@@ -220,6 +222,7 @@ public class LivePolicyTest
                     record.get("name"),
                     record.get("embargo"),
                     anonReads,
+                    adminFile,
                     adminRead,
                     record.get("item_type"),
                     readResults,
@@ -249,14 +252,22 @@ public class LivePolicyTest
     /////////////////////////////////////////////////
     // test running infrastructure
 
-    private void runTest(String name, String embargoDate, List<String> anonReads, boolean adminRead, String type, List<String> anonReadResults, String metadataResult)
+    private void runTest(String name,
+                         String embargoDate,
+                         List<String> anonReads,
+                         boolean adminFile,
+                         boolean adminRead,
+                         String type,
+                         List<String> anonReadResults,
+                         String metadataResult
+                        )
             throws Exception
     {
         this.testStart(name);
 
         // prep the reference and action item
-        ItemMakeRecord reference = this.makeItem(embargoDate, anonReads, adminRead);
-        ItemMakeRecord actOn = this.makeItem(embargoDate, anonReads, adminRead);
+        ItemMakeRecord reference = this.makeItem(embargoDate, anonReads, adminFile, adminRead);
+        ItemMakeRecord actOn = this.makeItem(embargoDate, anonReads, adminFile, adminRead);
 
         // run the operation
         if ("existing".equals(type))
@@ -348,7 +359,7 @@ public class LivePolicyTest
         return collection;
     }
 
-    private ItemMakeRecord makeItem(String embargoDate, List<String> anonReads, boolean adminRead)
+    private ItemMakeRecord makeItem(String embargoDate, List<String> anonReads, boolean adminFile, boolean adminRead)
             throws Exception
     {
         // make and print the information string
@@ -429,11 +440,14 @@ public class LivePolicyTest
             result.bitstreamIDs.add(original.getID());
         }
 
-        // then the ADMIN bundle
-        InputStream adminFile = new FileInputStream(this.bitstream);
-        Bitstream admin = item.createSingleBitstream(adminFile, "ADMIN");
-        admin.setName("adminfile.txt");
-        admin.update();
+        // then the ADMIN bundle if required
+        if (adminFile)
+        {
+            InputStream adminFileStream = new FileInputStream(this.bitstream);
+            Bitstream admin = item.createSingleBitstream(adminFileStream, "ADMIN");
+            admin.setName("adminfile.txt");
+            admin.update();
+        }
 
         // clear out any existing resource policies
         this.clearResourcePolicies(item);

@@ -53,7 +53,7 @@ public class DuoInstallConsumer implements Consumer
 
     /**
      * Consume an Install event.  If the item is being installed and it is not
-     * embargoed then we want to set the item's policies.  See {@link DuoPolicyManager}
+     * embargoed then we want to set the item's policies.  See {@link PolicyPatternManager}
      * for details
      *
      * @param context

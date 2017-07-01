@@ -342,7 +342,8 @@ public class LivePolicyTest
 
         this.context.commit();
 
-        System.out.println("Created collection with id " + collection.getID());
+        System.out.println("Created community with id " + community.getID() + "; handle " + community.getHandle());
+        System.out.println("Created collection with id " + collection.getID() + "; handle " + collection.getHandle());
 
         return collection;
     }

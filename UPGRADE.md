@@ -8,6 +8,10 @@ Note the following changes
 
 * addition of configuration for plugin.single.org.dspace.embargo.EmbargoSetter
 * new configuration values: plugin.named.org.dspace.embargo.EmbargoSetter and duo.embargo.communities
+* remove the Duo configuration for plugin.single.org.dspace.embargo.EmbargoLifter and replace it with the default:
+
+    plugin.single.org.dspace.embargo.EmbargoLifter = org.dspace.embargo.DefaultEmbargoLifter
+
 
 
 ## Update modules/curate.cfg
@@ -23,3 +27,16 @@ You will also be able to execute the task from the command line with:
 
     [dspace]/bin/dspace curate -t duopolicy -i [community/collection/item handle]
     
+
+## Update modules/swordv2-server.cfg
+
+The new policy is not to keep the original deposit files or metadata in the SWORD bundle, so the keep-original-package
+configuration has changed to :
+
+    keep-original-package = false
+    
+
+## StudentWeb Integration
+
+For reasons that are not clear, DSpace refuses to serve FS metadata back to StudentWeb due to a permissions restriction
+unless the StudentWeb user is an administrator account.

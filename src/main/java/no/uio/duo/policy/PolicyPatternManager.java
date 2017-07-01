@@ -254,7 +254,10 @@ public class PolicyPatternManager
             original = originals[0].value;
         }
 
-        String provenance = "Policy pattern application modified embargo date metadata: from '" + original + "' to '" + dcv.value + "'";
+        SimpleDateFormat stamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        String prefix = "[" + stamp.format(new Date()) + "] ";
+
+        String provenance = prefix + "Policy pattern application modified embargo date metadata: from '" + original + "' to '" + dcv.value + "'";
         item.addMetadata("dc", "description", "provenance", null, provenance);
     }
 
@@ -299,7 +302,10 @@ public class PolicyPatternManager
             original = originals[0].value;
         }
 
-        String provenance = "Policy pattern application removed embargo date, was: '" + original + "'";
+        SimpleDateFormat stamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        String prefix = "[" + stamp.format(new Date()) + "] ";
+
+        String provenance = prefix + "Policy pattern application removed embargo date, was: '" + original + "'";
         item.addMetadata("dc", "description", "provenance", null, provenance);
     }
 

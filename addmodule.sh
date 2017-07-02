@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
+DSPACE_SRC="/home/richard/Code/External/DSpaceOslo"
 MAVEN="mvn"
 
 # copy everything except the readme and the dspace.cfg extension

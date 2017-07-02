@@ -42,6 +42,14 @@ For reasons that are not clear, DSpace refuses to serve FS metadata back to Stud
 unless the StudentWeb user is an administrator account.
 
 
+## Checking for items with multiple ORIGINAL files
+
+To check for items which have multiple files in ORIGINAL, which may require some manual intervention for resolution
+of policy issues, run the following command
+
+    [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.MultiFileAnalyser -e [admin account email] -o [path for output file]
+
+
 ## Policy Migration
 
 After the new code has been deployed, the following script must be run once, to migrate all the old bundles to the new

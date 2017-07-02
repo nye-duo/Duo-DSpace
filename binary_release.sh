@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION="2.0.1"
-OUT="./dspace-duo-2.0.1"
+VERSION="3.0.0"
+OUT="./dspace-duo-3.0.0"
 MAVEN="mvn"
 
 # compile the library

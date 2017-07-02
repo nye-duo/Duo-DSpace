@@ -19,6 +19,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Script which analyses the entire holdings of a DSpace instance and reports on those items which
+ * have more than one file in the ORIGINAL bundle.  It also serialises the policies each of those files
+ * has and outputs them so they can be easily compared.  Produces a CSV for easy analysis.
+ */
 public class MultiFileAnalyser extends TraverseDSpace
 {
     public static void main(String[] args)
@@ -72,6 +77,12 @@ public class MultiFileAnalyser extends TraverseDSpace
         this.output();
     }
 
+    /**
+     * Report on a single item
+     *
+     * @param item
+     * @throws Exception
+     */
     public void doItem(Item item)
             throws Exception
     {

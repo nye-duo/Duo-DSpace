@@ -9,8 +9,21 @@ import org.dspace.curate.Curator;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * Curation task which allows the {@link PolicyPatternManager} to be run from the user interface or
+ * the command line
+ */
 public class DuoPolicyCurationTask extends AbstractCurationTask
 {
+    /**
+     * Execute the {@link PolicyPatternManager} over the given DSpace Object
+     *
+     * This will only run of the DSpace Object is an item, and it will execute PolicyPatternManager.applyToExistingItem
+     *
+     * @param dso
+     * @return
+     * @throws IOException
+     */
     @Override
     public int perform(DSpaceObject dso)
             throws IOException

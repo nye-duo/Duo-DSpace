@@ -18,6 +18,22 @@ import org.dspace.content.Item;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * Script which carries out a migration of all items so that they match the new policy pattern.
+ *
+ * The following actions are taken:
+ *
+ * <ul>
+ *     <li>Any bitstreams in bundle SECONDARY are moved to DUO_2NDRY_CLOSED</li>
+ *     <li>Any bitstreams in bundle SECONDARY_CLOSED are moved to DUO_2NDRY_CLOSED</li>
+ *     <li>Any bitstreams in bundle RESTRICTED are moved to DUO_ADMIN</li>
+ *     <li>Any bitstreams in bundle METADATA are moved to DUO_ADMIN</li>
+ *     <li>LICENSE bundle and associated bitstreams are removed</li>
+ *     <li>DELETED bundle and associated bitstreams are removed</li>
+ *     <li>PolicyPatternManager is applied to all items that are isArchived()</li>
+ * </ul>
+ *
+ */
 public class PolicyMigration extends TraverseDSpace
 {
     public static void main(String[] args)
@@ -46,6 +62,11 @@ public class PolicyMigration extends TraverseDSpace
         super(epersonEmail);
     }
 
+    /**
+     * Execute the migration
+     *
+     * @throws Exception
+     */
     public void migrate()
             throws Exception
     {
@@ -69,6 +90,15 @@ public class PolicyMigration extends TraverseDSpace
         System.out.println("Processed " + this.itemCount + " Items");
     }
 
+    /**
+     * Migrate a given item
+     *
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     * @throws Exception
+     */
     public void doItem(Item item)
             throws SQLException, AuthorizeException, IOException, Exception
     {

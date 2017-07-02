@@ -13,7 +13,30 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * <p>Implementation of the DSpace EmbargoSetter interface which applies the duo policy pattern where appropriate.</p>
+ *
+ * <p>Overall its behaviour is:</p>
+ *
+ * <ul>
+ *     <li>Check if an item has an embargo date</li>
+ *     <li>Check if the item is in the scope configured for this implementation (i.e. within an identified community)</li>
+ * </ul>
+ *
+ * <p>If both of these checks pass, then the setter runs the {@link PolicyPatternManager} on the item.  If
+ * either of the checks fail, then the fallback embargo setter is called instead (this can be the default DSpace one,
+ * for example).</p>
+ *
+ * <p>Configuration required to make this work:</p>
+ *
+ * <code>
+ * plugin.single.org.dspace.embargo.EmbargoSetter = no.uio.duo.policy.DuoEmbargoSetter<br>
+ * plugin.named.org.dspace.embargo.EmbargoSetter = org.dspace.embargo.DefaultEmbargoSetter=fallback<br>
+ * duo.embargo.communities = 123456789/10, 123456789/11
+ * </code>
+ *
+ * <p>(duo.embargo.communities is optional, if you want to restrict behaviour to one or more communities)</p>
+ */
 public class DuoEmbargoSetter implements EmbargoSetter
 {
     private EmbargoSetter fallback;
@@ -25,6 +48,17 @@ public class DuoEmbargoSetter implements EmbargoSetter
         this.policies = new PolicyPatternManager();
     }
 
+    /**
+     * Parse the embargo date.  Falls back to the fallback implementation in all cases
+     *
+     * @param context
+     * @param item
+     * @param s
+     * @return
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     @Override
     public DCDate parseTerms(Context context, Item item, String s)
             throws SQLException, AuthorizeException, IOException
@@ -32,6 +66,17 @@ public class DuoEmbargoSetter implements EmbargoSetter
         return this.fallback.parseTerms(context, item, s);
     }
 
+    /**
+     * Set the embargo on an item.  This runs {@link PolicyPatternManager}.applyToNewItem()
+     * or calls setEmbargo on the fallback, depending on whether this setter is allowed to
+     * run on this item
+     *
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     @Override
     public void setEmbargo(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
@@ -46,6 +91,17 @@ public class DuoEmbargoSetter implements EmbargoSetter
         }
     }
 
+    /**
+     * Check the embargo on an item.  This runs {@link PolicyPatternManager}.applyToExistingItem() or
+     * calls checkEmbargo on the fallback, depending on whether this setter is allowed to run on this
+     * item
+     *
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     @Override
     public void checkEmbargo(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
@@ -60,6 +116,14 @@ public class DuoEmbargoSetter implements EmbargoSetter
         }
     }
 
+    /**
+     * Determine if this setter is allowed to run on this item.
+     *
+     * @param context
+     * @param item
+     * @return
+     * @throws SQLException
+     */
     private boolean allow(Context context, Item item)
             throws SQLException
     {

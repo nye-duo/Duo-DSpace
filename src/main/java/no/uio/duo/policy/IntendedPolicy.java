@@ -10,6 +10,18 @@ import org.dspace.eperson.Group;
 import java.sql.SQLException;
 import java.util.Date;
 
+/**
+ * Class to represet the Anonymous READ policy that a bitstream is intended to have.  This covers a multitude of possible options:
+ *
+ * <ul>
+ *     <li>A policy with a permanent embargo</li>
+ *     <li>An unbound policy</li>
+ *     <li>A policy with a specified embargo date</li>
+ *     <li>A policy which already exists</li>
+ * </ul>
+ *
+ * Construct this object around the parameters required for the bitstream.
+ */
 public class IntendedPolicy
 {
     private Date embargo = null;
@@ -17,23 +29,47 @@ public class IntendedPolicy
     private boolean satisfied = false;
     private boolean permanent = false;
 
+    /**
+     * Create the default policy, which is an unbound Anonymous READ
+     */
     public IntendedPolicy() {}
 
+    /**
+     * Create a policy which is either permanently embargoed (pass true) or unbound (pass false)
+     *
+     * @param permanent
+     */
     public IntendedPolicy(boolean permanent)
     {
         this.permanent = permanent;
     }
 
+    /**
+     * Create a policy which embargoes the item until the given date
+     *
+     * @param embargo
+     */
     public IntendedPolicy(Date embargo)
     {
         this.embargo = embargo;
     }
 
+    /**
+     * Keep the existing policy
+     *
+     * @param existing
+     */
     public IntendedPolicy(ResourcePolicy existing)
     {
         this.existing = existing;
     }
 
+    /**
+     * Determine whether this IntentedPolicy would produce a policy which matches (is equivalent to) the one passed in
+     *
+     * @param policy
+     * @return
+     */
     public boolean matches(ResourcePolicy policy)
     {
         if (this.existing != null)
@@ -82,16 +118,37 @@ public class IntendedPolicy
         }
     }
 
+    /**
+     * Record that this policy is already satisfied for the intended bitstream
+     *
+     * @param satisfied
+     */
     public void setSatisfied(boolean satisfied)
     {
         this.satisfied = satisfied;
     }
 
+    /**
+     * Is this policy satisfied for the intended bitstream?
+     *
+     * @return
+     */
     public boolean isSatisfied()
     {
         return this.satisfied;
     }
 
+    /**
+     * Create the actual ResourcePolicy for the Bitstream
+     *
+     * This does not save the ResourcePolicy, you must call .update() yourself if you wish to keep it
+     *
+     * @param context
+     * @param bitstream
+     * @return
+     * @throws SQLException
+     * @throws AuthorizeException
+     */
     public ResourcePolicy makePolicy(Context context, Bitstream bitstream)
             throws SQLException, AuthorizeException
     {
@@ -124,6 +181,11 @@ public class IntendedPolicy
         return rp;
     }
 
+    /**
+     * Get the effective start date/embargo date for the policy
+     *
+     * @return
+     */
     public Date getStartDate()
     {
         if (this.embargo != null)
@@ -141,6 +203,11 @@ public class IntendedPolicy
         return null;
     }
 
+    /**
+     * Generate a date in the far future which is the effective permanent embargo date
+     *
+     * @return
+     */
     private Date getPermanentEmbargoDate()
     {
         // set the date far in the future.  The year 2970 or thereabouts.

@@ -3,6 +3,10 @@ package no.uio.duo.policy;
 import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
 
+/**
+ * Class which represents the unique combination of a bitstream and the bundle that it appears
+ * in
+ */
 public class ContextualBitstream
 {
     private Bitstream bitstream = null;

@@ -24,13 +24,15 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * This file is to run against a live DSpace for the purposes of testing the code.
+ * <p>This file is to run against a live DSpace for the purposes of testing the code.</p>
  *
- * This mitigates the fact that it is nearly impossible to cleanly unit test DSpace, especially
- * when writing add-ons like this one.
+ * <p><strong>DO NOT RUN THIS AGAINST A PRODUCTION SYSTEM</strong></p>
  *
- * Install this in your test DSpace, then run the main method of the class, and it will execute a suite
- * of tests.  The DSpace may not be in a clean state after.
+ * <p>This mitigates the fact that it is nearly impossible to cleanly unit test DSpace, especially
+ * when writing add-ons like this one.</p>
+ *
+ * <p>Install this in your test DSpace, then run the main method of the class, and it will execute a suite
+ * of tests.  The DSpace will not be in a clean state after.</p>
  */
 public class LivePolicyTest
 {

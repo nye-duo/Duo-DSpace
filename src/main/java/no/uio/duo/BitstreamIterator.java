@@ -10,12 +10,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Convenience class to allow us to iterate through all bitstreams in an item, retrieving
+ * both the bitstream and the bundle within which we are viewing it.
+ */
+
 public class BitstreamIterator implements Iterator<ContextualBitstream>
 {
     private Item item;
     private List<ContextualBitstream> entries = new ArrayList<ContextualBitstream>();
     private int index = 0;
 
+    /**
+     * Create a new iterator around an item
+     *
+     * @param item
+     * @throws SQLException
+     */
     public BitstreamIterator(Item item)
             throws SQLException
     {

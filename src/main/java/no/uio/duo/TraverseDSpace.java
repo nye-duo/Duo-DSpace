@@ -11,11 +11,24 @@ import org.dspace.xmlworkflow.storedcomponents.XmlWorkflowItem;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * Utility base class for scripts that want to be able to traverse the whole of DSpace, or parts of it.
+ *
+ * This class solves the issue of handling workflow and workspace items too.  Choose your entry point, and then
+ * this class will iterate down from there, passing through each community/sub-community/collection/item/workflow item/workspace item
+ *
+ * Subclasses should at least implement doItem, but may override any of the other methods too.
+ */
 public abstract class TraverseDSpace
 {
     protected Context context;
     protected EPerson eperson;
 
+    /**
+     * Create an instance of the object, where the contex will be initialised around the eperson account provided
+     * @param epersonEmail
+     * @throws Exception
+     */
     public TraverseDSpace(String epersonEmail)
             throws Exception
     {
@@ -25,6 +38,10 @@ public abstract class TraverseDSpace
         this.context.setCurrentUser(this.eperson);
     }
 
+    /**
+     * Hit every object in the whole of DSpace
+     * @throws Exception
+     */
     public void doDSpace()
             throws Exception
     {
@@ -35,6 +52,12 @@ public abstract class TraverseDSpace
         }
     }
 
+    /**
+     * Do community and everything therein
+     *
+     * @param handle
+     * @throws Exception
+     */
     public void doCommunity(String handle)
             throws Exception
     {
@@ -46,6 +69,12 @@ public abstract class TraverseDSpace
         this.doCommunity((Community) dso);
     }
 
+    /**
+     * Do community and everything therein
+     *
+     * @param community
+     * @throws Exception
+     */
     public void doCommunity(Community community)
             throws Exception
     {
@@ -62,6 +91,13 @@ public abstract class TraverseDSpace
         }
     }
 
+    /**
+     * Do collection and everything therein
+     *
+     * @param handle
+     * @throws SQLException
+     * @throws Exception
+     */
     public void doCollection(String handle)
             throws SQLException, Exception
     {
@@ -73,6 +109,13 @@ public abstract class TraverseDSpace
         this.doCollection((Collection) dso);
     }
 
+    /**
+     * Do collection and everything therein
+     *
+     * @param collection
+     * @throws SQLException
+     * @throws Exception
+     */
     public void doCollection(Collection collection)
             throws SQLException, Exception
     {
@@ -111,6 +154,13 @@ public abstract class TraverseDSpace
         }
     }
 
+    /**
+     * Do item
+     *
+     * @param handle
+     * @throws SQLException
+     * @throws Exception
+     */
     public void doItem(String handle)
             throws SQLException, Exception
     {
@@ -122,6 +172,13 @@ public abstract class TraverseDSpace
         this.doItem((Item) dso);
     }
 
+    /**
+     * Do workflow item
+     *
+     * @param wfid
+     * @throws SQLException
+     * @throws Exception
+     */
     public void doWorkflowItem(int wfid)
             throws SQLException, Exception
     {
@@ -138,6 +195,13 @@ public abstract class TraverseDSpace
         this.doItem(wfi.getItem());
     }
 
+    /**
+     * Do workspace item
+     *
+     * @param wsid
+     * @throws SQLException
+     * @throws Exception
+     */
     public void doWorkspaceItem(int wsid)
             throws SQLException, Exception
     {
@@ -149,6 +213,17 @@ public abstract class TraverseDSpace
         this.doItem(wsi.getItem());
     }
 
+    /**
+     * Do item.
+     *
+     * This is the one you probably want to override in your subclass
+     *
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     * @throws Exception
+     */
     public void doItem(Item item)
             throws SQLException, AuthorizeException, IOException, Exception
     {

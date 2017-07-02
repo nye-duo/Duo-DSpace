@@ -5,7 +5,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.*;
 import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
@@ -14,10 +13,15 @@ import org.dspace.eperson.EPerson;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * <p>A migration test to be run against a live DSpace.  All this actually does is create a single item suitable
+ * for testing a run of the migration script itself.</p>
+ *
+ * <p><strong>DO NOT RUN THIS ON A PRODUCTION SYSTEM</strong></p>
+ */
 public class LiveMigrateTest
 {
     public static void main(String[] args)
@@ -61,6 +65,11 @@ public class LiveMigrateTest
         this.collection = this.makeCollection();
     }
 
+    /**
+     * Execute all test activities.  This just creates a single item with makeTestItem
+     *
+     * @throws Exception
+     */
     public void runAll()
             throws Exception
     {
@@ -70,6 +79,15 @@ public class LiveMigrateTest
         System.out.println("Made Item " + item.getID());
     }
 
+    /**
+     * Make a test item for the migration.
+     *
+     * A test item consists of a minimal amount of metadata, including an embargo date from today (new Date()),
+     * and a lot of bundles each containing a single file.
+     *
+     * @return
+     * @throws Exception
+     */
     public Item makeTestItem()
             throws Exception
     {

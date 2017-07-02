@@ -22,33 +22,39 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * This class is responsible for applying a consistent and coherent set of resource policies to items it is handed.
+ * <p>This class is responsible for applying a consistent and coherent set of resource policies to items it is handed.</p>
  *
- * It carries out the following activities:
+ * <p>It carries out the following activities:</p>
  *
- * - inspects an existing item and determines what resource policies it should have on bundles and bitstreams
- * - compares existing policies with the intended policies and adds/removes policies as necessary
+ * <ul>
+ *     <li>inspects an existing item and determines what resource policies it should have on bundles and bitstreams</li>
+ *     <li>compares existing policies with the intended policies and adds/removes policies as necessary</li>
+ * </ul>
  *
- * It can apply these rules in two different ways: on existing items, and on new items
+ * <p>It can apply these rules in two different ways: on existing items, and on new items</p>
  *
- * For existing items, broadly the rules are:
+ * <p>For existing items, broadly the rules are:</p>
  *
- * - Embargo in metadata: No, Anon READ policy in place: No ; Apply permanent embargo
- * - Embargo in metadata: No, Anon READ policy in place: Yes ; Keep Anonymous read policy
- * - Embargo in metadata: Past, Anon READ policy in place: No ; Apply permanent embargo
- * - Embargo in metadata: Past, Anon READ policy in place: Yes ; Keep Anonymous read policy
- * - Embargo in metadata: Future, Anon READ policy in place: No ; Apply metadata embargo
- * - Embargo in metadata: Future, Anon READ policy in place: Yes ; Keep most restrictive policy
+ * <ul>
+ *     <li>Embargo in metadata: No, Anon READ policy in place: No ; Apply permanent embargo</li>
+ *     <li>Embargo in metadata: No, Anon READ policy in place: Yes ; Keep Anonymous read policy</li>
+ *     <li>Embargo in metadata: Past, Anon READ policy in place: No ; Apply permanent embargo</li>
+ *     <li>Embargo in metadata: Past, Anon READ policy in place: Yes ; Keep Anonymous read policy</li>
+ *     <li>Embargo in metadata: Future, Anon READ policy in place: No ; Apply metadata embargo</li>
+ *     <li>Embargo in metadata: Future, Anon READ policy in place: Yes ; Keep most restrictive policy</li>
+ * </ul>
  *
- * For new items, the rules are:
+ * <p>For new items, the rules are:</p>
  *
- * - If there is no embargo date in the metadata, apply an active Anonymous READ policy
- * - If there is an embargo date in the metadata, apply an Anonymous READ policy which begins on that date
+ * <ul>
+ *     <li>If there is no embargo date in the metadata, apply an active Anonymous READ policy</li>
+ *     <li>If there is an embargo date in the metadata, apply an Anonymous READ policy which begins on that date</li>
+ * </ul>
  *
- * For details about actual expected behaviour, see the "testmatrix.csv" in test/resources
+ * <p>For details about actual expected behaviour, see the "testmatrix.csv" in test/resources</p>
  *
- * The above rules are applied only to the ORIGINAL bundle, all other bundles are set to Admin READ only (they
- * have all their resource policies removed, which is effectively the same).
+ * <p>The above rules are applied only to the ORIGINAL bundle, all other bundles are set to Admin READ only (they
+ * have all their resource policies removed, which is effectively the same).</p>
  *
  */
 public class PolicyPatternManager

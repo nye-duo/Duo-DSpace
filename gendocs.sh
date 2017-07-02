@@ -1,1 +1,1 @@
-javadoc -d docs -sourcepath src/main/java/ -subpackages no.uio
+javadoc -d docs/javadocs -sourcepath src/main/java/ -subpackages no.uio

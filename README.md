@@ -11,4 +11,5 @@ This module contains plugins, extensions, and configuration for a DSpace impleme
 Note that this version of the module is for use with DSpace 4.2.  If you are looking for support for DSpace 1.8.2 please see the 
 **duo18** branch of the code repository.
  
-Documentation can be found in /docs/system, in particular, installation documentation is in /docs/system/INSTALL.md
+Documentation can be found in /docs/system, in particular, installation documentation is in /docs/system/INSTALL.md (or alongside
+this file in the same directory if you are looking at the binary release).

@@ -23,6 +23,7 @@ cp postinstall.sh $OUT
 cp postupdate.sh $OUT
 cp addbinarymodule.sh $OUT
 cp README.md $OUT
+cp docs/system/INSTALL.md $OUT
 cp migratedspace.sh $OUT
 
 tar -zcvf dspace-duo-$VERSION.tar.gz $OUT

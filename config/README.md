@@ -20,6 +20,8 @@ In order to successfully deploy the Duo extensions to DSpace, you will need all 
 
 **modules/cristin.cfg** - Configuration specific to the Cristin ingest.
 
+**modules/curate.cfg** - Updated configuration to add our curation task to the list of available tasks
+
 **modules/oai.cfg** - Enhanced OAI harvester configuration.  See the detailed documentation below for more details.
 
 **modules/studentweb.cfg** - Configuration specific to the StudentWeb ingest.
@@ -40,13 +42,14 @@ In order to successfully deploy the Duo extensions to DSpace, you will need all 
 
 ##dspace.cfg
 
-Additions and modifications to the main, standard dspace.cfg file.  To deploy this, it cannot just be appended to the existing dspace.cfg, it must be merged with it.  It duplicates the following fields from the main dspace.cfg:
+Additions and modifications to the main, standard dspace.cfg file.  To deploy this, it cannot just be appended to the 
+existing dspace.cfg, it must be merged with it.  It duplicates the following fields from the main dspace.cfg:
 
 * embargo.field.terms
 * embargo.field.lift
-* plugin.single.org.dspace.embargo.EmbargoLifter
 * event.dispatcher.default.consumers
 * plugin.named.org.dspace.content.crosswalk.IngestionCrosswalk
+* plugin.single.org.dspace.embargo.EmbargoSetter
 
 This file also defines the specific crosswalks to be used for the different types of content coming from Cristin.  At this stage there is only a generic crosswalk, but this configuration can be updated to use different crosswalks whenever necessary:
 

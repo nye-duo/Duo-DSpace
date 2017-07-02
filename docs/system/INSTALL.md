@@ -1,13 +1,6 @@
-DUO Extensions for DSpace 4.2
-=============================
+DUO Extensions Installation
+===========================
 
-This module contains plugins, extensions, and configuration for a DSpace implementation which will
-
-1. Support SWORDv2 deposit from StudentWeb
-2. Support harvesting content directly from CRISTIN
-
-Note that this version of the module is for use with DSpace 4.2.  If you are looking for support for DSpace 1.8.2 please see the **duo18** branch of the code repository.
- 
 
 How to use this documentation
 -----------------------------
@@ -23,15 +16,15 @@ If you are upgrading from Duo 1.8.2 to Duo 4.2, you should follow the section **
 Dependencies
 ------------
 
-###Java 1.7 or Java 1.8
+### Java 1.7 or Java 1.8
 
 Both DSpace 4.2 and the code provided here are dependent on a Java 1.7 or 1.8 installation.  DSpace 4.2 will not compile on Java 1.6.
 
-###Maven 3+
+### Maven 3+
 
 DSpace requires Maven 3+ to compile - it may work on earlier versions, but is not recommended.  The Duo extensions will compile under Maven 3+.
 
-###BagIt
+### BagIt
 
 This library depends on the related BagIt library, which must be downloaded and compiled as per the instructions here:
 
@@ -55,7 +48,7 @@ It is bundled here for your convenience.  Install it into your local maven repos
 
     mvn install:install-file -Dfile=lib/idservice-client/idservice-client.jar -DpomFile=lib/idservice-client/pom.xml
 
-###DSpace
+### DSpace
 
 It is designed to be installed into the Duo version of DSpace here:
 
@@ -68,7 +61,7 @@ This can be obtained with the following commands:
 
 This will be the source of your ultimate DSpace installation
 
-###Duo-DSpace
+### Duo-DSpace
 
 You will also need to check this code library out of GitHub, which you can do with 
 
@@ -84,7 +77,7 @@ You can then carry on with your preferred installation process below
 Fresh Installation
 ------------------
 
-###Binary Installation (recommended)
+### Binary Installation (recommended)
 
 **1/** Customise the addbinarymodule.sh and postinstall.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
 
@@ -112,7 +105,7 @@ Note that you **must** use bash to execute this file, or it will cause an error.
 Now go on to the **Common Installation Steps**
 
 
-###Source Installation
+### Source Installation
 
 Since the source installation requires Duo-DSpace to be compiled against a modified version of DSpace, it is necessary to install that modified DSpace into the local maven repository /before/ following the steps below.  This can be done with:
 
@@ -145,7 +138,7 @@ Note that you **must** use bash to execute this file, or it will cause an error.
 Now go on to the **Common Installation Steps**
 
 
-###Common Installation Steps
+### Common Installation Steps
 
 **4/** Append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for fields required)
 
@@ -202,7 +195,7 @@ This approach should be used if you want to install the Duo Extensions onto an e
 
 Start by following **Preparing the DSpace source** and then choose one of **Binary Installation** or **Source Installation** and finish with the **Custom Installation Steps**
 
-###Preparing the DSpace source
+### Preparing the DSpace source
 
 **1/** Checkout the Duo version of DSpace listed in the **Dependencies** section above
 
@@ -227,7 +220,7 @@ you should merge your all your custom configuration into the files in the direct
 
 You can find detailed documentation about the configuration options here: [https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md](https://github.com/nye-duo/Duo-DSpace/blob/master/config/README.md)
 
-###Binary Installation (recommended)
+### Binary Installation (recommended)
 
 **4/** Customise the addbinarymodule.sh and postupdate.sh scripts with the paths to your DSpace source, DSpace live and Maven installs as appropriate.
 
@@ -255,7 +248,7 @@ Note that you **must** use bash to execute this file, or it will cause an error.
 Now go on to the **Common Installation Steps**
 
 
-###Source Installation
+### Source Installation
 
 Since the source installation requires Duo-DSpace to be compiled against a modified version of DSpace, it is necessary to install that modified DSpace into the local maven repository /before/ following the steps below.  This can be done with:
 
@@ -287,7 +280,7 @@ Note that you **must** use bash to execute this file, or it will cause an error.
 
 Now go on to the **Common Installation Steps**
 
-###Common Installation Steps
+### Common Installation Steps
 
 **7/** Append/replace the values in dspace.cfg with the duo values (see config/dspace.cfg in the duo code for fields required)
 

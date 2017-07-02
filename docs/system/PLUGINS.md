@@ -16,6 +16,74 @@ This document describes each of the classes in this package which are DSpace plu
 
 **Co-Dependencies** - Other plugins which are **strongly recommended** to be included alongside the specified plugin
 
+## General use plugins
+
+### no.uio.duo.DSpace18FixedDispatcher 
+**Interface**: org.dspace.event.Dispatcher
+
+**Feature**: General Event Handling in DSpace, StudentWeb
+
+**Function**: Handles processing of events in an error-resistant way (fixing issues with the Basic Dispatcher in DSpace by default)
+
+**Configured In**: dspace.cfg
+
+**Configuration**: None
+
+**Hard-Dependencies**: None
+
+**Co-Dependencies**: None
+
+### no.uio.duo.policy.DuoEmbargoSetter
+
+**Interface**: org.dspace.embargo.EmbargoSetter
+
+**Feature**: Sets Embargoes on incoming or existing items
+
+**Function**: Applies the PolicyPatternManager appropriately to items
+
+**Configured In**: dspace.cfg
+
+**Configuration**: embargo.field.lift
+
+**Hard-Dependencies**: None
+
+**Co-Dependencies**: None
+
+
+### no.uio.duo.policy.DupPolicyCurationTask
+**Interface**: org.dspace.curate.CurationTask
+
+**Feature**: Curation Task system
+
+**Function**: Applies the PolicyPatternManager appropriately to items
+
+**Configured In**: curate.cfg
+
+**Configuration**:
+* plugin.named.org.dspace.curate.CurationTask
+* ui.tasknames
+
+**Hard-Dependencies**: None
+
+**Co-Dependencies**: None
+
+
+### no.uio.duo.DuoInstallConsumer 
+**Interface**: org.dspace.event.Consumer
+
+**Feature**: StudentWeb
+
+**Function**: Used to embargo/withdraw StudentWeb items with a "fail" grade on submission to the archive
+
+**Configured In**: dspace.cfg
+
+**Configuration**: None
+
+**Hard-Dependencies**: 
+* no.uio.duo.DSpace18FixedDispatcher
+
+**Co-Dependencies**: None
+
 
 ## Plugins for use with Cristin integration
 
@@ -152,55 +220,7 @@ It is **recommended** that all of these plugins be deployed if integrating Duo w
 
 Note also that the content handling plugins ( *DuoEntryDisseminator*, *FSBagItIngester*, and *FSEntryIngester* ) are not strictly dependent on each other but it is **strongly recommended** that they be deployed together, as they are designed to work as a coherent whole.
 
-## no.uio.duo.DSpace18FixedDispatcher 
-**Interface**: org.dspace.event.Dispatcher
-
-**Feature**: General Event Handling in DSpace, StudentWeb
-
-**Function**: Handles processing of events in an error-resistant way (fixing issues with the Basic Dispatcher in DSpace by default)
-
-**Configured In**: dspace.cfg
-
-**Configuration**: None
-
-**Hard-Dependencies**: None
-
-**Co-Dependencies**: None
-
-## no.uio.duo.DuoEmbargoLifter 
-**Interface**: org.dspace.embargo.EmbargoLifter
-
-**Feature**: Embargo System in DSpace, StudentWeb
-
-**Function**: Lifts embargoes on appropriate items, and applies standard Duo item access policies
-
-**Configured In**: dspace.cfg
-
-**Configuration**: dspace.cfg
-
-**Hard-Dependencies**: None
-
-**Co-Dependencies**:
-* no.uio.duo.DuoInstallConsumer 
-
-## no.uio.duo.DuoInstallConsumer 
-**Interface**: org.dspace.event.Consumer
-
-**Feature**: StudentWeb
-
-**Function**: Used to embargo/withdraw StudentWeb items with a "fail" grade on submission to the archive
-
-**Configured In**: dspace.cfg
-
-**Configuration**: None
-
-**Hard-Dependencies**: 
-* no.uio.duo.DSpace18FixedDispatcher
-
-**Co-Dependencies**: None
-
-
-## no.uio.duo.DuoEntryDisseminator 
+### no.uio.duo.DuoEntryDisseminator 
 **Interface**: org.dspace.sword2.SwordEntryDisseminator
 
 **Feature**: StudentWeb
@@ -217,7 +237,7 @@ Note also that the content handling plugins ( *DuoEntryDisseminator*, *FSBagItIn
 * no.uio.duo.FSBagItIngester 
 * no.uio.duo.FSEntryIngester 
 
-## no.uio.duo.FSBagItIngester 
+### no.uio.duo.FSBagItIngester 
 **Interface**: org.dspace.sword2.SwordContentIngester
 
 **Feature**: StudentWeb
@@ -234,7 +254,7 @@ Note also that the content handling plugins ( *DuoEntryDisseminator*, *FSBagItIn
 * no.uio.duo.DuoEntryDisseminator 
 * no.uio.duo.FSEntryIngester 
 
-## no.uio.duo.FSEntryIngester 
+### no.uio.duo.FSEntryIngester 
 **Interface**: org.dspace.sword2.SwordEntryIngester
 
 **Feature**: StudentWeb

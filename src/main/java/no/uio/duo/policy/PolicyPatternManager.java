@@ -3,6 +3,7 @@ package no.uio.duo.policy;
 import no.uio.duo.BitstreamIterator;
 import no.uio.duo.DuoException;
 import no.uio.duo.MetadataManager;
+import org.apache.log4j.Logger;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.authorize.AuthorizeManager;
 import org.dspace.authorize.ResourcePolicy;
@@ -20,13 +21,55 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * This class is responsible for applying a consistent and coherent set of resource policies to items it is handed.
+ *
+ * It carries out the following activities:
+ *
+ * - inspects an existing item and determines what resource policies it should have on bundles and bitstreams
+ * - compares existing policies with the intended policies and adds/removes policies as necessary
+ *
+ * It can apply these rules in two different ways: on existing items, and on new items
+ *
+ * For existing items, broadly the rules are:
+ *
+ * - Embargo in metadata: No, Anon READ policy in place: No ; Apply permanent embargo
+ * - Embargo in metadata: No, Anon READ policy in place: Yes ; Keep Anonymous read policy
+ * - Embargo in metadata: Past, Anon READ policy in place: No ; Apply permanent embargo
+ * - Embargo in metadata: Past, Anon READ policy in place: Yes ; Keep Anonymous read policy
+ * - Embargo in metadata: Future, Anon READ policy in place: No ; Apply metadata embargo
+ * - Embargo in metadata: Future, Anon READ policy in place: Yes ; Keep most restrictive policy
+ *
+ * For new items, the rules are:
+ *
+ * - If there is no embargo date in the metadata, apply an active Anonymous READ policy
+ * - If there is an embargo date in the metadata, apply an Anonymous READ policy which begins on that date
+ *
+ * For details about actual expected behaviour, see the "testmatrix.csv" in test/resources
+ *
+ * The above rules are applied only to the ORIGINAL bundle, all other bundles are set to Admin READ only (they
+ * have all their resource policies removed, which is effectively the same).
+ *
+ */
 public class PolicyPatternManager
 {
+    /** log4j logger */
+    private static Logger log = Logger.getLogger(PolicyPatternManager.class);
+
+    /**
+     * Inner class to allow us to keep track of the latest (in time) embargo date, as processing
+     * of bitstreams progresses
+     */
     class EmbargoDateTracker
     {
         public List<Date> startDates = new ArrayList<Date>();
         public boolean unbound = false;
 
+        /**
+         * Track the embargo date from the intended policy
+         *
+         * @param intendedPolicy
+         */
         public void track(IntendedPolicy intendedPolicy)
         {
             // record the start dates we see, and whether there is no start date on any policy (i.e. is unbound)
@@ -43,9 +86,23 @@ public class PolicyPatternManager
         }
     }
 
+    /**
+     * Apply the policy pattern to an existing item
+     *
+     * @param item
+     * @param context
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     public void applyToExistingItem(Item item, Context context)
             throws SQLException, AuthorizeException, IOException
     {
+        if (log.isDebugEnabled())
+        {
+            log.debug("Applying PolicyPatternManager to existing item " + item.getID());
+        }
+
         Date embargoDate = this.getEmbargoDate(item, context);
         EmbargoDateTracker tracker = new EmbargoDateTracker();
 
@@ -65,12 +122,17 @@ public class PolicyPatternManager
                 IntendedPolicy intendedPolicy = this.getIntendedPolicies(readPolicies, embargoDate);
                 List<ResourcePolicy> alsoRemove = this.filterUnnecessaryPolicies(readPolicies, intendedPolicy);
                 removePolicies.addAll(alsoRemove);
-
                 this.removePolicies(removePolicies);
+                if (removePolicies.size() > 0)
+                {
+                    log.info("PolicyPatternManager removed " + removePolicies.size() + " unwanted policies from bitstream " + cb.getBitstream().getID());
+                }
+
                 if (!intendedPolicy.isSatisfied())
                 {
                     ResourcePolicy policy = intendedPolicy.makePolicy(context, cb.getBitstream());
                     policy.update();
+                    log.info("PolicyPatternManager applied new policy on bitstream " + cb.getBitstream().getID());
                 }
 
                 // track the policy dates for later use
@@ -81,16 +143,40 @@ public class PolicyPatternManager
                 // just remove all the policies, we don't want any policies on other bundles' bitstreams
                 this.removePolicies(removePolicies);
                 this.removePolicies(readPolicies);
+
+                if (removePolicies.size() > 0)
+                {
+                    log.info("PolicyPatternManager removed " + removePolicies.size() + " unwanted policies from bitstream " + cb.getBitstream().getID());
+                }
             }
         }
 
         this.normaliseEmbargoDate(tracker, embargoDate, item, context);
         item.update();
+
+        if (log.isDebugEnabled())
+        {
+            log.debug("Finished applying PolicyPatternManager to existing item " + item.getID());
+        }
     }
 
+    /**
+     * Apply the policy pattern to a new item
+     *
+     * @param item
+     * @param context
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     public void applyToNewItem(Item item, Context context)
             throws SQLException, AuthorizeException, IOException
     {
+        if (log.isDebugEnabled())
+        {
+            log.debug("Applying PolicyPatternManager to new item " + item.getID());
+        }
+
         Date embargoDate = this.getEmbargoDate(item, context);
         EmbargoDateTracker tracker = new EmbargoDateTracker();
 
@@ -105,6 +191,10 @@ public class PolicyPatternManager
             // just remove all the bitstream's policies, we'll apply the correct one later
             List<ResourcePolicy> readPolicies = this.getReadPolicies(context, cb.getBitstream());
             this.removePolicies(readPolicies);
+            if (readPolicies.size() > 0)
+            {
+                log.info("PolicyPatternManager removed " + readPolicies.size() + " read policies from bitstream " + cb.getBitstream().getID());
+            }
 
             if ("ORIGINAL".equals(cb.getBundle().getName()))
             {
@@ -114,6 +204,7 @@ public class PolicyPatternManager
                     IntendedPolicy intended = new IntendedPolicy(false);
                     ResourcePolicy policy = intended.makePolicy(context, cb.getBitstream());
                     policy.update();
+                    log.info("PolicyPatternManager applied new policy on bitstream " + cb.getBitstream().getID());
 
                     // track the policy dates for later use
                     tracker.track(intended);
@@ -129,6 +220,7 @@ public class PolicyPatternManager
 
                     ResourcePolicy policy = intended.makePolicy(context, cb.getBitstream());
                     policy.update();
+                    log.info("PolicyPatternManager applied new policy on bitstream " + cb.getBitstream().getID());
 
                     // track the policy dates for later use
                     tracker.track(intended);
@@ -138,15 +230,37 @@ public class PolicyPatternManager
 
         this.normaliseEmbargoDate(tracker, embargoDate, item, context);
         item.update();
+
+        if (log.isDebugEnabled())
+        {
+            log.debug("Finished applying PolicyPatternManager to new item " + item.getID());
+        }
     }
 
+    /**
+     * Normalise the embargo date in the metadata with the embargo dates applied to bitstreams
+     *
+     * @param tracker
+     * @param embargoDate
+     * @param item
+     * @param context
+     */
     private void normaliseEmbargoDate(EmbargoDateTracker tracker, Date embargoDate, Item item, Context context)
     {
+        if (log.isDebugEnabled())
+        {
+            log.debug("PolicyPatternManager.normaliseEmbargoDate on item " + item.getID());
+        }
+
         // now determine how to set the embargo date in the metadata
         Date latest = null;
         if (tracker.startDates.size() > 0)
         {
-            System.out.println("start dates > 0");
+            if (log.isDebugEnabled())
+            {
+                log.debug("PolicyPatternManager.normaliseEmbargoDate: one or more start dates present in resource policies set for item " + item.getID());
+            }
+
             // look for the latest start date for a policy
             for (Date sd : tracker.startDates)
             {
@@ -170,32 +284,62 @@ public class PolicyPatternManager
         // just keep the existing embargo date
         if (latest == null && !tracker.unbound)
         {
-            System.out.println("latest null, !unbound");
+            if (log.isDebugEnabled())
+            {
+                log.debug("PolicyPatternManager.normaliseEmbargoDate: no latest start date, and no unbound policy for item " + item.getID());
+            }
             latest = embargoDate;
         }
 
         // if there is no latest date, then, just remove the embargo metadata
         if (embargoDate != null && latest == null)
         {
-            System.out.println("latest null - remove");
+            if (log.isDebugEnabled())
+            {
+                log.debug("PolicyPatternManager.normaliseEmbargoDate: no latest embargo date from policy for item " + item.getID() + " - removing embargo date from metadata");
+            }
             this.removeEmbargoDate(item, context);
+            log.info("Removed embargo date from item metadata: " + item.getID());
         }
         // if the embargo date is not set, but there is a latest date, set the latest date
         else if (embargoDate == null && latest != null)
         {
-            System.out.println("embargo null - setting date");
+            if (log.isDebugEnabled())
+            {
+                log.debug("PolicyPatternManager.normaliseEmbargoDate: no embargo date in item, but date from policy, for item " + item.getID() + " - adding embargo date in metadata");
+            }
             this.setEmbargoDate(latest, item, context);
+            log.info("Added embargo date to item metadata: " + item.getID());
         }
         // if the latest start date is after the current embargo metadata, move the metadata forward
         else if (latest != null && latest.after(embargoDate))
         {
-            System.out.println("latest later - setting date");
+            if (log.isDebugEnabled())
+            {
+                log.debug("PolicyPatternManager.normaliseEmbargoDate: policy embargo date later than metadata embargo date for item " + item.getID() + " - updating embargo date in metadata");
+            }
             this.setEmbargoDate(latest, item, context);
+            log.info("Updated embargo date in item metadata: " + item.getID());
         }
-        System.out.println("finished setting embargo");
+
         // in all other cases, just leave the embargo metadata as-is
+
+        if (log.isDebugEnabled())
+        {
+            log.debug("Finished PolicyPatternManager.normaliseEmbargoDate on item " + item.getID());
+        }
     }
 
+    /**
+     * Get the embargo date from the item metadata
+     *
+     * @param item
+     * @param context
+     * @return
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     private Date getEmbargoDate(Item item, Context context)
             throws SQLException, AuthorizeException, IOException
     {
@@ -222,6 +366,13 @@ public class PolicyPatternManager
         return embargoDate.toDate();
     }
 
+    /**
+     * Set the embargo date in the item metadata
+     *
+     * @param newDate
+     * @param item
+     * @param context
+     */
     private void setEmbargoDate(Date newDate, Item item, Context context)
     {
         String liftDateField = ConfigurationManager.getProperty("embargo.field.lift");
@@ -241,7 +392,7 @@ public class PolicyPatternManager
         }
         catch (DuoException e)
         {
-            // TODO just make sure we log this error in configuration
+            log.warn("Embargo date could not be set, as embargo.field.lift could not be interpreted as metadata field");
             return;
         }
 
@@ -260,8 +411,15 @@ public class PolicyPatternManager
 
         String provenance = prefix + "Policy pattern application modified embargo date metadata: from '" + original + "' to '" + dcv.value + "'";
         item.addMetadata("dc", "description", "provenance", null, provenance);
+        log.info("Item " + item.getID() + " " + provenance);
     }
 
+    /**
+     * Remove the embargo date from the metadata
+     *
+     * @param item
+     * @param context
+     */
     private void removeEmbargoDate(Item item, Context context)
     {
         String liftDateField = ConfigurationManager.getProperty("embargo.field.lift");
@@ -285,7 +443,7 @@ public class PolicyPatternManager
         }
         catch (DuoException e)
         {
-            // TODO just make sure we log this error in configuration
+            log.warn("Embargo date could not be removed, as embargo.field.lift could not be interpreted as metadata field");
             return;
         }
 
@@ -308,8 +466,17 @@ public class PolicyPatternManager
 
         String provenance = prefix + "Policy pattern application removed embargo date, was: '" + original + "'";
         item.addMetadata("dc", "description", "provenance", null, provenance);
+        log.info("Item " + item.getID() + " " + provenance);
     }
 
+    /**
+     * Get a list of all the READ policies on an item
+     *
+     * @param context
+     * @param dso
+     * @return
+     * @throws SQLException
+     */
     private List<ResourcePolicy> getReadPolicies(Context context, DSpaceObject dso)
             throws SQLException
     {
@@ -325,6 +492,12 @@ public class PolicyPatternManager
         return read;
     }
 
+    /**
+     * Go through the list of policies and return a list of those that can be immediately thrown away
+     *
+     * @param existing
+     * @return
+     */
     private List<ResourcePolicy> filterUnwantedPolicies(List<ResourcePolicy> existing)
     {
         Date now = new Date();
@@ -361,6 +534,14 @@ public class PolicyPatternManager
         return unwanted;
     }
 
+    /**
+     * Compute the IntendedPolicy for a bitstream given the list of existing policies and the
+     * embargo date from the metadata
+     *
+     * @param existing
+     * @param embargo
+     * @return
+     */
     private IntendedPolicy getIntendedPolicies(List<ResourcePolicy> existing, Date embargo)
     {
         ResourcePolicy anonRead = null;
@@ -479,6 +660,13 @@ public class PolicyPatternManager
         return intended;
     }
 
+    /**
+     * Filter out policies from the list of policies which are no longer necessary, given the IntededPolicy
+     *
+     * @param existing
+     * @param intended
+     * @return
+     */
     private List<ResourcePolicy> filterUnnecessaryPolicies(List<ResourcePolicy> existing, IntendedPolicy intended)
     {
         List<ResourcePolicy> remove = new ArrayList<ResourcePolicy>();
@@ -507,6 +695,17 @@ public class PolicyPatternManager
         return remove;
     }
 
+    /**
+     * Remove all resource policies from a bundle.
+     *
+     * Bundle policies do not appear to make any difference to access of items or bitstreams in DSpace, so they
+     * are redundant for our purposes
+     *
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     */
     private void removeAllBundlePolicies(Context context, Item item)
             throws SQLException, AuthorizeException
     {
@@ -519,6 +718,12 @@ public class PolicyPatternManager
         }
     }
 
+    /**
+     * Remove the listed policies
+     *
+     * @param policies
+     * @throws SQLException
+     */
     private void removePolicies(List<ResourcePolicy> policies)
             throws SQLException
     {

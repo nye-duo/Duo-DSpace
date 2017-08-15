@@ -125,6 +125,8 @@ public class LivePolicyTest
     private Date nearFuture = new Date(3153600000000L);
     private Date farFuture = new Date(31535996400000L);     // has to be set to this specific date, because of rounding oddities in the java Date library
 
+
+
     public LivePolicyTest(String epersonEmail, String bitstreamPath, String baseUrl, String matrixPath, String outPath)
             throws Exception
     {
@@ -580,6 +582,7 @@ public class LivePolicyTest
                 }
                 ResourcePolicy policy = existing.get(0);
                 Date start = policy.getStartDate();
+                start = this.correctForTimeZone(start);
 
                 // go through all possible anonRead states and evaluate the policy against them
                 if ("past".equals(anonRead))
@@ -674,6 +677,7 @@ public class LivePolicyTest
         {
             date = sdf.parse(val);
         }
+        date = this.correctForTimeZone(date);
 
         if ("none".equals(metadataResult))
         {
@@ -781,5 +785,44 @@ public class LivePolicyTest
                 System.out.println(key + " - " + pair.get(key));
             }
         }
+    }
+
+    private Date correctForTimeZone(Date date)
+    {
+        // FIXME: this still doesn't work quite right for timezones west of Greenwich, but I'm not sure why
+        // not going to work harder to fix it, as it won't be run in that timezone, and it's only a test script anyway
+        //
+        // but just in case you are interested, test 15 for example, yields an apparent difference between the resource policy
+        // time and the far future time of 42 hours, and I have no idea how that's possible.
+        if (date != null)
+        {
+            //System.out.println(date.getTime());
+
+            // This bit of code corrects for the issue that arises once dates have been round-tripped into the database without the time portion or any time
+            // zone information, such that those dates can still be compared to the absolute near/far future dates used in testing.
+            //
+            // first we get the local timezone and get the offset from UTC.
+            TimeZone tz = Calendar.getInstance().getTimeZone();
+            int offset = tz.getRawOffset();
+            //System.out.println(offset);
+
+            // if the offset is less than 0, this is a timezone west of Greenwich.  Since all the dates coming back from the database are without
+            // time information, they are all treated as if they represent UTC.  This means dates actually in -ve UTC will appear to be further in the
+            // future, not back in the past.  That is, a -6 UTC needs to actually be interpreted as a +18 UTC.  That's what this next bit of code
+            // calculates.
+            if (offset < 0)
+            {
+                offset = 86400000 + offset;
+            }
+            //System.out.println(offset);
+
+            // now create a new date from the new number of milliseconds
+            long startCompare = date.getTime() + (long) offset;
+            date = new Date(startCompare);
+
+            //System.out.println(date.getTime());
+        }
+
+        return date;
     }
 }

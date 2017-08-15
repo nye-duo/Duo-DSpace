@@ -80,7 +80,6 @@ public class PolicyPatternManager
         {
             // record the start dates we see, and whether there is no start date on any policy (i.e. is unbound)
             Date start = intendedPolicy.getStartDate();
-            System.out.println(start);
             if (start == null)
             {
                 this.unbound = true;

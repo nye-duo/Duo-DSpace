@@ -1,5 +1,6 @@
 package no.uio.duo;
 
+import no.uio.duo.policy.PolicyApplicationFilter;
 import no.uio.duo.policy.PolicyPatternManager;
 import org.dspace.content.DCValue;
 import org.dspace.content.Item;
@@ -74,8 +75,11 @@ public class DuoInstallConsumer implements Consumer
 
         // now simply apply the policy pattern, which will take the appropriate action
         // depending on the state of the item at the point we pick it up
-        PolicyPatternManager ppm = new PolicyPatternManager();
-        ppm.applyToNewItem(item, context);
+        if (PolicyApplicationFilter.allow(context, item))
+        {
+            PolicyPatternManager ppm = new PolicyPatternManager();
+            ppm.applyToNewItem(item, context);
+        }
     }
 
     private boolean isFail(Context context, Item item)

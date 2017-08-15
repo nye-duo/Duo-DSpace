@@ -81,7 +81,7 @@ public class DuoEmbargoSetter implements EmbargoSetter
     public void setEmbargo(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
     {
-        if (this.allow(context, item))
+        if (PolicyApplicationFilter.allow(context, item))
         {
             this.policies.applyToNewItem(item, context);
         }
@@ -106,7 +106,7 @@ public class DuoEmbargoSetter implements EmbargoSetter
     public void checkEmbargo(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
     {
-        if (this.allow(context, item))
+        if (PolicyApplicationFilter.allow(context, item))
         {
             this.policies.applyToExistingItem(item, context);
         }
@@ -116,56 +116,5 @@ public class DuoEmbargoSetter implements EmbargoSetter
         }
     }
 
-    /**
-     * Determine if this setter is allowed to run on this item.
-     *
-     * @param context
-     * @param item
-     * @return
-     * @throws SQLException
-     */
-    private boolean allow(Context context, Item item)
-            throws SQLException
-    {
-        String liftDateField = ConfigurationManager.getProperty("embargo.field.lift");
-        if (liftDateField == null)
-        {
-            return false;
-        }
 
-        DCValue[] dcvs = item.getMetadata(liftDateField);
-        if (dcvs.length == 0)
-        {
-            return false;
-        }
-
-        String scopeCfg = ConfigurationManager.getProperty("duo.embargo.communities");
-        if (scopeCfg == null)
-        {
-            return true;
-        }
-
-        List<Integer> communityIDs = new ArrayList<Integer>();
-        String[] handles = scopeCfg.split(",");
-        for (String handle : handles)
-        {
-            handle = handle.trim();
-            DSpaceObject dso = HandleManager.resolveToObject(context, handle);
-            if (dso instanceof Community)
-            {
-                communityIDs.add(dso.getID());
-            }
-        }
-
-        Community[] coms = item.getCommunities();
-        for (Community com : coms)
-        {
-            if (communityIDs.contains(com.getID()))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
 }

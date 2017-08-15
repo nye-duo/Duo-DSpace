@@ -62,6 +62,10 @@ To check for items which have multiple files in ORIGINAL, which may require some
 of policy issues, run the following command
 
     [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.MultiFileAnalyser -e [admin account email] -o [path for output file]
+    
+You can include a -v option to also print the output to the screen when the run is complete:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.MultiFileAnalyser -e [admin account email] -o [path for output file] -v
 
 ### Run Policy Migration
 

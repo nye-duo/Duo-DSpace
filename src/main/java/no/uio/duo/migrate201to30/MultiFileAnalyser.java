@@ -33,6 +33,7 @@ public class MultiFileAnalyser extends TraverseDSpace
         Options options = new Options();
         options.addOption("e", "eperson", true, "EPerson to run the script as");
         options.addOption("o", "out", true, "Path to file to output results to");
+        options.addOption("v", "verbose", false, "Produce verbose output");
         CommandLine line = parser.parse(options, args);
 
         if (!line.hasOption("e"))
@@ -47,7 +48,7 @@ public class MultiFileAnalyser extends TraverseDSpace
             System.exit(0);
         }
 
-        MultiFileAnalyser mfa = new MultiFileAnalyser(line.getOptionValue("e"), line.getOptionValue("o"));
+        MultiFileAnalyser mfa = new MultiFileAnalyser(line.getOptionValue("e"), line.getOptionValue("o"), line.hasOption("v"));
         mfa.analyse();
     }
 
@@ -62,12 +63,14 @@ public class MultiFileAnalyser extends TraverseDSpace
     private String outPath;
     private int maxBitstreamCount = 0;
     private List<ReportRow> rows = new ArrayList<ReportRow>();
+    private boolean verbose = false;
 
-    public MultiFileAnalyser(String epersonEmail, String outPath)
+    public MultiFileAnalyser(String epersonEmail, String outPath, boolean verbose)
             throws Exception
     {
         super(epersonEmail);
         this.outPath = outPath;
+        this.verbose = verbose;
     }
 
     public void analyse()
@@ -189,7 +192,10 @@ public class MultiFileAnalyser extends TraverseDSpace
             csv.append("\n");
         }
 
-        System.out.println(csv.toString());
+        if (this.verbose)
+        {
+            System.out.println(csv.toString());
+        }
 
         Writer out = new FileWriter(this.outPath);
         out.write(csv.toString());

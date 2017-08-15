@@ -67,6 +67,9 @@ You can include a -v option to also print the output to the screen when the run 
 
     [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.MultiFileAnalyser -e [admin account email] -o [path for output file] -v
 
+You can also include a -n option to report on items with no handles (i.e. those in the workflow/workspace) and a -b option to include detailed
+output regarding the bitstreams, including their resource policies.
+
 ### Run Policy Migration
 
 After the new code has been deployed, the following script must be run once, to migrate all the old bundles to the new

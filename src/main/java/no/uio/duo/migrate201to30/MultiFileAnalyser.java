@@ -34,6 +34,8 @@ public class MultiFileAnalyser extends TraverseDSpace
         options.addOption("e", "eperson", true, "EPerson to run the script as");
         options.addOption("o", "out", true, "Path to file to output results to");
         options.addOption("v", "verbose", false, "Produce verbose output");
+        options.addOption("n", "nohandle", false, "Include items with no handle in the output");
+        options.addOption("b", "bitstreams", false, "Include full bitstream information");
         CommandLine line = parser.parse(options, args);
 
         if (!line.hasOption("e"))
@@ -48,7 +50,7 @@ public class MultiFileAnalyser extends TraverseDSpace
             System.exit(0);
         }
 
-        MultiFileAnalyser mfa = new MultiFileAnalyser(line.getOptionValue("e"), line.getOptionValue("o"), line.hasOption("v"));
+        MultiFileAnalyser mfa = new MultiFileAnalyser(line.getOptionValue("e"), line.getOptionValue("o"), line.hasOption("n"), line.hasOption("b"), line.hasOption("v"));
         mfa.analyse();
     }
 
@@ -64,13 +66,17 @@ public class MultiFileAnalyser extends TraverseDSpace
     private int maxBitstreamCount = 0;
     private List<ReportRow> rows = new ArrayList<ReportRow>();
     private boolean verbose = false;
+    private boolean noHandle = false;
+    private boolean bitstreams = false;
 
-    public MultiFileAnalyser(String epersonEmail, String outPath, boolean verbose)
+    public MultiFileAnalyser(String epersonEmail, String outPath, boolean noHandle, boolean bitstreams, boolean verbose)
             throws Exception
     {
         super(epersonEmail);
         this.outPath = outPath;
         this.verbose = verbose;
+        this.noHandle = noHandle;
+        this.bitstreams = bitstreams;
     }
 
     public void analyse()
@@ -89,6 +95,11 @@ public class MultiFileAnalyser extends TraverseDSpace
     public void doItem(Item item)
             throws Exception
     {
+        if (item.getHandle() == null && !this.noHandle)
+        {
+            return;
+        }
+
         List<Bitstream> bitstreams = new ArrayList<Bitstream>();
 
         // get all the bitstreams in the original bundle (ensuring we handle the case where there
@@ -106,13 +117,17 @@ public class MultiFileAnalyser extends TraverseDSpace
             return;
         }
 
-        List<String> descs = this.describePolicies(bitstreams);
-
         ReportRow row = new ReportRow();
         row.id = item.getID();
         row.handle = item.getHandle();
         row.fileCount = bitstreams.size();
-        row.policies = descs;
+
+        if (this.bitstreams)
+        {
+            List<String> descs = this.describePolicies(bitstreams);
+            row.policies = descs;
+        }
+
         this.rows.add(row);
 
         // keep track of the largest number of bitstreams, which will matter when we produce the output
@@ -171,23 +186,29 @@ public class MultiFileAnalyser extends TraverseDSpace
     {
         StringBuilder csv = new StringBuilder();
         csv.append("ID,Handle,Number of Files");
-        for (int i = 0; i < this.maxBitstreamCount; i++)
+        if (this.bitstreams)
         {
-            csv.append(",Bitstream ").append(i+1);
+            for (int i = 0; i < this.maxBitstreamCount; i++)
+            {
+                csv.append(",Bitstream ").append(i + 1);
+            }
         }
         csv.append("\n");
 
         for (ReportRow row : this.rows)
         {
             csv.append(row.id).append(",").append(row.handle).append(",").append(row.fileCount);
-            for (String policy : row.policies)
+            if (this.bitstreams)
             {
-                policy = policy.replace("\"", "\\\"");
-                csv.append(",\"").append(policy).append("\"");
-            }
-            for (int i = row.policies.size(); i < this.maxBitstreamCount; i++)
-            {
-                csv.append(",");
+                for (String policy : row.policies)
+                {
+                    policy = policy.replace("\"", "\\\"");
+                    csv.append(",\"").append(policy).append("\"");
+                }
+                for (int i = row.policies.size(); i < this.maxBitstreamCount; i++)
+                {
+                    csv.append(",");
+                }
             }
             csv.append("\n");
         }

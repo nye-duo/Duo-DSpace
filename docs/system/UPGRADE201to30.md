@@ -49,14 +49,6 @@ You will also be able to execute the task from the command line with:
 
     [dspace]/bin/dspace curate -t duopolicy -i [community/collection/item handle]
     
-### modules/swordv2-server.cfg
-
-The new policy is not to keep the original deposit files or metadata in the SWORD bundle, so the keep-original-package
-configuration has changed to :
-
-    keep-original-package = false
-    
-
 ## Other notes and actions on the update
 
 ### StudentWeb Integration

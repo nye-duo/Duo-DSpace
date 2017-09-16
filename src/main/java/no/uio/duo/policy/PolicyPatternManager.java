@@ -114,6 +114,7 @@ public class PolicyPatternManager
         // first, remove all the bundle policies, we don't need any of them
         this.removeAllBundlePolicies(context, item);
 
+        int originalCounter = 0;
         BitstreamIterator bsi = new BitstreamIterator(item);
         while (bsi.hasNext())
         {
@@ -123,6 +124,8 @@ public class PolicyPatternManager
 
             if ("ORIGINAL".equals(cb.getBundle().getName()))
             {
+                originalCounter++;
+
                 // if this is the original bundle, apply an intelligent approach to normalising the policies
                 IntendedPolicy intendedPolicy = this.getIntendedPolicies(readPolicies, embargoDate);
                 List<ResourcePolicy> alsoRemove = this.filterUnnecessaryPolicies(readPolicies, intendedPolicy);
@@ -156,7 +159,12 @@ public class PolicyPatternManager
             }
         }
 
-        this.normaliseEmbargoDate(tracker, embargoDate, item, context);
+        if (originalCounter > 0) {
+            this.normaliseEmbargoDate(tracker, embargoDate, item, context);
+        } else {
+            this.removeDudEmbargoDate(embargoDate, item, context);
+        }
+
         item.update();
 
         if (log.isDebugEnabled())
@@ -188,6 +196,7 @@ public class PolicyPatternManager
         // first, remove all the bundle policies, we don't need any of them
         this.removeAllBundlePolicies(context, item);
 
+        int originalCounter = 0;
         BitstreamIterator bsi = new BitstreamIterator(item);
         while (bsi.hasNext())
         {
@@ -203,6 +212,8 @@ public class PolicyPatternManager
 
             if ("ORIGINAL".equals(cb.getBundle().getName()))
             {
+                originalCounter++;
+
                 if (embargoDate == null)
                 {
                     // if there is no embargo date in the metadata, apply an unbound Anon READ
@@ -233,7 +244,11 @@ public class PolicyPatternManager
             }
         }
 
-        this.normaliseEmbargoDate(tracker, embargoDate, item, context);
+        if (originalCounter > 0) {
+            this.normaliseEmbargoDate(tracker, embargoDate, item, context);
+        } else {
+            this.removeDudEmbargoDate(embargoDate, item, context);
+        }
         item.update();
 
         if (log.isDebugEnabled())
@@ -332,6 +347,26 @@ public class PolicyPatternManager
         if (log.isDebugEnabled())
         {
             log.debug("Finished PolicyPatternManager.normaliseEmbargoDate on item " + item.getID());
+        }
+    }
+
+    /**
+     * Remove the embargo date for the item if it is in the present or the past
+     *
+     * @param embargoDate
+     * @param item
+     * @param context
+     */
+    private void removeDudEmbargoDate(Date embargoDate, Item item, Context context)
+    {
+        if (embargoDate == null)
+        {
+            return;
+        }
+        Date now = new Date();
+        if (embargoDate.equals(now) || embargoDate.before(now))
+        {
+            this.removeEmbargoDate(item, context);
         }
     }
 

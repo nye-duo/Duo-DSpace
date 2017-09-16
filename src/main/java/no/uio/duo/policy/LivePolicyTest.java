@@ -686,6 +686,26 @@ public class LivePolicyTest
                 return "Item should have had no embargo metadata, had: " + val;
             }
         }
+        else if ("past".equals(metadataResult))
+        {
+            if (val == null || date == null)
+            {
+                return "Item should have past embargo metadata, but date could not be found or could not be parsed";
+            }
+            if (date.equals(this.now) || date.after(this.now)) {
+                return "Item should have a past embargo date, but was equal to or later than now";
+            }
+        }
+        else if ("present".equals(metadataResult))
+        {
+            if (val == null || date == null)
+            {
+                return "Item should have present embargo metadata, but date could not be found or could not be parsed";
+            }
+            if (!date.equals(this.now)) {
+                return "Item should have a present embargo date, but was either later than or earlier than now";
+            }
+        }
         else if ("future".equals(metadataResult))
         {
             if (val == null || date == null)

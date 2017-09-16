@@ -43,7 +43,7 @@ structure, and adds/removes items from the system.
     
 For example in [dspace]/bin:
 
-    ./dspace dsrun no.uio.duo.policy.LivePolicyTest -e richard@cottagelabs.com -b /home/richard/Code/External/Duo-DSpace/TEST.md -u http://localhost:8080/xmlui -m /home/richard/Code/External/Duo-DSpace/src/test/resources/testmatrix.csv -o /home/richard/Code/External/Duo-DSpace/src/test/resources/check.csv
+    ./dspace dsrun no.uio.duo.policy.LivePolicyTest -e richard@cottagelabs.com -b /home/richard/Code/External/Duo-DSpace/docs/system/TEST.md -u http://localhost:8080/xmlui -m /home/richard/Code/External/Duo-DSpace/src/test/resources/testmatrix.csv -o /home/richard/Code/External/Duo-DSpace/src/test/resources/check.csv
 
 This will execute the tests as defined in src/test/resources/testmatrix.csv
 
@@ -69,3 +69,9 @@ You should then run the main migrate script, which can be done with:
     [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email]
     
 Once this has been done, check the item created in the first step to ensure it has been restructured appropriately.
+
+You can run just the single item created in the first step by specifying either the item id or the handle, e.g.
+
+    [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email] -i 123
+    
+    [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email] -h 123456789/111

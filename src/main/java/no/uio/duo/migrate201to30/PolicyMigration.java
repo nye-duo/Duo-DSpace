@@ -13,6 +13,7 @@ import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
 import org.dspace.content.Item;
+import org.dspace.handle.HandleManager;
 
 
 import java.io.IOException;
@@ -42,6 +43,8 @@ public class PolicyMigration extends TraverseDSpace
         CommandLineParser parser = new PosixParser();
         Options options = new Options();
         options.addOption("e", "eperson", true, "EPerson to do the migration as");
+        options.addOption("i", "item", true, "Item id on which to perform the migration");
+        options.addOption("h", "handle", true, "Item handle on which to perform the migration");
         CommandLine line = parser.parse(options, args);
 
         if (!line.hasOption("e"))
@@ -50,8 +53,27 @@ public class PolicyMigration extends TraverseDSpace
             System.exit(0);
         }
 
+        if (line.hasOption("i") && line.hasOption("h")) {
+            System.out.println("Please provide either -i or -h but not both");
+            System.exit(0);
+        }
+
         PolicyMigration pm = new PolicyMigration(line.getOptionValue("e"));
-        pm.migrate();
+        if (line.hasOption("i") || line.hasOption("h"))
+        {
+            int iid = -1;
+            String id = line.getOptionValue("i");
+            if (id != null)
+            {
+                iid = Integer.parseInt(id);
+            }
+            pm.migrateItem(iid, line.getOptionValue("h"));
+        }
+        else
+        {
+            pm.migrateAll();
+        }
+
     }
 
     private int itemCount = 0;
@@ -63,11 +85,53 @@ public class PolicyMigration extends TraverseDSpace
     }
 
     /**
-     * Execute the migration
+     * On an item identified either by the given id or the given handle
+     *
+     * @param id
+     * @param handle
+     * @throws Exception
+     */
+    public void migrateItem(int id, String handle)
+            throws Exception
+    {
+        try
+        {
+            Item item = null;
+            if (id > -1)
+            {
+                item = Item.find(this.context, id);
+            }
+            else if (handle != null)
+            {
+                item = (Item) HandleManager.resolveToObject(this.context, handle);
+            }
+            if (item != null)
+            {
+                this.doItem(item);
+            }
+        }
+        catch (Exception e)
+        {
+            this.context.abort();
+            throw e;
+        }
+        finally
+        {
+            if (this.context.isValid())
+            {
+                this.context.complete();
+            }
+        }
+
+        System.out.println("Processed 1 Item");
+    }
+
+    /**
+     * Execute the migration on all DSpace items
      *
      * @throws Exception
      */
-    public void migrate()
+    public void migrateAll()
             throws Exception
     {
         try

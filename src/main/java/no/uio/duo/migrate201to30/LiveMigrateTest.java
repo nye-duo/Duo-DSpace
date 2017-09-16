@@ -76,7 +76,7 @@ public class LiveMigrateTest
         Item item = this.makeTestItem();
         this.context.complete();
 
-        System.out.println("Made Item " + item.getID());
+        System.out.println("Made Item with ID " + item.getID() + " and handle " + item.getHandle());
     }
 
     /**

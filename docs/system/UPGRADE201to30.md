@@ -77,4 +77,18 @@ bundles, and to apply the new policy pattern.  This is applied to all items in t
 
     [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email]
     
+If you want to run the migration on only a single item, you can do this by identifying it with either its id or its handle:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email] -i 123
     
+    [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email] -h 123456789/111
+    
+I have found that depending on the number of items in the DSpace instance, and the way they are structured, additional memory
+may be required.  You can increase the memory provided to a script as follows:
+
+    JAVA_OPTS=-Xmx1024m
+    export JAVA_OPTS
+    
+When you run the script, this will give it 1Gb of memory.  Adjust the JAVA_OPTS value accordingly, if errors arise.
+
+The policy migration can safely be run repeatedly over the same items.

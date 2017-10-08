@@ -92,22 +92,18 @@ public class PolicyPatternManager
     }
 
     /**
-     * Apply the policy pattern to an existing item
+     * Method which will apply the policy rules to the provided item, using the specific implementation of the IntendedPolicyInterface provided
      *
      * @param item
      * @param context
+     * @param intendedPolicyImpl
      * @throws SQLException
      * @throws AuthorizeException
      * @throws IOException
      */
-    public void applyToExistingItem(Item item, Context context)
+    private void applyPolicyRules(Item item, Context context, IntendedPolicyInterface intendedPolicyImpl)
             throws SQLException, AuthorizeException, IOException
     {
-        if (log.isDebugEnabled())
-        {
-            log.debug("Applying PolicyPatternManager to existing item " + item.getID());
-        }
-
         Date embargoDate = this.getEmbargoDate(item, context);
         EmbargoDateTracker tracker = new EmbargoDateTracker();
 
@@ -127,7 +123,8 @@ public class PolicyPatternManager
                 originalCounter++;
 
                 // if this is the original bundle, apply an intelligent approach to normalising the policies
-                IntendedPolicy intendedPolicy = this.getIntendedPolicies(readPolicies, embargoDate);
+                // IntendedPolicy intendedPolicy = this.getIntendedPolicies(readPolicies, embargoDate);
+                IntendedPolicy intendedPolicy = intendedPolicyImpl.getIntendedPolicies(readPolicies, embargoDate);
                 List<ResourcePolicy> alsoRemove = this.filterUnnecessaryPolicies(readPolicies, intendedPolicy);
                 removePolicies.addAll(alsoRemove);
                 this.removePolicies(removePolicies);
@@ -166,6 +163,26 @@ public class PolicyPatternManager
         }
 
         item.update();
+    }
+
+    /**
+     * Apply the policy pattern to an existing item
+     *
+     * @param item
+     * @param context
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
+    public void applyToExistingItem(Item item, Context context)
+            throws SQLException, AuthorizeException, IOException
+    {
+        if (log.isDebugEnabled())
+        {
+            log.debug("Applying PolicyPatternManager to existing item " + item.getID());
+        }
+
+        this.applyPolicyRules(item, context, new IntendedPolicyExisting());
 
         if (log.isDebugEnabled())
         {
@@ -190,66 +207,7 @@ public class PolicyPatternManager
             log.debug("Applying PolicyPatternManager to new item " + item.getID());
         }
 
-        Date embargoDate = this.getEmbargoDate(item, context);
-        EmbargoDateTracker tracker = new EmbargoDateTracker();
-
-        // first, remove all the bundle policies, we don't need any of them
-        this.removeAllBundlePolicies(context, item);
-
-        int originalCounter = 0;
-        BitstreamIterator bsi = new BitstreamIterator(item);
-        while (bsi.hasNext())
-        {
-            ContextualBitstream cb = bsi.next();
-
-            // just remove all the bitstream's policies, we'll apply the correct one later
-            List<ResourcePolicy> readPolicies = this.getReadPolicies(context, cb.getBitstream());
-            this.removePolicies(readPolicies);
-            if (readPolicies.size() > 0)
-            {
-                log.info("PolicyPatternManager removed " + readPolicies.size() + " read policies from bitstream " + cb.getBitstream().getID());
-            }
-
-            if ("ORIGINAL".equals(cb.getBundle().getName()))
-            {
-                originalCounter++;
-
-                if (embargoDate == null)
-                {
-                    // if there is no embargo date in the metadata, apply an unbound Anon READ
-                    IntendedPolicy intended = new IntendedPolicy(false);
-                    ResourcePolicy policy = intended.makePolicy(context, cb.getBitstream());
-                    policy.update();
-                    log.info("PolicyPatternManager applied new policy on bitstream " + cb.getBitstream().getID());
-
-                    // track the policy dates for later use
-                    tracker.track(intended);
-                }
-                else
-                {
-                    // if there is an embargo date in the metadata, apply an Anon READ (active from that date, if it is in the future)
-                    IntendedPolicy intended = new IntendedPolicy(false);    // default to unbound anon read
-                    if (embargoDate.after(new Date()))
-                    {
-                        intended = new IntendedPolicy(embargoDate);
-                    }
-
-                    ResourcePolicy policy = intended.makePolicy(context, cb.getBitstream());
-                    policy.update();
-                    log.info("PolicyPatternManager applied new policy on bitstream " + cb.getBitstream().getID());
-
-                    // track the policy dates for later use
-                    tracker.track(intended);
-                }
-            }
-        }
-
-        if (originalCounter > 0) {
-            this.normaliseEmbargoDate(tracker, embargoDate, item, context);
-        } else {
-            this.removeDudEmbargoDate(embargoDate, item, context);
-        }
-        item.update();
+        this.applyPolicyRules(item, context, new IntendedPolicyNew());
 
         if (log.isDebugEnabled())
         {
@@ -572,132 +530,6 @@ public class PolicyPatternManager
         }
 
         return unwanted;
-    }
-
-    /**
-     * Compute the IntendedPolicy for a bitstream given the list of existing policies and the
-     * embargo date from the metadata
-     *
-     * @param existing
-     * @param embargo
-     * @return
-     */
-    private IntendedPolicy getIntendedPolicies(List<ResourcePolicy> existing, Date embargo)
-    {
-        ResourcePolicy anonRead = null;
-        for (ResourcePolicy policy : existing)
-        {
-            if (policy.getGroupID() == 0 && policy.getAction() == Constants.READ)
-            {
-                anonRead = policy;
-                break;
-            }
-        }
-
-        IntendedPolicy intended = null;
-
-        Date now = new Date();
-        if (embargo == null)    // no embargo
-        {
-            if (anonRead == null)
-            {
-                // no embargo date in metadata, and no anonymous read policy - permanent embargo
-                intended = new IntendedPolicy(true);
-            }
-            else
-            {
-                Date start = anonRead.getStartDate();
-                if (start == null)
-                {
-                    // no embargo date in metadata, and an existing unbound anonymous read policy - keep the existing policy
-                    intended = new IntendedPolicy(anonRead);
-                }
-                else if (start.before(now))
-                {
-                    // no embargo date, and existing anonymous read in the past - new unbound anon read policy
-                    intended = new IntendedPolicy(false);
-                }
-                else if (start.equals(now))
-                {
-                    // no embargo date, and existing anonymous read for today - new unbound anon read policy
-                    intended = new IntendedPolicy(false);
-                }
-                else if (start.after(now))
-                {
-                    // no embargo date in metadata, and an existing future anonymous read policy - keep the existing policy
-                    intended = new IntendedPolicy(anonRead);
-                }
-            }
-        }
-        else if (embargo.before(now))   // embargo in the past
-        {
-            if (anonRead == null)
-            {
-                // embargo is in the past, and no anonymous read policy - permanent embargo
-                intended = new IntendedPolicy(true);
-            }
-            else
-            {
-                Date start = anonRead.getStartDate();
-                if (start == null)
-                {
-                    // embargo is in the past, and an existing unbound anon read policy - keep the existing policy
-                    intended = new IntendedPolicy(anonRead);
-                }
-                else if (start.before(now))
-                {
-                    // embargo is in the past, and an existing anon read policy starting in the past - a fresh unbound anon read policy
-                    intended = new IntendedPolicy(false);
-                }
-                else
-                {
-                    // embargo is in the past, and an existing anon read policy starting today or in the future - keep the existing policy
-                    intended = new IntendedPolicy(anonRead);
-                }
-            }
-        }
-        else if (embargo.after(now))    // embargo in the future
-        {
-            if (anonRead == null)
-            {
-                // embargo is in the future, and no anonymous read policy - embargo until the date in the metadata
-                intended = new IntendedPolicy(embargo);
-            }
-            else
-            {
-                Date start = anonRead.getStartDate();
-                if (start == null)
-                {
-                    // embargo is in the future, and an existing (active) anon read policy - embargo until the date in the metadata
-                    intended = new IntendedPolicy(embargo);
-                }
-                else if (embargo.after(start))
-                {
-                    // embargo is in the future, and an existing anon read policy starting before the embargo ends - embargo until the date in the metadata
-                    intended = new IntendedPolicy(embargo);
-                }
-                else
-                {
-                    // embargo is in the future, and an existing anon read policy starting after the embargo ends - keep the more restrictive anon read policy
-                    intended = new IntendedPolicy(anonRead);
-                }
-            }
-        }
-        else                // embargo is today
-        {
-            if (anonRead == null)
-            {
-                // embargo is today, and no anonymous read policy - set up an embargo for today
-                intended = new IntendedPolicy(embargo);
-            }
-            else
-            {
-                // embargo is today, and an anonymous read policy - keep the existing policy
-                intended = new IntendedPolicy(anonRead);
-            }
-        }
-
-        return intended;
     }
 
     /**

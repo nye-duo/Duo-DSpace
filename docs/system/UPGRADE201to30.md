@@ -92,3 +92,13 @@ may be required.  You can increase the memory provided to a script as follows:
 When you run the script, this will give it 1Gb of memory.  Adjust the JAVA_OPTS value accordingly, if errors arise.
 
 The policy migration can safely be run repeatedly over the same items.
+
+To run the policy migration over individual collections and communities you may also do:
+
+Collection (-l):
+
+    [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email] -l 123456789/222
+
+Community (-m):
+    
+    [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email] -m 123456789/222

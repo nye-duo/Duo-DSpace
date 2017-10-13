@@ -45,6 +45,8 @@ public class PolicyMigration extends TraverseDSpace
         options.addOption("e", "eperson", true, "EPerson to do the migration as");
         options.addOption("i", "item", true, "Item id on which to perform the migration");
         options.addOption("h", "handle", true, "Item handle on which to perform the migration");
+        options.addOption("l", "collection", true, "Collection handle on which to perform the migration");
+        options.addOption("m", "community", true, "Community handle on which to perform the migration");
         CommandLine line = parser.parse(options, args);
 
         if (!line.hasOption("e"))
@@ -55,6 +57,25 @@ public class PolicyMigration extends TraverseDSpace
 
         if (line.hasOption("i") && line.hasOption("h")) {
             System.out.println("Please provide either -i or -h but not both");
+            System.exit(0);
+        }
+
+        int idents = 0;
+        if (line.hasOption("i") || line.hasOption("h"))
+        {
+            idents++;
+        }
+        if (line.hasOption("l"))
+        {
+            idents++;
+        }
+        if (line.hasOption("m"))
+        {
+            idents++;
+        }
+        if (idents > 1)
+        {
+            System.out.println("Please provide -i, -h, -l or -m but not more than one of those");
             System.exit(0);
         }
 
@@ -69,6 +90,14 @@ public class PolicyMigration extends TraverseDSpace
             }
             pm.migrateItem(iid, line.getOptionValue("h"));
         }
+        else if (line.hasOption("l"))
+        {
+            pm.migrateCollection(line.getOptionValue("l"));
+        }
+        else if (line.hasOption("m"))
+        {
+            pm.migrateCommunity(line.getOptionValue("m"));
+        }
         else
         {
             pm.migrateAll();
@@ -78,10 +107,75 @@ public class PolicyMigration extends TraverseDSpace
 
     private int itemCount = 0;
 
+    /**
+     * Create a new instance of the policy migration tool
+     *
+     * @param epersonEmail
+     * @throws Exception
+     */
     public PolicyMigration(String epersonEmail)
             throws Exception
     {
         super(epersonEmail);
+    }
+
+    /**
+     * Migrate the collection specified by the handle.  This does all items in workspace, workflow, archive and withdrawn
+     *
+     * @param handle
+     * @throws Exception
+     */
+    public void migrateCollection(String handle)
+            throws Exception
+    {
+        try
+        {
+            this.doCollection(handle);
+        }
+        catch (Exception e)
+        {
+            this.context.abort();
+            throw e;
+        }
+        finally
+        {
+            if (this.context.isValid())
+            {
+                this.context.complete();
+            }
+        }
+
+        System.out.println("Processed 1 Collection");
+    }
+
+    /**
+     * Migrate the community specified by the handle.  This does all sub communities, collections and their items
+     * in workspace, workflow, archive and withdrawn
+     *
+     * @param handle
+     * @throws Exception
+     */
+    public void migrateCommunity(String handle)
+            throws Exception
+    {
+        try
+        {
+            this.doCommunity(handle);
+        }
+        catch (Exception e)
+        {
+            this.context.abort();
+            throw e;
+        }
+        finally
+        {
+            if (this.context.isValid())
+            {
+                this.context.complete();
+            }
+        }
+
+        System.out.println("Processed 1 Community");
     }
 
     /**

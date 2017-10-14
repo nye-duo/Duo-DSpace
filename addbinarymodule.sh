@@ -2,7 +2,7 @@
 
 DSPACE_SRC="/home/richard/Code/External/Duo-Dev/DSpace-42-Scratch"
 MAVEN="mvn"
-VERSION="3.0.0"
+VERSION="3.1.0"
 
 # copy everything except the readme and the dspace.cfg extension
 shopt -s extglob

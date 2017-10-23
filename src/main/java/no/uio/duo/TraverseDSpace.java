@@ -52,6 +52,27 @@ public abstract class TraverseDSpace
         }
     }
 
+    public void doDSpaceManageContext()
+            throws Exception
+    {
+        try
+        {
+            this.doDSpace();
+        }
+        catch (Exception e)
+        {
+            this.context.abort();
+            throw e;
+        }
+        finally
+        {
+            if (this.context.isValid())
+            {
+                this.context.complete();
+            }
+        }
+    }
+
     /**
      * Do community and everything therein
      *
@@ -90,6 +111,8 @@ public abstract class TraverseDSpace
             this.doCollection(cols[i]);
         }
     }
+
+    
 
     /**
      * Do collection and everything therein

@@ -1,41 +1,18 @@
-package no.uio.duo.migrate201to30;
+package no.uio.duo.cleanup;
 
-import no.uio.duo.BitstreamIterator;
-import no.uio.duo.DuoConstants;
 import no.uio.duo.TraverseDSpace;
-import no.uio.duo.policy.ContextualBitstream;
-import no.uio.duo.policy.PolicyPatternManager;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.dspace.authorize.AuthorizeException;
-import org.dspace.content.Bitstream;
-import org.dspace.content.Bundle;
 import org.dspace.content.Item;
 import org.dspace.handle.HandleManager;
-
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-/**
- * Script which carries out a migration of all items so that they match the new policy pattern.
- *
- * The following actions are taken:
- *
- * <ul>
- *     <li>Any bitstreams in bundle SECONDARY are moved to DUO_2NDRY_CLOSED</li>
- *     <li>Any bitstreams in bundle SECONDARY_CLOSED are moved to DUO_2NDRY_CLOSED</li>
- *     <li>Any bitstreams in bundle RESTRICTED are moved to DUO_ADMIN</li>
- *     <li>Any bitstreams in bundle METADATA are moved to DUO_ADMIN</li>
- *     <li>LICENSE bundle and associated bitstreams are removed</li>
- *     <li>DELETED bundle and associated bitstreams are removed</li>
- *     <li>PolicyPatternManager is applied to all items that are isArchived()</li>
- * </ul>
- *
- */
-public class PolicyMigration extends TraverseDSpace
+public class MetadataCleanup extends TraverseDSpace
 {
     public static void main(String[] args)
             throws Exception
@@ -55,7 +32,8 @@ public class PolicyMigration extends TraverseDSpace
             System.exit(0);
         }
 
-        if (line.hasOption("i") && line.hasOption("h")) {
+        if (line.hasOption("i") && line.hasOption("h"))
+        {
             System.out.println("Please provide either -i or -h but not both");
             System.exit(0);
         }
@@ -79,7 +57,7 @@ public class PolicyMigration extends TraverseDSpace
             System.exit(0);
         }
 
-        PolicyMigration pm = new PolicyMigration(line.getOptionValue("e"));
+        MetadataCleanup mc = new MetadataCleanup(line.getOptionValue("e"));
         if (line.hasOption("i") || line.hasOption("h"))
         {
             int iid = -1;
@@ -88,31 +66,22 @@ public class PolicyMigration extends TraverseDSpace
             {
                 iid = Integer.parseInt(id);
             }
-            pm.migrateItem(iid, line.getOptionValue("h"));
+            mc.cleanItem(iid, line.getOptionValue("h"));
         }
         else if (line.hasOption("l"))
         {
-            pm.migrateCollection(line.getOptionValue("l"));
+            mc.cleanCollection(line.getOptionValue("l"));
         }
         else if (line.hasOption("m"))
         {
-            pm.migrateCommunity(line.getOptionValue("m"));
+            mc.cleanCommunity(line.getOptionValue("m"));
         }
         else
         {
-            pm.migrateAll();
+            mc.cleanAll();
         }
     }
-
-    private int itemCount = 0;
-
-    /**
-     * Create a new instance of the policy migration tool
-     *
-     * @param epersonEmail
-     * @throws Exception
-     */
-    public PolicyMigration(String epersonEmail)
+    public MetadataCleanup(String epersonEmail)
             throws Exception
     {
         super(epersonEmail);
@@ -124,7 +93,7 @@ public class PolicyMigration extends TraverseDSpace
      * @param handle
      * @throws Exception
      */
-    public void migrateCollection(String handle)
+    public void cleanCollection(String handle)
             throws Exception
     {
         try
@@ -154,7 +123,7 @@ public class PolicyMigration extends TraverseDSpace
      * @param handle
      * @throws Exception
      */
-    public void migrateCommunity(String handle)
+    public void cleanCommunity(String handle)
             throws Exception
     {
         try
@@ -184,7 +153,7 @@ public class PolicyMigration extends TraverseDSpace
      * @param handle
      * @throws Exception
      */
-    public void migrateItem(int id, String handle)
+    public void cleanItem(int id, String handle)
             throws Exception
     {
         try
@@ -224,7 +193,7 @@ public class PolicyMigration extends TraverseDSpace
      *
      * @throws Exception
      */
-    public void migrateAll()
+    public void cleanAll()
             throws Exception
     {
         try
@@ -259,87 +228,6 @@ public class PolicyMigration extends TraverseDSpace
     public void doItem(Item item)
             throws SQLException, AuthorizeException, IOException, Exception
     {
-        // first move all of the bitstreams
-        Bundle secondary = null;
-        Bundle admin = null;
-
-        BitstreamIterator bsi = new BitstreamIterator(item);
-        while (bsi.hasNext())
-        {
-            ContextualBitstream cb = bsi.next();
-            Bundle bundle = cb.getBundle();
-            String name = bundle.getName();
-
-            Bitstream bs = cb.getBitstream();
-
-            if ("SECONDARY".equals(name))
-            {
-                if (secondary == null)
-                {
-                    secondary = item.createBundle(DuoConstants.SECONDARY_BUNDLE);
-                }
-                secondary.addBitstream(bs);
-                bundle.removeBitstream(bs);
-            }
-            else if ("SECONDARY_CLOSED".equals(name))
-            {
-                if (secondary == null)
-                {
-                    secondary = item.createBundle(DuoConstants.SECONDARY_BUNDLE);
-                }
-                secondary.addBitstream(bs);
-                bundle.removeBitstream(bs);
-            }
-            else if ("RESTRICTED".equals(name))
-            {
-                if (admin == null)
-                {
-                    admin = item.createBundle(DuoConstants.ADMIN_BUNDLE);
-                }
-                admin.addBitstream(bs);
-                bundle.removeBitstream(bs);
-            }
-            else if ("METADATA".equals(name))
-            {
-                if (admin == null)
-                {
-                    admin = item.createBundle(DuoConstants.ADMIN_BUNDLE);
-                }
-                admin.addBitstream(bs);
-                bundle.removeBitstream(bs);
-            }
-            else if ("LICENSE".equals(name))
-            {
-                bundle.removeBitstream(bs);
-            }
-            else if ("DELETED".equals(name))
-            {
-                bundle.removeBitstream(bs);
-            }
-        }
-
-        for (Bundle bundle : item.getBundles())
-        {
-            if (bundle.getBitstreams().length == 0)
-            {
-                item.removeBundle(bundle);
-            }
-        }
-        
-        // after the first stage, commit the context
-        this.context.commit();
-
-        // apply the policy pattern manager to items in the repository (archived or withdrawn)
-        if (item.isArchived() || item.isWithdrawn())
-        {
-            PolicyPatternManager ppm = new PolicyPatternManager();
-            ppm.applyToExistingItem(item, this.context);
-
-            // after this final stage, commit the context again
-            this.context.commit();
-        }
-
-        this.itemCount++;
 
     }
 }

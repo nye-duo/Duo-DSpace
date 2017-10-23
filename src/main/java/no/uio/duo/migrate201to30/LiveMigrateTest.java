@@ -117,10 +117,19 @@ public class LiveMigrateTest
         this.makeBitstream(item, "LICENSE");
         this.makeBitstream(item, "DELETED");
 
+        // add an empty bundle, to make sure they are treated right
+        this.makeBundle(item, "EMPTY");
+
         item.update();
         this.context.commit();
 
         return item;
+    }
+
+    private Bundle makeBundle(Item item, String bundle)
+            throws Exception
+    {
+        return item.createBundle(bundle);
     }
 
     private Bitstream makeBitstream(Item item, String bundle)

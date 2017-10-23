@@ -317,13 +317,16 @@ public class PolicyMigration extends TraverseDSpace
             {
                 bundle.removeBitstream(bs);
             }
+        }
 
+        for (Bundle bundle : item.getBundles())
+        {
             if (bundle.getBitstreams().length == 0)
             {
                 item.removeBundle(bundle);
             }
         }
-
+        
         // after the first stage, commit the context
         this.context.commit();
 

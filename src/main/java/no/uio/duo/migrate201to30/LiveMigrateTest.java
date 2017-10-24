@@ -107,7 +107,8 @@ public class LiveMigrateTest
         item.addMetadata(dcv.schema, dcv.element, dcv.qualifier, null, ed);
 
         // create a file in all the relevant bundles
-        this.makeBitstream(item, "ORIGINAL");
+        this.makeBitstream(item, "ORIGINAL", 1);
+        this.makeBitstream(item, "ORIGINAL", 2);
         this.makeBitstream(item, "SECONDARY");
         this.makeBitstream(item, "SECONDARY_CLOSED");
         this.makeBitstream(item, "RESTRICTED");
@@ -135,9 +136,32 @@ public class LiveMigrateTest
     private Bitstream makeBitstream(Item item, String bundle)
             throws Exception
     {
+        return this.makeBitstream(item, bundle, 1);
+    }
+
+    private Bitstream makeBitstream(Item item, String bundle, int ident)
+            throws Exception
+    {
         InputStream originalFile = new FileInputStream(this.bitstream);
-        Bitstream bs = item.createSingleBitstream(originalFile, bundle);
-        bs.setName(bundle + "file.txt");
+        Bundle[] bundles = item.getBundles();
+
+        Bundle container = null;
+        for (Bundle b : bundles)
+        {
+            if (b.getName().equals(bundle))
+            {
+                container = b;
+                break;
+            }
+        }
+
+        if (container == null)
+        {
+            container = item.createBundle(bundle);
+        }
+
+        Bitstream bs = container.createBitstream(originalFile);
+        bs.setName(bundle + "file" + ident + ".txt");
         bs.update();
         return bs;
     }

@@ -436,12 +436,14 @@ public class LivePolicyTest
         int idx = 1;
         for (String ar : anonReads)
         {
+            Bitstream original = this.makeBitstream(item, "ORIGINAL", idx++);
+            /*
             InputStream originalFile = new FileInputStream(this.bitstream);
             Bitstream original = item.createSingleBitstream(originalFile, "ORIGINAL");
             original.setName("originalfile" + idx++ + ".txt");
             original.update();
+            */
             originals.add(original);
-
             result.bitstreamIDs.add(original.getID());
         }
 
@@ -540,6 +542,33 @@ public class LivePolicyTest
 
         result.item = item;
         return result;
+    }
+
+    private Bitstream makeBitstream(Item item, String bundle, int ident)
+            throws Exception
+    {
+        InputStream originalFile = new FileInputStream(this.bitstream);
+        Bundle[] bundles = item.getBundles();
+
+        Bundle container = null;
+        for (Bundle b : bundles)
+        {
+            if (b.getName().equals(bundle))
+            {
+                container = b;
+                break;
+            }
+        }
+
+        if (container == null)
+        {
+            container = item.createBundle(bundle);
+        }
+
+        Bitstream bs = container.createBitstream(originalFile);
+        bs.setName(bundle + "file" + ident + ".txt");
+        bs.update();
+        return bs;
     }
 
     private String checkItem(Item item, Map<Integer, String> anonReadResults, String metadataResult)

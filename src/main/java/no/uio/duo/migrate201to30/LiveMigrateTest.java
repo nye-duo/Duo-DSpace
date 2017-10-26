@@ -1,5 +1,6 @@
 package no.uio.duo.migrate201to30;
 
+import no.uio.duo.MetadataManager;
 import no.uio.duo.WorkflowManagerWrapper;
 import no.uio.duo.livetest.LiveTest;
 import org.apache.commons.cli.CommandLine;
@@ -8,12 +9,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.dspace.content.*;
 import org.dspace.core.ConfigurationManager;
-import org.dspace.core.Context;
-import org.dspace.eperson.EPerson;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -48,9 +45,6 @@ public class LiveMigrateTest extends LiveTest
         LiveMigrateTest lmt = new LiveMigrateTest(line.getOptionValue("e"), line.getOptionValue("b"));
         lmt.runAll();
     }
-
-    private Collection collection;
-    private File bitstream;
 
     public LiveMigrateTest(String epersonEmail, String bitstreamPath)
             throws Exception
@@ -99,7 +93,8 @@ public class LiveMigrateTest extends LiveTest
         SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
         String ed = sdf.format(new Date());
         String md = ConfigurationManager.getProperty("embargo.field.terms");
-        DCValue dcv = this.stringToDC(md);
+        MetadataManager mm = new MetadataManager();
+        DCValue dcv = mm.makeDCValue(md, null);
         item.addMetadata(dcv.schema, dcv.element, dcv.qualifier, null, ed);
 
         // create a file in all the relevant bundles
@@ -121,77 +116,5 @@ public class LiveMigrateTest extends LiveTest
         this.context.commit();
 
         return item;
-    }
-
-    private Bundle makeBundle(Item item, String bundle)
-            throws Exception
-    {
-        return item.createBundle(bundle);
-    }
-
-    private Bitstream makeBitstream(Item item, String bundle)
-            throws Exception
-    {
-        return this.makeBitstream(item, bundle, 1);
-    }
-
-    private Bitstream makeBitstream(Item item, String bundle, int ident)
-            throws Exception
-    {
-        InputStream originalFile = new FileInputStream(this.bitstream);
-        Bundle[] bundles = item.getBundles();
-
-        Bundle container = null;
-        for (Bundle b : bundles)
-        {
-            if (b.getName().equals(bundle))
-            {
-                container = b;
-                break;
-            }
-        }
-
-        if (container == null)
-        {
-            container = item.createBundle(bundle);
-        }
-
-        Bitstream bs = container.createBitstream(originalFile);
-        bs.setName(bundle + "file" + ident + ".txt");
-        bs.update();
-        return bs;
-    }
-
-    /*
-    private Collection makeCollection()
-            throws Exception
-    {
-        Community community = Community.create(null, this.context);
-        community.setMetadata("name", "Policy Test Community " + community.getID());
-        community.update();
-
-        Collection collection = community.createCollection();
-        collection.setMetadata("name", "Policy Test Collection " + collection.getID());
-        collection.update();
-
-        this.context.commit();
-
-        System.out.println("Created community with id " + community.getID() + "; handle " + community.getHandle());
-        System.out.println("Created collection with id " + collection.getID() + "; handle " + collection.getHandle());
-
-        return collection;
-    }*/
-
-    private DCValue stringToDC(String field)
-    {
-        String[] bits = field.split("\\.");
-        DCValue dcv = new DCValue();
-        dcv.schema = bits[0];
-        dcv.element = bits[1];
-        if (bits.length > 2)
-        {
-            dcv.qualifier = bits[2];
-        }
-        return dcv;
     }
 }

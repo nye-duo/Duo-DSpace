@@ -1,7 +1,9 @@
 package no.uio.duo.policy;
 
 import no.uio.duo.BitstreamIterator;
+import no.uio.duo.MetadataManager;
 import no.uio.duo.WorkflowManagerWrapper;
+import no.uio.duo.livetest.LiveTest;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
@@ -34,7 +36,7 @@ import java.util.*;
  * <p>Install this in your test DSpace, then run the main method of the class, and it will execute a suite
  * of tests.  The DSpace will not be in a clean state after.</p>
  */
-public class LivePolicyTest
+public class LivePolicyTest extends LiveTest
 {
     public static void main(String[] args)
             throws Exception
@@ -110,10 +112,6 @@ public class LivePolicyTest
         List<Integer> bitstreamIDs = new ArrayList<Integer>();
     }
 
-    private Context context;
-    private Collection collection;
-    private EPerson eperson;
-    private File bitstream;
     private PolicyPatternManager policyManager;
     private List<CheckReport> checkList = new ArrayList<CheckReport>();
     private String baseUrl;
@@ -135,6 +133,8 @@ public class LivePolicyTest
     public LivePolicyTest(String epersonEmail, String bitstreamPath, String baseUrl, String matrixPath, String outPath, boolean workspace)
             throws Exception
     {
+        super(epersonEmail);
+
         System.out.println("===========================================");
         System.out.println("== Starting up                           ==");
         System.out.println("===========================================");
@@ -353,24 +353,6 @@ public class LivePolicyTest
     /////////////////////////////////////////////////
     // utilities for making test data
 
-    private Collection makeCollection()
-            throws Exception
-    {
-        Community community = Community.create(null, this.context);
-        community.setMetadata("name", "Policy Test Community " + community.getID());
-        community.update();
-
-        Collection collection = community.createCollection();
-        collection.setMetadata("name", "Policy Test Collection " + collection.getID());
-        collection.update();
-
-        this.context.commit();
-
-        System.out.println("Created community with id " + community.getID() + "; handle " + community.getHandle());
-        System.out.println("Created collection with id " + collection.getID() + "; handle " + collection.getHandle());
-
-        return collection;
-    }
 
     private ItemMakeRecord makeItem(String embargoDate, List<String> anonReads, boolean adminFile, boolean adminRead, String state)
             throws Exception
@@ -437,7 +419,8 @@ public class LivePolicyTest
         if (ed != null)
         {
             String md = ConfigurationManager.getProperty("embargo.field.terms");
-            DCValue dcv = this.stringToDC(md);
+            MetadataManager mm = new MetadataManager();
+            DCValue dcv = mm.makeDCValue(md, null);
             item.addMetadata(dcv.schema, dcv.element, dcv.qualifier, null, ed);
         }
 
@@ -449,12 +432,6 @@ public class LivePolicyTest
         for (String ar : anonReads)
         {
             Bitstream original = this.makeBitstream(item, "ORIGINAL", idx++);
-            /*
-            InputStream originalFile = new FileInputStream(this.bitstream);
-            Bitstream original = item.createSingleBitstream(originalFile, "ORIGINAL");
-            original.setName("originalfile" + idx++ + ".txt");
-            original.update();
-            */
             originals.add(original);
             result.bitstreamIDs.add(original.getID());
         }
@@ -554,33 +531,6 @@ public class LivePolicyTest
 
         result.item = item;
         return result;
-    }
-
-    private Bitstream makeBitstream(Item item, String bundle, int ident)
-            throws Exception
-    {
-        InputStream originalFile = new FileInputStream(this.bitstream);
-        Bundle[] bundles = item.getBundles();
-
-        Bundle container = null;
-        for (Bundle b : bundles)
-        {
-            if (b.getName().equals(bundle))
-            {
-                container = b;
-                break;
-            }
-        }
-
-        if (container == null)
-        {
-            container = item.createBundle(bundle);
-        }
-
-        Bitstream bs = container.createBitstream(originalFile);
-        bs.setName(bundle + "file" + ident + ".txt");
-        bs.update();
-        return bs;
     }
 
     private String checkItem(Item item, Map<Integer, String> anonReadResults, String metadataResult)
@@ -803,19 +753,6 @@ public class LivePolicyTest
                 policy.delete();
             }
         }
-    }
-
-    private DCValue stringToDC(String field)
-    {
-        String[] bits = field.split("\\.");
-        DCValue dcv = new DCValue();
-        dcv.schema = bits[0];
-        dcv.element = bits[1];
-        if (bits.length > 2)
-        {
-            dcv.qualifier = bits[2];
-        }
-        return dcv;
     }
 
     private void outputCheckList()

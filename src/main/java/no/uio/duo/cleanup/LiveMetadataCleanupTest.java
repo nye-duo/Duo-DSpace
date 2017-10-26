@@ -30,7 +30,7 @@ public class LiveMetadataCleanupTest extends LiveTest
         lmct.runAll();
     }
 
-    private Collection collection;
+    // private Collection collection;
 
     public LiveMetadataCleanupTest(String epersonEmail)
             throws Exception

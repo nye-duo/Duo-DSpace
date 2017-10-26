@@ -1,15 +1,23 @@
 package no.uio.duo.cleanup;
 
+import no.uio.duo.MetadataManager;
 import no.uio.duo.TraverseDSpace;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.dspace.authorize.AuthorizeException;
+import org.dspace.content.DCValue;
 import org.dspace.content.Item;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MetadataCleanup extends TraverseDSpace
 {
@@ -82,6 +90,15 @@ public class MetadataCleanup extends TraverseDSpace
         mc.report();
     }
 
+    public static Map<String, List<String>> allowedHTMLByField = new HashMap<String, List<String>>();
+    static {
+        List<String> lineSeparators = new ArrayList<String>();
+        lineSeparators.add("br");
+        lineSeparators.add("p");
+
+        allowedHTMLByField.put("dc.description.abstract", lineSeparators);
+    }
+
     public MetadataCleanup(String epersonEmail)
             throws Exception
     {
@@ -100,6 +117,37 @@ public class MetadataCleanup extends TraverseDSpace
     public void processItem(Item item)
             throws SQLException, AuthorizeException, IOException, Exception
     {
+        MetadataManager mm = new MetadataManager();
 
+        Whitelist base = Whitelist.none();
+        List<DCValue> cleanMetadata = new ArrayList<DCValue>();
+
+        DCValue[] allMetadata = mm.allMetadata(item);
+        for (DCValue dcv : allMetadata)
+        {
+            Whitelist custom = null;
+
+            String fieldString = mm.makeFieldString(dcv);
+            if (allowedHTMLByField.containsKey(fieldString))
+            {
+                custom = Whitelist.none();
+                List<String> allowed = allowedHTMLByField.get(fieldString);
+                for (String tag : allowed)
+                {
+                    custom.addTags(tag);
+                }
+            }
+
+            Whitelist apply = base;
+            if (custom != null)
+            {
+                apply = custom;
+            }
+
+            dcv.value = Jsoup.clean(dcv.value, apply);
+            cleanMetadata.add(dcv);
+        }
+
+        mm.replaceMetadata(item, cleanMetadata);
     }
 }

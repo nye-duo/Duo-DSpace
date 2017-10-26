@@ -17,6 +17,7 @@ import org.jdom.input.SAXBuilder;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Class for providing utilities for Metadata management in the Duo module
@@ -178,5 +179,29 @@ public class MetadataManager
         }
         dcv.value = value;
         return dcv;
+    }
+
+    public DCValue[] allMetadata(Item item)
+    {
+        return item.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
+    }
+
+    public String makeFieldString(DCValue dcv)
+    {
+        String field = dcv.schema + "." + dcv.element;
+        if (dcv.qualifier != null)
+        {
+            field += "." + dcv.qualifier;
+        }
+        return field;
+    }
+
+    public void replaceMetadata(Item item, List<DCValue> md)
+    {
+        item.clearMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
+        for (DCValue dcv : md)
+        {
+            item.addMetadata(dcv.schema, dcv.element, dcv.qualifier, dcv.language, dcv.value);
+        }
     }
 }

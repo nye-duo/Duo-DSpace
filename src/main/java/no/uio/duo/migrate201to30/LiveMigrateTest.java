@@ -1,6 +1,7 @@
 package no.uio.duo.migrate201to30;
 
 import no.uio.duo.WorkflowManagerWrapper;
+import no.uio.duo.livetest.LiveTest;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
@@ -22,7 +23,7 @@ import java.util.Date;
  *
  * <p><strong>DO NOT RUN THIS ON A PRODUCTION SYSTEM</strong></p>
  */
-public class LiveMigrateTest
+public class LiveMigrateTest extends LiveTest
 {
     public static void main(String[] args)
             throws Exception
@@ -48,20 +49,15 @@ public class LiveMigrateTest
         lmt.runAll();
     }
 
-    private Context context;
-    private EPerson eperson;
     private Collection collection;
     private File bitstream;
 
     public LiveMigrateTest(String epersonEmail, String bitstreamPath)
             throws Exception
     {
+        super(epersonEmail);
+
         this.bitstream = new File(bitstreamPath);
-        this.context = new Context();
-
-        this.eperson = EPerson.findByEmail(this.context, epersonEmail);
-        this.context.setCurrentUser(this.eperson);
-
         this.collection = this.makeCollection();
     }
 
@@ -166,6 +162,7 @@ public class LiveMigrateTest
         return bs;
     }
 
+    /*
     private Collection makeCollection()
             throws Exception
     {
@@ -183,7 +180,7 @@ public class LiveMigrateTest
         System.out.println("Created collection with id " + collection.getID() + "; handle " + collection.getHandle());
 
         return collection;
-    }
+    }*/
 
     private DCValue stringToDC(String field)
     {

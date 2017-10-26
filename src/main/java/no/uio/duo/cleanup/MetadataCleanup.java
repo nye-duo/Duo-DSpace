@@ -26,11 +26,11 @@ public class MetadataCleanup extends TraverseDSpace
     {
         CommandLineParser parser = new PosixParser();
         Options options = new Options();
-        options.addOption("e", "eperson", true, "EPerson to do the migration as");
-        options.addOption("i", "item", true, "Item id on which to perform the migration");
-        options.addOption("h", "handle", true, "Item handle on which to perform the migration");
-        options.addOption("l", "collection", true, "Collection handle on which to perform the migration");
-        options.addOption("m", "community", true, "Community handle on which to perform the migration");
+        options.addOption("e", "eperson", true, "EPerson to do the cleanup as");
+        options.addOption("i", "item", true, "Item id on which to perform the cleanup");
+        options.addOption("h", "handle", true, "Item handle on which to perform the cleanup");
+        options.addOption("l", "collection", true, "Collection handle on which to perform the cleanup");
+        options.addOption("m", "community", true, "Community handle on which to perform the cleanup");
         CommandLine line = parser.parse(options, args);
 
         if (!line.hasOption("e"))
@@ -145,9 +145,11 @@ public class MetadataCleanup extends TraverseDSpace
             }
 
             dcv.value = Jsoup.clean(dcv.value, apply);
+
             cleanMetadata.add(dcv);
         }
 
         mm.replaceMetadata(item, cleanMetadata);
+        item.update();
     }
 }

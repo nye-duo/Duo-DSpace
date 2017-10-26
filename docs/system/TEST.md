@@ -52,7 +52,7 @@ a before/after URL which will take you to items which can be compared to show yo
 system was applied, and then again after.  This can be used for manually checking the results of the process.  Note that the
 policy test system does also check the results automatically.
 
-## Migration
+## Migration from 2.0.1 to 3.1.0
 
 In order to test for the migration, we just need to run the migrate script knowing that there are items which need
 to be migrated.  The following script will create a single item in the DSpace system which will need to be migrated.
@@ -75,3 +75,8 @@ You can run just the single item created in the first step by specifying either 
     [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email] -i 123
     
     [dspace]/bin/dspace dsrun no.uio.duo.migrate201to30.PolicyMigration -e [admin account email] -h 123456789/111
+    
+    
+## HTML Cleanup
+
+    [dspace]/bin/dspace dsrun no.uio.duo.cleanup.LiveMetadataCleanupTest -e [admin account email]

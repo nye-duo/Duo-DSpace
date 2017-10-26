@@ -88,20 +88,21 @@ public class PolicyMigration extends TraverseDSpace
             {
                 iid = Integer.parseInt(id);
             }
-            pm.migrateItem(iid, line.getOptionValue("h"));
+            pm.doItem(iid, line.getOptionValue("h"));
         }
         else if (line.hasOption("l"))
         {
-            pm.migrateCollection(line.getOptionValue("l"));
+            pm.doCollection(line.getOptionValue("l"));
         }
         else if (line.hasOption("m"))
         {
-            pm.migrateCommunity(line.getOptionValue("m"));
+            pm.doCommunity(line.getOptionValue("m"));
         }
         else
         {
-            pm.migrateAll();
+            pm.doDSpace();
         }
+        pm.report();
     }
 
     private int itemCount = 0;
@@ -115,136 +116,7 @@ public class PolicyMigration extends TraverseDSpace
     public PolicyMigration(String epersonEmail)
             throws Exception
     {
-        super(epersonEmail);
-    }
-
-    /**
-     * Migrate the collection specified by the handle.  This does all items in workspace, workflow, archive and withdrawn
-     *
-     * @param handle
-     * @throws Exception
-     */
-    public void migrateCollection(String handle)
-            throws Exception
-    {
-        try
-        {
-            this.doCollection(handle);
-        }
-        catch (Exception e)
-        {
-            this.context.abort();
-            throw e;
-        }
-        finally
-        {
-            if (this.context.isValid())
-            {
-                this.context.complete();
-            }
-        }
-
-        System.out.println("Processed 1 Collection");
-    }
-
-    /**
-     * Migrate the community specified by the handle.  This does all sub communities, collections and their items
-     * in workspace, workflow, archive and withdrawn
-     *
-     * @param handle
-     * @throws Exception
-     */
-    public void migrateCommunity(String handle)
-            throws Exception
-    {
-        try
-        {
-            this.doCommunity(handle);
-        }
-        catch (Exception e)
-        {
-            this.context.abort();
-            throw e;
-        }
-        finally
-        {
-            if (this.context.isValid())
-            {
-                this.context.complete();
-            }
-        }
-
-        System.out.println("Processed 1 Community");
-    }
-
-    /**
-     * On an item identified either by the given id or the given handle
-     *
-     * @param id
-     * @param handle
-     * @throws Exception
-     */
-    public void migrateItem(int id, String handle)
-            throws Exception
-    {
-        try
-        {
-            Item item = null;
-            if (id > -1)
-            {
-                item = Item.find(this.context, id);
-            }
-            else if (handle != null)
-            {
-                item = (Item) HandleManager.resolveToObject(this.context, handle);
-            }
-            if (item != null)
-            {
-                this.doItem(item);
-            }
-        }
-        catch (Exception e)
-        {
-            this.context.abort();
-            throw e;
-        }
-        finally
-        {
-            if (this.context.isValid())
-            {
-                this.context.complete();
-            }
-        }
-
-        System.out.println("Processed 1 Item");
-    }
-
-    /**
-     * Execute the migration on all DSpace items
-     *
-     * @throws Exception
-     */
-    public void migrateAll()
-            throws Exception
-    {
-        try
-        {
-            this.doDSpace();
-        }
-        catch (Exception e)
-        {
-            this.context.abort();
-            throw e;
-        }
-        finally
-        {
-            if (this.context.isValid())
-            {
-                this.context.complete();
-            }
-        }
-
-        System.out.println("Processed " + this.itemCount + " Items");
+        super(epersonEmail, true);
     }
 
     /**
@@ -339,7 +211,7 @@ public class PolicyMigration extends TraverseDSpace
             this.context.commit();
         }
 
-        this.itemCount++;
-
+        // this.itemCount++;
+        super.doItem(item);
     }
 }

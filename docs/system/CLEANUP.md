@@ -54,3 +54,16 @@ If you want to run this on a workspace or a workflow item, you can do so using i
     [dspace]/bin/dspace dsrun no.uio.duo.NumberChecker -s item -w 23
 
     [dspace]/bin/dspace dsrun no.uio.duo.NumberChecker -s item -f 55
+    
+    
+## HTML in Metadata
+
+    [dspace]/bin/dspace dsrun no.uio.duo.cleanup.MetadataCleanup -e [admin email] -i [item id]
+    
+    [dspace]/bin/dspace dsrun no.uio.duo.cleanup.MetadataCleanup -e [admin email] -h [item handle]
+    
+    [dspace]/bin/dspace dsrun no.uio.duo.cleanup.MetadataCleanup -e [admin email] -l [collection handle]
+    
+    [dspace]/bin/dspace dsrun no.uio.duo.cleanup.MetadataCleanup -e [admin email] -m [community handle]
+    
+    [dspace]/bin/dspace dsrun no.uio.duo.cleanup.MetadataCleanup -e [admin email]

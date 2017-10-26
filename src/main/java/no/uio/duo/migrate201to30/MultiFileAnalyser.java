@@ -52,6 +52,7 @@ public class MultiFileAnalyser extends TraverseDSpace
 
         MultiFileAnalyser mfa = new MultiFileAnalyser(line.getOptionValue("e"), line.getOptionValue("o"), line.hasOption("n"), line.hasOption("b"), line.hasOption("v"));
         mfa.analyse();
+        mfa.report();
     }
 
     class ReportRow
@@ -135,6 +136,8 @@ public class MultiFileAnalyser extends TraverseDSpace
         {
             this.maxBitstreamCount = bitstreams.size();
         }
+
+        super.doItem(item);
     }
 
     private List<String> describePolicies(List<Bitstream> bitstreams)

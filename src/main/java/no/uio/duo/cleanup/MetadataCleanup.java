@@ -7,7 +7,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.Item;
-import org.dspace.handle.HandleManager;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -66,154 +65,27 @@ public class MetadataCleanup extends TraverseDSpace
             {
                 iid = Integer.parseInt(id);
             }
-            mc.cleanItem(iid, line.getOptionValue("h"));
+            mc.doItem(iid, line.getOptionValue("h"));
         }
         else if (line.hasOption("l"))
         {
-            mc.cleanCollection(line.getOptionValue("l"));
+            mc.doCollection(line.getOptionValue("l"));
         }
         else if (line.hasOption("m"))
         {
-            mc.cleanCommunity(line.getOptionValue("m"));
+            mc.doCommunity(line.getOptionValue("m"));
         }
         else
         {
-            mc.cleanAll();
+            mc.doDSpace();
         }
+        mc.report();
     }
+
     public MetadataCleanup(String epersonEmail)
             throws Exception
     {
-        super(epersonEmail);
-    }
-
-    /**
-     * Migrate the collection specified by the handle.  This does all items in workspace, workflow, archive and withdrawn
-     *
-     * @param handle
-     * @throws Exception
-     */
-    public void cleanCollection(String handle)
-            throws Exception
-    {
-        try
-        {
-            this.doCollection(handle);
-        }
-        catch (Exception e)
-        {
-            this.context.abort();
-            throw e;
-        }
-        finally
-        {
-            if (this.context.isValid())
-            {
-                this.context.complete();
-            }
-        }
-
-        System.out.println("Processed 1 Collection");
-    }
-
-    /**
-     * Migrate the community specified by the handle.  This does all sub communities, collections and their items
-     * in workspace, workflow, archive and withdrawn
-     *
-     * @param handle
-     * @throws Exception
-     */
-    public void cleanCommunity(String handle)
-            throws Exception
-    {
-        try
-        {
-            this.doCommunity(handle);
-        }
-        catch (Exception e)
-        {
-            this.context.abort();
-            throw e;
-        }
-        finally
-        {
-            if (this.context.isValid())
-            {
-                this.context.complete();
-            }
-        }
-
-        System.out.println("Processed 1 Community");
-    }
-
-    /**
-     * On an item identified either by the given id or the given handle
-     *
-     * @param id
-     * @param handle
-     * @throws Exception
-     */
-    public void cleanItem(int id, String handle)
-            throws Exception
-    {
-        try
-        {
-            Item item = null;
-            if (id > -1)
-            {
-                item = Item.find(this.context, id);
-            }
-            else if (handle != null)
-            {
-                item = (Item) HandleManager.resolveToObject(this.context, handle);
-            }
-            if (item != null)
-            {
-                this.doItem(item);
-            }
-        }
-        catch (Exception e)
-        {
-            this.context.abort();
-            throw e;
-        }
-        finally
-        {
-            if (this.context.isValid())
-            {
-                this.context.complete();
-            }
-        }
-
-        System.out.println("Processed 1 Item");
-    }
-
-    /**
-     * Execute the migration on all DSpace items
-     *
-     * @throws Exception
-     */
-    public void cleanAll()
-            throws Exception
-    {
-        try
-        {
-            this.doDSpace();
-        }
-        catch (Exception e)
-        {
-            this.context.abort();
-            throw e;
-        }
-        finally
-        {
-            if (this.context.isValid())
-            {
-                this.context.complete();
-            }
-        }
-
-        System.out.println("Processed " + this.itemCount + " Items");
+        super(epersonEmail, true);
     }
 
     /**
@@ -228,6 +100,6 @@ public class MetadataCleanup extends TraverseDSpace
     public void doItem(Item item)
             throws SQLException, AuthorizeException, IOException, Exception
     {
-
+        super.doItem(item);
     }
 }

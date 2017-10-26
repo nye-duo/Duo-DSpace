@@ -6,10 +6,13 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.dspace.content.Collection;
 import org.dspace.content.Item;
 import org.dspace.content.WorkspaceItem;
 
+/**
+ * A Live test for ensuring that HTML can be cleared from metadata.  When run it produces an item with
+ * metadata containing HTML suitable for testing the cleanup tool.
+ */
 public class LiveMetadataCleanupTest extends LiveTest
 {
     public static void main(String[] args)
@@ -30,8 +33,12 @@ public class LiveMetadataCleanupTest extends LiveTest
         lmct.runAll();
     }
 
-    // private Collection collection;
-
+    /**
+     * Create a new metadata cleanup test instance
+     *
+     * @param epersonEmail
+     * @throws Exception
+     */
     public LiveMetadataCleanupTest(String epersonEmail)
             throws Exception
     {
@@ -39,6 +46,11 @@ public class LiveMetadataCleanupTest extends LiveTest
         this.collection = this.makeCollection();
     }
 
+    /**
+     * Run the utility, which will produce a single item with HTML in the metadata
+     *
+     * @throws Exception
+     */
     public void runAll()
             throws Exception
     {
@@ -49,10 +61,10 @@ public class LiveMetadataCleanupTest extends LiveTest
     }
 
     /**
-     * Make a test item for the migration.
+     * Make a test item for the cleanup
      *
-     * A test item consists of a minimal amount of metadata, including an embargo date from today (new Date()),
-     * and a lot of bundles each containing a single file.
+     * A test item consists of a minimal amount of metadata containing HTML.  The item does not contain
+     * any bitstreams.
      *
      * @return
      * @throws Exception

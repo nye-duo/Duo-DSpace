@@ -17,7 +17,9 @@ import java.sql.SQLException;
  * This class solves the issue of handling workflow and workspace items too.  Choose your entry point, and then
  * this class will iterate down from there, passing through each community/sub-community/collection/item/workflow item/workspace item
  *
- * Subclasses should at least implement doItem, but may override any of the other methods too.
+ * Subclasses should at least implement processItem, but may override any of the other methods too.
+ *
+ * This class also handles aborting and completing the context, if desired
  */
 public abstract class TraverseDSpace
 {
@@ -33,6 +35,13 @@ public abstract class TraverseDSpace
     protected int workflowCount = 0;
     protected int itemCount = 0;
 
+    /**
+     * Create a new utility which traverses DSpace.  This will not manage the context for you, so if you use this
+     * one you need to manage the context yourself.
+     *
+     * @param epersonEmail
+     * @throws Exception
+     */
     public TraverseDSpace(String epersonEmail)
             throws Exception
     {
@@ -40,7 +49,10 @@ public abstract class TraverseDSpace
     }
 
     /**
-     * Create an instance of the object, where the contex will be initialised around the eperson account provided
+     * Create an instance of the object, where the context will be initialised around the eperson account provided.
+     *
+     * if manageContext is true, the utility will also abort or complete the context at the end of the run
+     *
      * @param epersonEmail
      * @throws Exception
      */
@@ -54,6 +66,12 @@ public abstract class TraverseDSpace
         this.context.setCurrentUser(this.eperson);
     }
 
+    /**
+     * Record the entry point the caller has used to the utility.  This allows us to track at what level to complete
+     * or abort the context at the end
+     *
+     * @param entryPoint
+     */
     private void setContextEntryPoint(String entryPoint)
     {
         if (this.contextEntryPoint == null)
@@ -62,6 +80,13 @@ public abstract class TraverseDSpace
         }
     }
 
+    /**
+     * Is the context being managed for the given entry point?  Methods use this to determine whether it is their
+     * responsibility to commit or abort the context
+     *
+     * @param entryPoint
+     * @return
+     */
     private boolean contextManaged(String entryPoint)
     {
         return this.manageContext && entryPoint.equals(this.contextEntryPoint);
@@ -69,6 +94,7 @@ public abstract class TraverseDSpace
 
     /**
      * Hit every object in the whole of DSpace
+     *
      * @throws Exception
      */
     public void doDSpace()
@@ -314,7 +340,7 @@ public abstract class TraverseDSpace
     }
 
     /**
-     * Do item
+     * Do item by handle
      *
      * @param handle
      * @throws SQLException
@@ -356,6 +382,14 @@ public abstract class TraverseDSpace
         }
     }
 
+    /**
+     * Do item by either id or handle
+     *
+     * @param id
+     * @param handle
+     * @throws SQLException
+     * @throws Exception
+     */
     public void doItem(int id, String handle)
             throws SQLException, Exception
     {
@@ -498,7 +532,7 @@ public abstract class TraverseDSpace
     }
 
     /**
-     * Do item.
+     * Do item.  Internally, this calls processItem, which is the abstract method subclasses should implement.
      *
      * @param item
      * @throws SQLException
@@ -538,6 +572,9 @@ public abstract class TraverseDSpace
         }
     }
 
+    /**
+     * Output the counts of objects that have been touched by the utility so far
+     */
     public void report()
     {
         System.out.println("Processed " + this.communityCount + " Communities");
@@ -547,5 +584,14 @@ public abstract class TraverseDSpace
         System.out.println("\tof which " + this.workspaceCount + " Workspace Items");
     }
 
+    /**
+     * This is the method to implement for actions that should be performed on your item
+     * 
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     * @throws Exception
+     */
     protected abstract void processItem(Item item) throws SQLException, AuthorizeException, IOException, Exception;
 }

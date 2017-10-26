@@ -79,4 +79,16 @@ You can run just the single item created in the first step by specifying either 
     
 ## HTML Cleanup
 
+In order to test for HTML cleanup, we need to load an item with HTML in the metadata into the system.  The following
+script will create a community, collection and a single item which has HTML for the metadata cleanup script to clean
+for you:
+
     [dspace]/bin/dspace dsrun no.uio.duo.cleanup.LiveMetadataCleanupTest -e [admin account email]
+    
+The item ID and handle will output to the screen, so you can look it up via the DSpace interface.
+
+You should then run the MetadataCleanup script, which can be done with:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.cleanup.MetadataCleanup -e [admin email] -i [item id]
+    
+Once this has been done, check the item created in the first step to ensure that the HTML has been cleaned correctly.

@@ -8,6 +8,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+/**
+ * Superclass providing services to utilities which want to allow testing of a live DSpace instance
+ *
+ */
 public class LiveTest
 {
     protected Context context;
@@ -15,6 +19,12 @@ public class LiveTest
     protected Collection collection;
     protected File bitstream;
 
+    /**
+     * Create a new live test utility.  This will set up the context and the current user eperson
+     *
+     * @param epersonEmail
+     * @throws Exception
+     */
     public LiveTest(String epersonEmail)
             throws Exception
     {
@@ -24,6 +34,12 @@ public class LiveTest
         this.context.setCurrentUser(this.eperson);
     }
 
+    /**
+     * Make a basic test collection
+     *
+     * @return
+     * @throws Exception
+     */
     protected Collection makeCollection()
             throws Exception
     {
@@ -43,18 +59,43 @@ public class LiveTest
         return collection;
     }
 
+    /**
+     * Create a bundle on the item with the given name
+     * @param item
+     * @param bundle
+     * @return
+     * @throws Exception
+     */
     protected Bundle makeBundle(Item item, String bundle)
             throws Exception
     {
         return item.createBundle(bundle);
     }
 
+    /**
+     * Make a bitstream from this.bitstream on the given item int he given bundle
+     *
+     * @param item
+     * @param bundle
+     * @return
+     * @throws Exception
+     */
     protected Bitstream makeBitstream(Item item, String bundle)
             throws Exception
     {
         return this.makeBitstream(item, bundle, 1);
     }
 
+    /**
+     * Make a bitstream from this.bitstream on the given item in the given bundle, identified by
+     * some sequential integer identifier (this will appear in the filename)
+     *
+     * @param item
+     * @param bundle
+     * @param ident
+     * @return
+     * @throws Exception
+     */
     protected Bitstream makeBitstream(Item item, String bundle, int ident)
             throws Exception
     {

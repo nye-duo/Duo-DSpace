@@ -19,6 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Tool to run a cleanup of all HTML in the item metadata
+ */
 public class MetadataCleanup extends TraverseDSpace
 {
     public static void main(String[] args)
@@ -90,6 +93,10 @@ public class MetadataCleanup extends TraverseDSpace
         mc.report();
     }
 
+    /**
+     * If a field has special rules associated with it, regarding which HTML tags are permitted,
+     * this member variable holds the mapping between the dc field and the list of allowed tags
+     */
     public static Map<String, List<String>> allowedHTMLByField = new HashMap<String, List<String>>();
     static {
         List<String> lineSeparators = new ArrayList<String>();
@@ -99,6 +106,12 @@ public class MetadataCleanup extends TraverseDSpace
         allowedHTMLByField.put("dc.description.abstract", lineSeparators);
     }
 
+    /**
+     * Create a new instance of the metadata cleanup utility
+     *
+     * @param epersonEmail
+     * @throws Exception
+     */
     public MetadataCleanup(String epersonEmail)
             throws Exception
     {
@@ -106,7 +119,7 @@ public class MetadataCleanup extends TraverseDSpace
     }
 
     /**
-     * Migrate a given item
+     * Cleanup a given item
      *
      * @param item
      * @throws SQLException

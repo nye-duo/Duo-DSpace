@@ -104,9 +104,7 @@ public class PolicyMigration extends TraverseDSpace
         }
         pm.report();
     }
-
-    private int itemCount = 0;
-
+    
     /**
      * Create a new instance of the policy migration tool
      *
@@ -128,7 +126,7 @@ public class PolicyMigration extends TraverseDSpace
      * @throws IOException
      * @throws Exception
      */
-    public void doItem(Item item)
+    public void processItem(Item item)
             throws SQLException, AuthorizeException, IOException, Exception
     {
         // first move all of the bitstreams
@@ -210,8 +208,5 @@ public class PolicyMigration extends TraverseDSpace
             // after this final stage, commit the context again
             this.context.commit();
         }
-
-        // this.itemCount++;
-        super.doItem(item);
     }
 }

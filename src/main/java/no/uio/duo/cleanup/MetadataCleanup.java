@@ -97,9 +97,9 @@ public class MetadataCleanup extends TraverseDSpace
      * @throws IOException
      * @throws Exception
      */
-    public void doItem(Item item)
+    public void processItem(Item item)
             throws SQLException, AuthorizeException, IOException, Exception
     {
-        super.doItem(item);
+
     }
 }

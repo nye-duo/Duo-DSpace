@@ -93,7 +93,7 @@ public class MultiFileAnalyser extends TraverseDSpace
      * @param item
      * @throws Exception
      */
-    public void doItem(Item item)
+    public void processItem(Item item)
             throws Exception
     {
         if (item.getHandle() == null && !this.noHandle)
@@ -136,8 +136,6 @@ public class MultiFileAnalyser extends TraverseDSpace
         {
             this.maxBitstreamCount = bitstreams.size();
         }
-
-        super.doItem(item);
     }
 
     private List<String> describePolicies(List<Bitstream> bitstreams)

@@ -19,7 +19,7 @@ import java.sql.SQLException;
  *
  * Subclasses should at least implement doItem, but may override any of the other methods too.
  */
-public class TraverseDSpace
+public abstract class TraverseDSpace
 {
     protected Context context;
     protected EPerson eperson;
@@ -500,8 +500,6 @@ public class TraverseDSpace
     /**
      * Do item.
      *
-     * This is the one you probably want to override in your subclass
-     *
      * @param item
      * @throws SQLException
      * @throws AuthorizeException
@@ -511,7 +509,33 @@ public class TraverseDSpace
     public void doItem(Item item)
             throws SQLException, AuthorizeException, IOException, Exception
     {
-        this.itemCount++;
+        String entryPoint = "WorkspaceID";
+        this.setContextEntryPoint(entryPoint);
+
+        try
+        {
+            this.processItem(item);
+            this.itemCount++;
+        }
+        catch (Exception e)
+        {
+            if (this.contextManaged(entryPoint))
+            {
+                this.context.abort();
+            }
+            throw e;
+        }
+        finally
+        {
+            if (this.contextManaged(entryPoint))
+            {
+                if (this.context.isValid())
+                {
+                    this.context.complete();
+                }
+                this.contextEntryPoint = null;
+            }
+        }
     }
 
     public void report()
@@ -522,4 +546,6 @@ public class TraverseDSpace
         System.out.println("\tof which " + this.workflowCount + " Workflow Items");
         System.out.println("\tof which " + this.workspaceCount + " Workspace Items");
     }
+
+    protected abstract void processItem(Item item) throws SQLException, AuthorizeException, IOException, Exception;
 }

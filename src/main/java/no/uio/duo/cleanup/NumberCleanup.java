@@ -1,4 +1,4 @@
-package no.uio.duo;
+package no.uio.duo.cleanup;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

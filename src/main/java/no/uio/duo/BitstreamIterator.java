@@ -30,8 +30,24 @@ public class BitstreamIterator implements Iterator<ContextualBitstream>
     public BitstreamIterator(Item item)
             throws SQLException
     {
+        this(item, null);
+    }
+
+    public BitstreamIterator(Item item, String bundleName)
+            throws SQLException
+    {
         this.item = item;
-        Bundle[] bundles = this.item.getBundles();
+
+        Bundle[] bundles = null;
+        if (bundleName != null)
+        {
+            bundles = this.item.getBundles(bundleName);
+        }
+        else
+        {
+            bundles = this.item.getBundles();
+        }
+
         for (Bundle bundle : bundles)
         {
             Bitstream[] bitstreams = bundle.getBitstreams();

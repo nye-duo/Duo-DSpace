@@ -92,3 +92,47 @@ You should then run the MetadataCleanup script, which can be done with:
     [dspace]/bin/dspace dsrun no.uio.duo.cleanup.MetadataCleanup -e [admin email] -i [item id]
     
 Once this has been done, check the item created in the first step to ensure that the HTML has been cleaned correctly.
+
+
+## Install Consumer
+
+In order to ensure that the DuoInstallConsumer is behaving correctly with regard to applying the appropriate policies
+when an item is installed into the archive, you can use the following Live test.
+
+### IMPORTANT: Before testing
+
+To test the install consumer, we need to ensure that the consumer will run when an item is installed in DSpace.
+
+To do this, in dspace.cfg:
+
+* Comment out duo.embargo.communities - this means it will run on all communities
+* Ensure the DuoInstallConsumer configuration is set
+
+The configuration should look like this:
+
+    event.dispatcher.default.consumers = versioning, discovery, eperson, harvester, duo
+    event.consumer.duo.class = no.uio.duo.DuoInstallConsumer
+    event.consumer.duo.filters = Item+Install
+
+Be sure to restart DSpace after making these changes, and don't forget to put them back after you have finished running
+the tests.
+
+### Running the tests
+
+To test the install consumer you can run a live functional test on a running DSpace with the following command:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.livetest.LiveInstallTest -e [eperson email] -b [path to bitstream] -u [dspace base url] -m [test matrix file] -o [output report path]
+    
+**DO NOT UNDER ANY CIRCUMSTANCES RUN THIS ON A PRODUCTION SYSTEM** - it makes changes to the community and collection 
+structure, and adds/removes items from the system.
+    
+For example in [dspace]/bin:
+
+    ./dspace dsrun no.uio.duo.livetest.LiveInstallTest -e richard@cottagelabs.com -b /home/richard/Code/External/Duo-DSpace/docs/system/TEST.md -u http://localhost:8080/xmlui -m /home/richard/Code/External/Duo-DSpace/src/test/resources/install_testmatrix.csv -o /home/richard/Code/External/Duo-DSpace/src/test/resources/check.csv
+
+This will execute the tests as defined in src/test/resources/install_testmatrix.csv
+
+The output of this process will be a csv file which you can open in Excel, which will give you the test number (from install_testmatrix.csv) and
+a before/after URL which will take you to items which can be compared to show you what the item was like before the install to the repo
+was applied, and then again after.  This can be used for manually checking the results of the process.  Note that the
+install test system does also check the results automatically.

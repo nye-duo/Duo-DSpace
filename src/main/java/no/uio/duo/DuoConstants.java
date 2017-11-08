@@ -33,4 +33,10 @@ public class DuoConstants
 
     /** "closed" access condition for items coming from StudentWeb */
     public static String CLOSED = "closed";
+
+    /** "pass" grade string for items coming from StudentWeb */
+    public static String FS_PASS = "pass";
+
+    /** embargo type which indicates an item is "restricted" from StudentWeb */
+    public static String FS_RESTRICTED = "restricted";
 }

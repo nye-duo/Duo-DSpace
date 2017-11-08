@@ -65,6 +65,23 @@ public class DuoInstallConsumer implements Consumer
     {
         Item item = (Item) event.getSubject(context);
 
+        if (FSRestrictionManager.consumes(item))
+        {
+            FSRestrictionManager fsrm = new FSRestrictionManager();
+            fsrm.onInstall(context, item);
+        }
+        else
+        {
+            // simply apply the policy pattern, which will take the appropriate action
+            // depending on the state of the item at the point we pick it up
+            if (PolicyApplicationFilter.allow(context, item))
+            {
+                PolicyPatternManager ppm = new PolicyPatternManager();
+                ppm.applyToNewItem(item, context);
+            }
+        }
+
+        /*
         // check to see if the item has a StudentWeb grade of "fail"
         if (this.isFail(context, item))
         {
@@ -79,9 +96,10 @@ public class DuoInstallConsumer implements Consumer
         {
             PolicyPatternManager ppm = new PolicyPatternManager();
             ppm.applyToNewItem(item, context);
-        }
+        }*/
     }
 
+    /*
     private boolean isFail(Context context, Item item)
     {
         String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
@@ -94,6 +112,6 @@ public class DuoInstallConsumer implements Consumer
             }
         }
         return false;
-    }
+    }*/
 
 }

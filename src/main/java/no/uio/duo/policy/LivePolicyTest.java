@@ -48,6 +48,7 @@ public class LivePolicyTest
         options.addOption("m", "matrix", true, "Path to test matrix file");
         options.addOption("o", "out", true, "Path to file to output manual check results to");
         options.addOption("t", "test", true, "test number or range of numbers to run");
+        options.addOption("w", "workspace", false, "workspace mode - leave the reference item in the workspace");
         CommandLine line = parser.parse(options, args);
 
         if (!line.hasOption("e"))
@@ -76,7 +77,9 @@ public class LivePolicyTest
             System.exit(0);
         }
 
-        LivePolicyTest lpt = new LivePolicyTest(line.getOptionValue("e"), line.getOptionValue("b"), line.getOptionValue("u"), line.getOptionValue("m"), line.getOptionValue("o"));
+        boolean workspace = line.hasOption("w");
+
+        LivePolicyTest lpt = new LivePolicyTest(line.getOptionValue("e"), line.getOptionValue("b"), line.getOptionValue("u"), line.getOptionValue("m"), line.getOptionValue("o"), workspace);
 
         if (line.hasOption("-t"))
         {
@@ -97,6 +100,7 @@ public class LivePolicyTest
     {
         public String testName;
         public String reference;
+        public int referenceId;
         public String changed;
     }
 
@@ -117,6 +121,7 @@ public class LivePolicyTest
     private List<Map<String, String>> failures = new ArrayList<Map<String, String>>();
     private String outPath;
 
+    private boolean workspaceMode = false;
     private int from = -1;
     private int to = -1;
 
@@ -127,13 +132,14 @@ public class LivePolicyTest
 
 
 
-    public LivePolicyTest(String epersonEmail, String bitstreamPath, String baseUrl, String matrixPath, String outPath)
+    public LivePolicyTest(String epersonEmail, String bitstreamPath, String baseUrl, String matrixPath, String outPath, boolean workspace)
             throws Exception
     {
         System.out.println("===========================================");
         System.out.println("== Starting up                           ==");
         System.out.println("===========================================");
 
+        this.workspaceMode = workspace;
         this.baseUrl = baseUrl;
         this.bitstream = new File(bitstreamPath);
         this.outPath = outPath;
@@ -271,8 +277,9 @@ public class LivePolicyTest
         this.testStart(name);
 
         // prep the reference and action item
-        ItemMakeRecord reference = this.makeItem(embargoDate, anonReads, adminFile, adminRead);
-        ItemMakeRecord actOn = this.makeItem(embargoDate, anonReads, adminFile, adminRead);
+        String state = this.workspaceMode ? "workspace" : "archive";
+        ItemMakeRecord reference = this.makeItem(embargoDate, anonReads, adminFile, adminRead, state);
+        ItemMakeRecord actOn = this.makeItem(embargoDate, anonReads, adminFile, adminRead, "archive");
 
         // run the operation
         if ("existing".equals(type))
@@ -328,6 +335,7 @@ public class LivePolicyTest
         CheckReport report = new CheckReport();
         report.testName = name;
         report.reference = reference.getHandle();
+        report.referenceId = reference.getID();
         report.changed = actOn.getHandle();
         this.checkList.add(report);
     }
@@ -364,7 +372,7 @@ public class LivePolicyTest
         return collection;
     }
 
-    private ItemMakeRecord makeItem(String embargoDate, List<String> anonReads, boolean adminFile, boolean adminRead)
+    private ItemMakeRecord makeItem(String embargoDate, List<String> anonReads, boolean adminFile, boolean adminRead, String state)
             throws Exception
     {
         // make and print the information string
@@ -385,8 +393,12 @@ public class LivePolicyTest
         WorkspaceItem wsi = WorkspaceItem.create(this.context, this.collection, false);
         Item item = wsi.getItem();
 
-        WorkflowManagerWrapper.startWithoutNotify(this.context, wsi);
-        item = Item.find(this.context, item.getID());
+        if ("archive".equals(state))
+        {
+            WorkflowManagerWrapper.startWithoutNotify(this.context, wsi);
+            item = Item.find(this.context, item.getID());
+        }
+
         item.addMetadata("dc", "title", null, null, "Item ID " + item.getID());
 
         // set the embargo date
@@ -813,6 +825,10 @@ public class LivePolicyTest
         for (CheckReport report : this.checkList)
         {
             String reference = this.baseUrl + "/handle/" + report.reference;
+            if (report.reference == null)
+            {
+                reference = this.baseUrl + "/admin/item?itemID=" + report.referenceId;
+            }
             String changed = this.baseUrl + "/handle/" + report.changed;
             String row = report.testName + "," + reference + "," + changed;
             System.out.println(row);

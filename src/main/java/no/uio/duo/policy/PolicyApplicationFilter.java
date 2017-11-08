@@ -1,7 +1,6 @@
 package no.uio.duo.policy;
 
 import org.dspace.content.Community;
-import org.dspace.content.DCValue;
 import org.dspace.content.DSpaceObject;
 import org.dspace.content.Item;
 import org.dspace.core.ConfigurationManager;
@@ -25,18 +24,6 @@ public class PolicyApplicationFilter
     public static boolean allow(Context context, Item item)
             throws SQLException
     {
-        String liftDateField = ConfigurationManager.getProperty("embargo.field.lift");
-        if (liftDateField == null)
-        {
-            return false;
-        }
-
-        DCValue[] dcvs = item.getMetadata(liftDateField);
-        if (dcvs.length == 0)
-        {
-            return false;
-        }
-
         String scopeCfg = ConfigurationManager.getProperty("duo.embargo.communities");
         if (scopeCfg == null)
         {

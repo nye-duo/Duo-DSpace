@@ -117,7 +117,34 @@ The configuration should look like this:
 Be sure to restart DSpace after making these changes, and don't forget to put them back after you have finished running
 the tests.
 
-### Running the tests
+### Testing Standard Policy Patterns
+
+To test that policy patterns are appropriately applied by the PolicyPaternManager during a normal install, you can run
+the above LivePolicyTest with a special mode.
+
+The above LivePolicyTest is designed to test the PolicyPatternManager itself, and not whether it is applied correctly
+during an install of a new item.  The test below ensures that newly submitted items passing through the DuoInstallConsumer
+have the PolicyPatternManager applied correctly.
+
+    [dspace]/bin/dspace dsrun no.uio.duo.policy.LivePolicyTest -e [eperson email] -b [path to bitstream] -u [dspace base url] -m [test matrix file] -o [output report path] -w
+
+Note the addition of the -w option - this causes the test to leave the reference item in the user workspace, so you can
+compare the before and after submission items.  Administrator URLs for the item in the user workspace are output in
+the final report from the test.
+
+Additionally, the test matrix file is different to the one used before.  Instead we are only testing items which are "new",
+and we give them the type "other" instead, to distinguish them from the previous test.  The test resource "makematrix.csv"
+provides the appropriate test parameters.
+    
+**DO NOT UNDER ANY CIRCUMSTANCES RUN THIS ON A PRODUCTION SYSTEM** - it makes changes to the community and collection 
+structure, and adds/removes items from the system.
+    
+For example in [dspace]/bin:
+
+    ./dspace dsrun no.uio.duo.policy.LivePolicyTest -e richard@cottagelabs.com -b /home/richard/Code/External/Duo-DSpace/docs/system/TEST.md -u http://localhost:8080/xmlui -m /home/richard/Code/External/Duo-DSpace/src/test/resources/makematrix.csv -o /home/richard/Code/External/Duo-DSpace/src/test/resources/check.csv -w
+
+
+### Testing FS Policies
 
 To test the install consumer you can run a live functional test on a running DSpace with the following command:
 

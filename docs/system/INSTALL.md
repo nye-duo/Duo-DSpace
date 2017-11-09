@@ -46,7 +46,10 @@ In order to generate URNs for items in the repository using the National Library
 
 It is bundled here for your convenience.  Install it into your local maven repository with:
 
-    mvn install:install-file -Dfile=lib/idservice-client/idservice-client.jar -DpomFile=lib/idservice-client/pom.xml
+    mvn install:install-file -Dfile=lib/idservice-client/idservice-client-2.0.jar -DpomFile=lib/idservice-client/pom.xml
+
+Note if you wish to use an older version of the IdService you will need to modify the pom.xml for the right version, and
+switch the jars in the command above.
 
 ### DSpace
 

@@ -320,9 +320,12 @@ public class LiveInstallTest extends LiveTest
         item.addMetadata("dc", "title", null, null, "Item ID " + item.getID());
 
         // set the grade
-        String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
-        DCValue gradeDcv = mm.makeDCValue(gradeField, null);
-        item.addMetadata(gradeDcv.schema, gradeDcv.element, gradeDcv.qualifier, null, grade);
+        if (!"none".equals(grade))
+        {
+            String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
+            DCValue gradeDcv = mm.makeDCValue(gradeField, null);
+            item.addMetadata(gradeDcv.schema, gradeDcv.element, gradeDcv.qualifier, null, grade);
+        }
 
         // set the embargo date
         String ed = null;
@@ -379,7 +382,7 @@ public class LiveInstallTest extends LiveTest
         result.bitstreamIDs.add(original.getID());
 
         // clear out any existing resource policies
-        this.clearResourcePolicies(item);
+        // this.clearResourcePolicies(item);
 
         if ("archive".equals(state))
         {

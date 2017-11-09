@@ -7,3 +7,4 @@ name,grade,embargo,type,result_status,original_files,admin_files,anon_read_resul
 6,pass,future,1 year,archived,1,0,future
 7,fail,none,none,withdrawn,0,1,n/a
 8,none,none,none,archived,1,0,unbound
+9,none,future,none,archived,1,0,future

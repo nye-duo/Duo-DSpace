@@ -19,6 +19,10 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * Class to apply restriction rules to items coming from StudentWeb
+ *
+ */
 public class FSRestrictionManager
 {
     /** log4j logger */
@@ -39,6 +43,15 @@ public class FSRestrictionManager
         return dcvs.length > 0;
     }
 
+    /**
+     * Method to run when an item is installed in the repository
+     *
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     public void onInstall(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
     {
@@ -62,6 +75,12 @@ public class FSRestrictionManager
         }
     }
 
+    /**
+     * Does the item have a pass grade?
+     *
+     * @param item
+     * @return
+     */
     private boolean isPass(Item item)
     {
         String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
@@ -76,6 +95,12 @@ public class FSRestrictionManager
         return false;
     }
 
+    /**
+     * Does the item have a restricted embargo type
+     *
+     * @param item
+     * @return
+     */
     private boolean isRestricted(Item item)
     {
         String gradeField = ConfigurationManager.getProperty("studentweb", "embargo-type.field");
@@ -90,6 +115,14 @@ public class FSRestrictionManager
         return false;
     }
 
+    /**
+     * Move all the bitstreams in the ORIGINAL bundle to the DUO_ADMIN bundle
+     *
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     private void original2Admin(Item item)
             throws SQLException, AuthorizeException, IOException
     {
@@ -127,6 +160,15 @@ public class FSRestrictionManager
         }
     }
 
+    /**
+     * Apply the policy pattern manager (if the collection configured is the correct one) to the item
+     *
+     * @param item
+     * @param context
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     private void applyPolicyPatternManager(Item item, Context context)
             throws SQLException, AuthorizeException, IOException
     {
@@ -142,6 +184,14 @@ public class FSRestrictionManager
         }
     }
 
+    /**
+     * Withdraw the item from the repository
+     *
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     private void withdraw(Item item)
             throws SQLException, AuthorizeException, IOException
     {
@@ -149,6 +199,14 @@ public class FSRestrictionManager
         item.withdraw();
     }
 
+    /**
+     * Send an email alert to the repository administrator indicating that the item has been restricted
+     *
+     * @param item
+     * @param pass
+     * @param restricted
+     * @throws IOException
+     */
     private void alert(Item item, boolean pass, boolean restricted)
             throws IOException
     {

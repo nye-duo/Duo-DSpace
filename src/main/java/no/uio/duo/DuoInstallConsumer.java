@@ -91,38 +91,6 @@ public class DuoInstallConsumer implements Consumer
                 log.info("Not taking any action on Item " + item.getID());
             }
         }
-
-        /*
-        // check to see if the item has a StudentWeb grade of "fail"
-        if (this.isFail(context, item))
-        {
-            // if so, withdraw the item
-            item.withdraw();
-            return;
-        }
-
-        // now simply apply the policy pattern, which will take the appropriate action
-        // depending on the state of the item at the point we pick it up
-        if (PolicyApplicationFilter.allow(context, item))
-        {
-            PolicyPatternManager ppm = new PolicyPatternManager();
-            ppm.applyToNewItem(item, context);
-        }*/
     }
-
-    /*
-    private boolean isFail(Context context, Item item)
-    {
-        String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
-        DCValue[] dcvs = item.getMetadata(gradeField);
-        for (DCValue dcv : dcvs)
-        {
-            if ("fail".equals(dcv.value.trim()))
-            {
-                return true;
-            }
-        }
-        return false;
-    }*/
 
 }

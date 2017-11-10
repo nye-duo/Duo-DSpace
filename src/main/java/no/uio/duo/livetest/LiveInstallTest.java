@@ -23,6 +23,10 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * Class which can apply a live test to ensure that the DuoInstallConsumer is behaving correctly
+ *
+ */
 public class LiveInstallTest extends LiveTest
 {
     public static void main(String[] args)
@@ -111,7 +115,7 @@ public class LiveInstallTest extends LiveTest
 
 
     /**
-     * Create a new metadata cleanup test instance
+     * Create a new live install test instance
      *
      * @param epersonEmail
      * @throws Exception
@@ -156,6 +160,12 @@ public class LiveInstallTest extends LiveTest
         System.out.println("\n\n");
     }
 
+    /**
+     * Set the range of tests to be run
+     *
+     * @param from
+     * @param to
+     */
     public void setRange(int from, int to)
     {
         this.from = from;
@@ -224,6 +234,19 @@ public class LiveInstallTest extends LiveTest
     /////////////////////////////////////////////////
     // test running infrastructure
 
+    /**
+     * Run an individual test, with the given parameters
+     *
+     * @param name
+     * @param grade
+     * @param embargo
+     * @param embargoType
+     * @param resultStatus
+     * @param originalFiles
+     * @param adminFiles
+     * @param anonReadResult
+     * @throws Exception
+     */
     private void runTest(String name,
                          String grade,
                          String embargo,
@@ -425,27 +448,6 @@ public class LiveInstallTest extends LiveTest
             for (String key : pair.keySet())
             {
                 System.out.println(key + " - " + pair.get(key));
-            }
-        }
-    }
-
-    private void clearResourcePolicies(Item item)
-            throws Exception
-    {
-        List<ResourcePolicy> existing = AuthorizeManager.getPolicies(this.context, item);
-        for (ResourcePolicy policy : existing)
-        {
-            policy.delete();
-        }
-
-        BitstreamIterator bsi = new BitstreamIterator(item);
-        while (bsi.hasNext())
-        {
-            Bitstream bitstream = bsi.next().getBitstream();
-            List<ResourcePolicy> bsPolicy = AuthorizeManager.getPolicies(this.context, bitstream);
-            for (ResourcePolicy policy : bsPolicy)
-            {
-                policy.delete();
             }
         }
     }

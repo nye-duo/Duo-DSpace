@@ -7,12 +7,16 @@ This file contains notes about how to upgrade from duo 3.0.0 to duo 3.1.0.
 The following changes have been made to the software in 3.1.0
 
 * A metadata cleanup script has been added, to clear HTML tags from the item metadata
+* The restrictions applied to items coming from StudentWeb have been extended
+* A notification email is now sent when a failed or restricted item is archived from StudentWeb
 
 
 ## How to update
 
 You will need to install the new code, and update the configuration in the usual way, as per INSTALL.md.
 
+Note that there is a new email template, so ensure that you fully synchronise the new configuraiton with your existing
+configuration.
 
 ## Other notes and actions on the update
 

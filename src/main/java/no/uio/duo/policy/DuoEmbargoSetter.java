@@ -1,5 +1,6 @@
 package no.uio.duo.policy;
 
+import org.apache.log4j.Logger;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.*;
 import org.dspace.core.ConfigurationManager;
@@ -39,6 +40,9 @@ import java.util.List;
  */
 public class DuoEmbargoSetter implements EmbargoSetter
 {
+    /** log4j logger */
+    private static Logger log = Logger.getLogger(DuoEmbargoSetter.class);
+
     private EmbargoSetter fallback;
     private PolicyPatternManager policies;
 
@@ -81,12 +85,15 @@ public class DuoEmbargoSetter implements EmbargoSetter
     public void setEmbargo(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
     {
+        log.info("Setting embargo on item " + item.getID());
         if (PolicyApplicationFilter.allow(context, item))
         {
+            log.info("Apply policy pattern manager to item " + item.getID());
             this.policies.applyToNewItem(item, context);
         }
         else
         {
+            log.info("Falling back to standard Embargo Setter for item " + item.getID());
             this.fallback.setEmbargo(context, item);
         }
     }

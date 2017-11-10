@@ -4,6 +4,7 @@ package no.uio.duo;
 import no.uio.duo.policy.ContextualBitstream;
 import no.uio.duo.policy.PolicyApplicationFilter;
 import no.uio.duo.policy.PolicyPatternManager;
+import org.apache.log4j.Logger;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
@@ -20,6 +21,9 @@ import java.sql.SQLException;
 
 public class FSRestrictionManager
 {
+    /** log4j logger */
+    private static Logger log = Logger.getLogger(FSRestrictionManager.class);
+
     /**
      * Should this class process the given item.
      *
@@ -38,11 +42,14 @@ public class FSRestrictionManager
     public void onInstall(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
     {
+        log.info("Processing install for StudentWeb item " + item.getID());
+
         boolean pass = this.isPass(item);
         boolean restricted = this.isRestricted(item);
 
         if (!pass || (pass && restricted))
         {
+            log.info("Item " + item.getID() + " is a fail or a pass with a restricted embargo type");
             this.original2Admin(item);
             this.applyPolicyPatternManager(item, context);
             this.withdraw(item);
@@ -50,6 +57,7 @@ public class FSRestrictionManager
         }
         else
         {
+            log.info("Item " + item.getID() + " is a pass without a restricted embargo type");
             this.applyPolicyPatternManager(item, context);
         }
     }
@@ -85,6 +93,8 @@ public class FSRestrictionManager
     private void original2Admin(Item item)
             throws SQLException, AuthorizeException, IOException
     {
+        log.info("Moving " + DuoConstants.ORIGINAL_BUNDLE + " bundle bitstreams to " + DuoConstants.ADMIN_BUNDLE + " for item " + item.getID());
+
         Bundle admin = null;
         Bundle[] admins = item.getBundles(DuoConstants.ADMIN_BUNDLE);
         if (admins.length > 0)
@@ -105,6 +115,7 @@ public class FSRestrictionManager
 
             admin.addBitstream(bs);
             bundle.removeBitstream(bs);
+            log.info("Moved bitstream " + bs.getID() + " from " + DuoConstants.ORIGINAL_BUNDLE + " to " + DuoConstants.ADMIN_BUNDLE + " for item " + item.getID());
         }
 
         for (Bundle bundle : item.getBundles())
@@ -121,20 +132,28 @@ public class FSRestrictionManager
     {
         if (PolicyApplicationFilter.allow(context, item))
         {
+            log.info("Applying PolicyPatternManager to item " + item.getID());
             PolicyPatternManager ppm = new PolicyPatternManager();
             ppm.applyToNewItem(item, context);
+        }
+        else
+        {
+            log.info("Not applying PolicyPatternManater to item " + item.getID());
         }
     }
 
     private void withdraw(Item item)
             throws SQLException, AuthorizeException, IOException
     {
+        log.info("Withdrawing item " + item.getID());
         item.withdraw();
     }
 
     private void alert(Item item, boolean pass, boolean restricted)
             throws IOException
     {
+        log.info("Sending email alert for failed or pass with restricted embargo type for item " + item.getID());
+
         Email email = Email.getEmail(I18nUtil.getEmailFilename(I18nUtil.getDefaultLocale(), "installrestricted"));
         String to = ConfigurationManager.getProperty("mail.admin");
         email.addRecipient(to);

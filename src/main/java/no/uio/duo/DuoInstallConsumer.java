@@ -2,6 +2,7 @@ package no.uio.duo;
 
 import no.uio.duo.policy.PolicyApplicationFilter;
 import no.uio.duo.policy.PolicyPatternManager;
+import org.apache.log4j.Logger;
 import org.dspace.content.DCValue;
 import org.dspace.content.Item;
 import org.dspace.core.ConfigurationManager;
@@ -30,6 +31,9 @@ import org.dspace.event.Event;
  */
 public class DuoInstallConsumer implements Consumer
 {
+    /** log4j logger */
+    private static Logger log = Logger.getLogger(DuoInstallConsumer.class);
+
     /**
      * Initialise the install consumer.  Does nothing.
      * @throws Exception
@@ -64,9 +68,11 @@ public class DuoInstallConsumer implements Consumer
     public void consume(Context context, Event event) throws Exception
     {
         Item item = (Item) event.getSubject(context);
+        log.info("Processing Install of Item " + item.getID());
 
         if (FSRestrictionManager.consumes(item))
         {
+            log.info("FSRestrictionManager will apply restrictions to item " + item.getID());
             FSRestrictionManager fsrm = new FSRestrictionManager();
             fsrm.onInstall(context, item);
         }
@@ -76,8 +82,13 @@ public class DuoInstallConsumer implements Consumer
             // depending on the state of the item at the point we pick it up
             if (PolicyApplicationFilter.allow(context, item))
             {
+                log.info("Applying standard policy pattern to Item " + item.getID());
                 PolicyPatternManager ppm = new PolicyPatternManager();
                 ppm.applyToNewItem(item, context);
+            }
+            else
+            {
+                log.info("Not taking any action on Item " + item.getID());
             }
         }
 

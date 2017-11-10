@@ -6,10 +6,10 @@
 #
 # See org.dspace.core.Email for information on the format of this file.
 #
-Subject: DSpace - {0} item has been withdrawn
+Subject: DSpace - {0} StudentWeb item has been withdrawn
 The item:
 
-{0}
+{1}
 
 Has been installed into the archive in a withdrawn state because it is {0}
 

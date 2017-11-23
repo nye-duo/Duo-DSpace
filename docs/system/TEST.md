@@ -94,32 +94,32 @@ You should then run the MetadataCleanup script, which can be done with:
 Once this has been done, check the item created in the first step to ensure that the HTML has been cleaned correctly.
 
 
-## Install Consumer
+## Event Consumer
 
-In order to ensure that the DuoInstallConsumer is behaving correctly with regard to applying the appropriate policies
+In order to ensure that the DuoEventConsumer is behaving correctly with regard to applying the appropriate policies
 when an item is installed into the archive, you can use the following Live test.
 
 ### IMPORTANT: Before testing
 
-To test the install consumer, we need to ensure that the consumer will run when an item is installed in DSpace.
+To test the event consumer, we need to ensure that the consumer will run when an item is installed/modified in DSpace.
 
 To do this, in dspace.cfg:
 
 * Comment out duo.embargo.communities - this means it will run on all communities
-* Ensure the DuoInstallConsumer configuration is set
+* Ensure the DuoEventConsumer configuration is set
 
 The configuration should look like this:
 
     event.dispatcher.default.consumers = versioning, discovery, eperson, harvester, duo
-    event.consumer.duo.class = no.uio.duo.DuoInstallConsumer
-    event.consumer.duo.filters = Item+Install
+    event.consumer.duo.class = no.uio.duo.DuoEventConsumer
+    event.consumer.duo.filters = Item+Install|Modify_Metadata
 
 Be sure to restart DSpace after making these changes, and don't forget to put them back after you have finished running
 the tests.
 
 ### Testing Standard Policy Patterns
 
-To test that policy patterns are appropriately applied by the PolicyPaternManager during a normal install, you can run
+To test that policy patterns are appropriately applied by the PolicyPatternManager during a normal install, you can run
 the above LivePolicyTest with a special mode.
 
 The above LivePolicyTest is designed to test the PolicyPatternManager itself, and not whether it is applied correctly

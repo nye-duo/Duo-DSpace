@@ -9,13 +9,14 @@ The following changes have been made to the software in 3.1.0
 * A metadata cleanup script has been added, to clear HTML tags from the item metadata
 * The restrictions applied to items coming from StudentWeb have been extended
 * A notification email is now sent when a failed or restricted item is archived from StudentWeb
+* The Install Consumer has been generalised as an event consumer, and now also applies policies when items metadata is edited (e.g. by an admin)
 
 
 ## How to update
 
 You will need to install the new code, and update the configuration in the usual way, as per INSTALL.md.
 
-Note that there is a new email template, so ensure that you fully synchronise the new configuraiton with your existing
+Note that there are several new new email templates, so ensure that you fully synchronise the new configuraiton with your existing
 configuration.
 
 ## Other notes and actions on the update

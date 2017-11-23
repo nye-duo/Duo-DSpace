@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Class which can apply a live test to ensure that the DuoInstallConsumer is behaving correctly
+ * Class which can apply a live test to ensure that the DuoEventConsumer is behaving correctly
  *
  */
 public class LiveInstallTest extends LiveTest

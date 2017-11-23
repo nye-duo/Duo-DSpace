@@ -1,0 +1,17 @@
+# Email sent to DSpace admin when a fail or pass+restricted item has its metadata modified
+# in a relevant way
+#
+# Parameters: {0} the prefix for the subject
+#             {1} the item that has changed
+#
+#
+# See org.dspace.core.Email for information on the format of this file.
+#
+Subject: DSpace - {0} StudentWeb item has been modified and withdrawn
+The item:
+
+{1}
+
+Has had its metadata modified.  As a result, it has been placed into a withdrawn state because it is now {0}
+
+- The Duo Event Consumer

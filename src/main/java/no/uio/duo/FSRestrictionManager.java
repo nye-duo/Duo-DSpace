@@ -53,8 +53,17 @@ public class FSRestrictionManager
      * @throws IOException
      */
     public void onInstall(Context context, Item item)
-            throws SQLException, AuthorizeException, IOException
+            throws SQLException, AuthorizeException, IOException, DuoException
     {
+        log.info("Processing install for StudentWeb item " + item.getID());
+
+        boolean pass = this.isPass(item);
+        boolean restricted = this.isRestricted(item);
+
+        String newState = this.getNewState(pass, restricted);
+        this.processStateTransition(context, item, null, newState);
+
+        /*
         log.info("Processing install for StudentWeb item " + item.getID());
 
         boolean pass = this.isPass(item);
@@ -72,7 +81,159 @@ public class FSRestrictionManager
         {
             log.info("Item " + item.getID() + " is a pass without a restricted embargo type");
             this.applyPolicyPatternManager(item, context);
+        }*/
+    }
+
+    /**
+     * Method to run when an item is installed in the repository
+     *
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
+    public void onModifyMetadata(Context context, Item item)
+            throws SQLException, AuthorizeException, IOException, DuoException
+    {
+        log.info("Processing Modify_Metadata for StudentWeb item " + item.getID());
+
+        boolean pass = this.isPass(item);
+        boolean restricted = this.isRestricted(item);
+        boolean withdrawn = item.isWithdrawn();
+
+        String oldState = null;
+        String newState = this.getNewState(pass, restricted);
+
+        if (!withdrawn)
+        {
+            oldState = "pass";
         }
+        else
+        {
+            if (restricted)
+            {
+                oldState = "restricted";
+            }
+            else
+            {
+                oldState = "fail";
+            }
+        }
+
+        this.processStateTransition(context, item, oldState, newState);
+    }
+
+    private String getNewState(boolean pass, boolean restricted)
+    {
+        String newState = null;
+        if (!pass)
+        {
+            newState = "fail";
+        }
+        else if (pass & !restricted)
+        {
+            newState = "pass";
+        }
+        else if (pass & restricted)
+        {
+            newState = "restricted";
+        }
+        return newState;
+    }
+
+    private void processStateTransition(Context context, Item item, String oldState, String newState)
+            throws SQLException, AuthorizeException, IOException, DuoException
+    {
+        if (newState == null)
+        {
+            throw new DuoException("FSRestrictionManager cannot implement a restriction for a newState that is null");
+        }
+
+        if (oldState != null && !"restricted".equals(oldState) && !"fail".equals(oldState) && !"pass".equals(oldState))
+        {
+            throw new DuoException("FSRestrictionManager received invalid oldState " + oldState);
+        }
+
+        if (!"restricted".equals(newState) && !"fail".equals(newState) && !"pass".equals(newState))
+        {
+            throw new DuoException("FSRestrictionManager received invalid newState " + newState);
+        }
+
+        // first, let's ignore any null state transitions
+
+        // if the states are the same
+        if (newState.equals(oldState))
+        {
+            return;
+        }
+
+        // if we are moving from restricted to fail (or vice versa)
+        if ("restricted".equals(oldState) && "fail".equals(newState))
+        {
+            return;
+        }
+        if ("fail".equals(oldState) && "restricted".equals(newState))
+        {
+            return;
+        }
+
+        // for convenience, make a bunch of booleans
+        boolean fromRestrictedFail = "restricted".equals(oldState) || "fail".equals(oldState);
+        boolean toRestrictedFail = "restricted".equals(newState) || "fail".equals(newState);
+        boolean toPass = "pass".equals(newState);
+        boolean fromPass = "pass".equals(oldState);
+        boolean fromNull = oldState == null;
+
+        // explicitly lay out the transitions for clarity
+        if (fromNull)
+        {
+            if (toRestrictedFail)
+            {
+                this.fromPassNullToRestrictedFail(context, item, oldState, newState);
+            }
+            else if (toPass)
+            {
+                this.fromNullToPass(context, item);
+            }
+        }
+        else if (fromRestrictedFail)
+        {
+            if (toPass)
+            {
+                this.fromRestrictedFailToPass(context, item, oldState);
+            }
+        }
+        else if (fromPass)
+        {
+            if (toRestrictedFail)
+            {
+                this.fromPassNullToRestrictedFail(context, item, oldState, newState);
+            }
+        }
+    }
+
+    private void fromNullToPass(Context context, Item item)
+            throws SQLException, AuthorizeException, IOException
+    {
+        this.applyPolicyPatternManager(item, context);
+    }
+
+    private void fromRestrictedFailToPass(Context context, Item item, String oldState)
+            throws SQLException, AuthorizeException, IOException
+    {
+        this.reinstate(item);
+        this.applyPolicyPatternManager(item, context);
+        this.alert(item, oldState, "pass");
+    }
+
+    private void fromPassNullToRestrictedFail(Context context, Item item, String oldState, String newState)
+            throws SQLException, AuthorizeException, IOException
+    {
+        this.original2Admin(item);
+        this.applyPolicyPatternManager(item, context);
+        this.withdraw(item);
+        this.alert(item, oldState, newState);
     }
 
     /**
@@ -200,39 +361,41 @@ public class FSRestrictionManager
     }
 
     /**
+     * Reinstate an item into the repository
+     *
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
+    private void reinstate(Item item)
+            throws SQLException, AuthorizeException, IOException
+    {
+        log.info("Reinstating item " + item.getID());
+        item.reinstate();
+    }
+
+    /**
      * Send an email alert to the repository administrator indicating that the item has been restricted
      *
      * @param item
-     * @param pass
-     * @param restricted
+     * @param oldState
+     * @param newState
      * @throws IOException
      */
-    private void alert(Item item, boolean pass, boolean restricted)
+    private void alert(Item item, String oldState, String newState)
             throws IOException
     {
-        log.info("Sending email alert for failed or pass with restricted embargo type for item " + item.getID());
+        // unpack the incoming strings into useful booleans
+        boolean install = oldState == null;
+        boolean modify = "pass".equals(oldState) || "restricted".equals(oldState) || "fail".equals(oldState);
+        boolean restricted = "restricted".equals(newState);
+        boolean fail = "fail".equals(newState);
+        boolean pass = "pass".equals(newState);
 
-        Email email = Email.getEmail(I18nUtil.getEmailFilename(I18nUtil.getDefaultLocale(), "installrestricted"));
         String to = ConfigurationManager.getProperty("mail.admin");
-        email.addRecipient(to);
 
-        // add the arguments, which are:
-        // {0} the prefix for the subject
-        // {1} the item that has changed
-
-        // {0} the prefix for the subject
-        String prefix = "";
-        if (!pass)
-        {
-            prefix = "FAILED";
-        }
-        else if (pass && restricted)
-        {
-            prefix = "RESTRICTED";
-        }
-        email.addArgument(prefix);
-
-        // {1} the item that has changed
+        // the item that has changed
         String itemArg = "";
         DCValue[] titles = item.getMetadata("dc.title");
         if (titles.length > 0)
@@ -244,7 +407,58 @@ public class FSRestrictionManager
             itemArg += "Untitled";
         }
         itemArg += " (" + item.getHandle() + ")";
-        email.addArgument(itemArg);
+
+        Email email;
+        if (install)
+        {
+            log.info("Sending email alert for install; failed or pass with restricted embargo type for item " + item.getID());
+
+            email = Email.getEmail(I18nUtil.getEmailFilename(I18nUtil.getDefaultLocale(), "installrestricted"));
+            email.addRecipient(to);
+
+            // add the arguments, which are:
+            // {0} the prefix for the subject
+            // {1} the item that has changed
+
+            // {0} the prefix for the subject
+            String prefix = restricted ? "RESTRICTED" : "FAILED";
+            email.addArgument(prefix);
+
+            // {1} the item that has changed
+            email.addArgument(itemArg);
+        }
+        else
+        {
+            if (pass)
+            {
+                log.info("Sending email alert for modify_metadata; pass for item " + item.getID());
+
+                email = Email.getEmail(I18nUtil.getEmailFilename(I18nUtil.getDefaultLocale(), "modifymetadatacheckfiles"));
+                email.addRecipient(to);
+
+                // add the arguments, which are:
+                // {0} the item that has changed
+                email.addArgument(itemArg);
+            }
+            else
+            {
+                log.info("Sending email alert for modify_metadata; failed or pass with restricted embargo type for item " + item.getID());
+
+                email = Email.getEmail(I18nUtil.getEmailFilename(I18nUtil.getDefaultLocale(), "modifymetadatarestricted"));
+                email.addRecipient(to);
+
+                // add the arguments, which are:
+                // {0} the prefix for the subject
+                // {1} the item that has changed
+
+                // {0} the prefix for the subject
+                String prefix = restricted ? "RESTRICTED" : "FAILED";
+                email.addArgument(prefix);
+
+                // {1} the item that has changed
+                email.addArgument(itemArg);
+            }
+        }
 
         // now send it
         try

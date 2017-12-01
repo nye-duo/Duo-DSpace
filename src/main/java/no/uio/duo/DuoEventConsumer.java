@@ -101,7 +101,7 @@ public class DuoEventConsumer implements Consumer
             }
             else
             {
-                log.info("Not taking any action on installed Item " + item.getID());
+                log.info("FSRestrictionManager and PolicyPatternManager not applicable; Not taking any action on installed Item " + item.getID());
             }
         }
     }
@@ -117,7 +117,18 @@ public class DuoEventConsumer implements Consumer
         }
         else
         {
-            log.info("Not taking any action on installed Item " + item.getID());
+            // simply apply the policy pattern, which will take the appropriate action
+            // depending on the state of the item at the point we pick it up
+            if (PolicyApplicationFilter.allow(context, item))
+            {
+                log.info("Applying standard policy pattern to modified Item " + item.getID());
+                PolicyPatternManager ppm = new PolicyPatternManager();
+                ppm.applyToNewItem(item, context);
+            }
+            else
+            {
+                log.info("FSRestrictionManager and PolicyPatternManager not applicable; Not taking any action on modified Item " + item.getID());
+            }
         }
     }
 

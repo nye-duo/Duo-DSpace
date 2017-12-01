@@ -68,12 +68,12 @@ This document describes each of the classes in this package which are DSpace plu
 **Co-Dependencies**: None
 
 
-### no.uio.duo.DuoInstallConsumer 
+### no.uio.duo.DuoEventConsumer 
 **Interface**: org.dspace.event.Consumer
 
 **Feature**: StudentWeb
 
-**Function**: Used to embargo/withdraw StudentWeb items with a "fail" grade on submission to the archive
+**Function**: Used to embargo/withdraw StudentWeb items with a "fail" grade on submission to the archive, and subsequent modifications
 
 **Configured In**: dspace.cfg
 

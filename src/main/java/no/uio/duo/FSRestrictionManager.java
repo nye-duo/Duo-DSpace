@@ -6,18 +6,15 @@ import no.uio.duo.policy.PolicyApplicationFilter;
 import no.uio.duo.policy.PolicyPatternManager;
 import org.apache.log4j.Logger;
 import org.dspace.authorize.AuthorizeException;
-import org.dspace.content.Bitstream;
-import org.dspace.content.Bundle;
-import org.dspace.content.DCValue;
-import org.dspace.content.Item;
-import org.dspace.core.ConfigurationManager;
-import org.dspace.core.Context;
-import org.dspace.core.Email;
-import org.dspace.core.I18nUtil;
+import org.dspace.content.*;
+import org.dspace.core.*;
+import org.dspace.embargo.EmbargoSetter;
+import org.dspace.workflow.WorkflowItem;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * Class to apply restriction rules to items coming from StudentWeb
@@ -59,9 +56,10 @@ public class FSRestrictionManager
 
         boolean pass = this.isPass(item);
         boolean restricted = this.isRestricted(item);
+        Date embargo = this.getEmbargoDate(item, context);
 
         String newState = this.getNewState(pass, restricted);
-        this.processStateTransition(context, item, null, newState);
+        this.processStateTransition(context, item, null, newState, embargo);
 
         /*
         log.info("Processing install for StudentWeb item " + item.getID());
@@ -98,9 +96,16 @@ public class FSRestrictionManager
     {
         log.info("Processing Modify_Metadata for StudentWeb item " + item.getID());
 
+        if (!item.isArchived() && !item.isWithdrawn())
+        {
+            log.info("Item " + item.getID() + " is in workflow; not applying changes");
+            return;
+        }
+
         boolean pass = this.isPass(item);
         boolean restricted = this.isRestricted(item);
         boolean withdrawn = item.isWithdrawn();
+        Date embargo = this.getEmbargoDate(item, context);
 
         String oldState = null;
         String newState = this.getNewState(pass, restricted);
@@ -121,7 +126,7 @@ public class FSRestrictionManager
             }
         }
 
-        this.processStateTransition(context, item, oldState, newState);
+        this.processStateTransition(context, item, oldState, newState, embargo);
     }
 
     private String getNewState(boolean pass, boolean restricted)
@@ -142,7 +147,7 @@ public class FSRestrictionManager
         return newState;
     }
 
-    private void processStateTransition(Context context, Item item, String oldState, String newState)
+    private void processStateTransition(Context context, Item item, String oldState, String newState, Date embargo)
             throws SQLException, AuthorizeException, IOException, DuoException
     {
         if (newState == null)
@@ -160,21 +165,26 @@ public class FSRestrictionManager
             throw new DuoException("FSRestrictionManager received invalid newState " + newState);
         }
 
+        log.info("Processing state transition for item " + item.getID() + "; oldState=" + oldState + " newState=" + newState + " embargo=" + embargo);
+
         // first, let's ignore any null state transitions
 
-        // if the states are the same
-        if (newState.equals(oldState))
+        // if the states are the same and we don't have to worry about an embargo, no need to go further
+        if (newState.equals(oldState) && embargo == null)
         {
+            log.info("Before and after states are equal, and no embargo.  No action.");
             return;
         }
 
-        // if we are moving from restricted to fail (or vice versa)
-        if ("restricted".equals(oldState) && "fail".equals(newState))
+        // if we are moving from restricted to fail (or vice versa), and we don't have to worry about an embargo
+        if ("restricted".equals(oldState) && "fail".equals(newState) && embargo == null)
         {
+            log.info("Before and after states are equivalent, and no embargo.  No action.");
             return;
         }
-        if ("fail".equals(oldState) && "restricted".equals(newState))
+        if ("fail".equals(oldState) && "restricted".equals(newState) && embargo == null)
         {
+            log.info("Before and after states are equivalent, and no embargo.  No action.");
             return;
         }
 
@@ -203,6 +213,11 @@ public class FSRestrictionManager
             {
                 this.fromRestrictedFailToPass(context, item, oldState);
             }
+            else if (toRestrictedFail)
+            {
+                log.info("Transition from fail/restricted to fail/restricted, with embargo date.");
+                this.applyPolicyPatternManager(item, context);
+            }
         }
         else if (fromPass)
         {
@@ -210,19 +225,31 @@ public class FSRestrictionManager
             {
                 this.fromPassNullToRestrictedFail(context, item, oldState, newState);
             }
+            else if (toPass)
+            {
+                log.info("Transition from pass to pass, with embargo date.");
+                this.applyPolicyPatternManager(item, context);
+            }
+        }
+        else
+        {
+            log.info("You shouldn't be in this state, how did you get here?  Applying policy manager anyway");
+            this.applyPolicyPatternManager(item, context);
         }
     }
 
     private void fromNullToPass(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
     {
+        log.info("Item " + item.getID() + " transitioning from no state to pass");
         this.applyPolicyPatternManager(item, context);
     }
 
     private void fromRestrictedFailToPass(Context context, Item item, String oldState)
             throws SQLException, AuthorizeException, IOException
     {
-        this.reinstate(item);
+        log.info("Item " + item.getID() + " transitioning from no restricted/fail to pass");
+        // this.reinstate(item);
         this.applyPolicyPatternManager(item, context);
         this.alert(item, oldState, "pass");
     }
@@ -230,6 +257,7 @@ public class FSRestrictionManager
     private void fromPassNullToRestrictedFail(Context context, Item item, String oldState, String newState)
             throws SQLException, AuthorizeException, IOException
     {
+        log.info("Item " + item.getID() + " transitioning from pass/new to restricted/fail");
         this.original2Admin(item);
         this.applyPolicyPatternManager(item, context);
         this.withdraw(item);
@@ -274,6 +302,42 @@ public class FSRestrictionManager
             }
         }
         return false;
+    }
+
+    /**
+     * Get the embargo date from the item metadata
+     *
+     * @param item
+     * @param context
+     * @return
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
+    private Date getEmbargoDate(Item item, Context context)
+            throws SQLException, AuthorizeException, IOException
+    {
+        // first check that there is a date
+        String liftDateField = ConfigurationManager.getProperty("embargo.field.lift");
+        if (liftDateField == null)
+        {
+            return null;
+        }
+
+        // if there is no embargo value, the item isn't embargoed
+        DCValue[] embargoes = item.getMetadata(liftDateField);
+        if (embargoes.length == 0)
+        {
+            return null;
+        }
+
+        // then generate a java Date object
+        // we can't use this, as it validates the date of the embargo, which we don't want
+        // DCDate embargoDate = EmbargoManager.getEmbargoTermsAsDate(context, item);
+
+        EmbargoSetter setter = (EmbargoSetter) PluginManager.getSinglePlugin(EmbargoSetter.class);
+        DCDate embargoDate = setter.parseTerms(context, item, embargoes[0].value);
+        return embargoDate.toDate();
     }
 
     /**

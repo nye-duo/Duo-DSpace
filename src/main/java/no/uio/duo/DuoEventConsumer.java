@@ -78,6 +78,11 @@ public class DuoEventConsumer implements Consumer
             log.info("Processing Modify Metadata of Item " + item.getID());
             this.onModifyMetadata(context, item);
         }
+        else if (Event.MODIFY == event.getEventType() && "REINSTATE".equals(event.getDetail()))
+        {
+            log.info("Processing Reinstate of Item " + item.getID());
+            this.onReinstate(context, item);
+        }
     }
 
     private void onInstall(Context context, Item item)
@@ -132,4 +137,29 @@ public class DuoEventConsumer implements Consumer
         }
     }
 
+    private void onReinstate(Context context, Item item)
+            throws Exception
+    {
+        if (FSRestrictionManager.consumes(item))
+        {
+            log.info("FSRestrictionManager will apply restrictions to item " + item.getID());
+            FSRestrictionManager fsrm = new FSRestrictionManager();
+            fsrm.onReinstate(context, item);
+        }
+        else
+        {
+            // simply apply the policy pattern, which will take the appropriate action
+            // depending on the state of the item at the point we pick it up
+            if (PolicyApplicationFilter.allow(context, item))
+            {
+                log.info("Applying standard policy pattern to reinstated Item " + item.getID());
+                PolicyPatternManager ppm = new PolicyPatternManager();
+                ppm.applyToNewItem(item, context);      // Note that although the item is not new, reinstating it is treating it like a newly submitted item
+            }
+            else
+            {
+                log.info("FSRestrictionManager and PolicyPatternManager not applicable; Not taking any action on reinstated Item " + item.getID());
+            }
+        }
+    }
 }

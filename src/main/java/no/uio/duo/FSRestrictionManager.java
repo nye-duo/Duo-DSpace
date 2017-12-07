@@ -129,6 +129,12 @@ public class FSRestrictionManager
         this.processStateTransition(context, item, oldState, newState, embargo);
     }
 
+    public void onReinstate(Context context, Item item)
+            throws SQLException, AuthorizeException, IOException, DuoException
+    {
+
+    }
+
     private String getNewState(boolean pass, boolean restricted)
     {
         String newState = null;
@@ -170,6 +176,7 @@ public class FSRestrictionManager
         // first, let's ignore any null state transitions
 
         // if the states are the same and we don't have to worry about an embargo, no need to go further
+        /*
         if (newState.equals(oldState) && embargo == null)
         {
             log.info("Before and after states are equal, and no embargo.  No action.");
@@ -186,7 +193,7 @@ public class FSRestrictionManager
         {
             log.info("Before and after states are equivalent, and no embargo.  No action.");
             return;
-        }
+        }*/
 
         // for convenience, make a bunch of booleans
         boolean fromRestrictedFail = "restricted".equals(oldState) || "fail".equals(oldState);
@@ -215,8 +222,8 @@ public class FSRestrictionManager
             }
             else if (toRestrictedFail)
             {
-                log.info("Transition from fail/restricted to fail/restricted, with embargo date.");
-                this.applyPolicyPatternManager(item, context);
+                log.info("Transition from fail/restricted to fail/restricted; embargo may need to be applied/removed");
+                this.applyPolicyPatternManager(item, context, false);
             }
         }
         else if (fromPass)
@@ -227,14 +234,14 @@ public class FSRestrictionManager
             }
             else if (toPass)
             {
-                log.info("Transition from pass to pass, with embargo date.");
-                this.applyPolicyPatternManager(item, context);
+                log.info("Transition from pass to pass; embargo may need to be applied/removed");
+                this.applyPolicyPatternManager(item, context, false);
             }
         }
         else
         {
             log.info("You shouldn't be in this state, how did you get here?  Applying policy manager anyway");
-            this.applyPolicyPatternManager(item, context);
+            this.applyPolicyPatternManager(item, context, false);
         }
     }
 
@@ -242,7 +249,7 @@ public class FSRestrictionManager
             throws SQLException, AuthorizeException, IOException
     {
         log.info("Item " + item.getID() + " transitioning from no state to pass");
-        this.applyPolicyPatternManager(item, context);
+        this.applyPolicyPatternManager(item, context, true);
     }
 
     private void fromRestrictedFailToPass(Context context, Item item, String oldState)
@@ -250,7 +257,7 @@ public class FSRestrictionManager
     {
         log.info("Item " + item.getID() + " transitioning from no restricted/fail to pass");
         // this.reinstate(item);
-        this.applyPolicyPatternManager(item, context);
+        this.applyPolicyPatternManager(item, context, false);
         this.alert(item, oldState, "pass");
     }
 
@@ -259,7 +266,8 @@ public class FSRestrictionManager
     {
         log.info("Item " + item.getID() + " transitioning from pass/new to restricted/fail");
         this.original2Admin(item);
-        this.applyPolicyPatternManager(item, context);
+        boolean asNew = oldState == null;
+        this.applyPolicyPatternManager(item, context, asNew);
         this.withdraw(item);
         this.alert(item, oldState, newState);
     }
@@ -394,14 +402,21 @@ public class FSRestrictionManager
      * @throws AuthorizeException
      * @throws IOException
      */
-    private void applyPolicyPatternManager(Item item, Context context)
+    private void applyPolicyPatternManager(Item item, Context context, boolean asNew)
             throws SQLException, AuthorizeException, IOException
     {
         if (PolicyApplicationFilter.allow(context, item))
         {
             log.info("Applying PolicyPatternManager to item " + item.getID());
             PolicyPatternManager ppm = new PolicyPatternManager();
-            ppm.applyToNewItem(item, context);
+            if (asNew)
+            {
+                ppm.applyToNewItem(item, context);
+            }
+            else
+            {
+                ppm.applyToExistingItem(item, context);
+            }
         }
         else
         {

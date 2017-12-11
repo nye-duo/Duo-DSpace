@@ -60,26 +60,6 @@ public class FSRestrictionManager
 
         String newState = this.getNewState(pass, restricted);
         this.processStateTransition(context, item, null, newState, embargo);
-
-        /*
-        log.info("Processing install for StudentWeb item " + item.getID());
-
-        boolean pass = this.isPass(item);
-        boolean restricted = this.isRestricted(item);
-
-        if (!pass || (pass && restricted))
-        {
-            log.info("Item " + item.getID() + " is a fail or a pass with a restricted embargo type");
-            this.original2Admin(item);
-            this.applyPolicyPatternManager(item, context);
-            this.withdraw(item);
-            this.alert(item, pass, restricted);
-        }
-        else
-        {
-            log.info("Item " + item.getID() + " is a pass without a restricted embargo type");
-            this.applyPolicyPatternManager(item, context);
-        }*/
     }
 
     /**
@@ -132,7 +112,16 @@ public class FSRestrictionManager
     public void onReinstate(Context context, Item item)
             throws SQLException, AuthorizeException, IOException, DuoException
     {
+        log.info("Processing Reinstate for StudentWeb item " + item.getID());
 
+        boolean pass = this.isPass(item);
+        boolean restricted = this.isRestricted(item);
+        Date embargo = this.getEmbargoDate(item, context);
+
+        String oldState = "withdrawn";
+        String newState = this.getNewState(pass, restricted);
+
+        this.processStateTransition(context, item, oldState, newState, embargo);
     }
 
     private String getNewState(boolean pass, boolean restricted)
@@ -161,7 +150,7 @@ public class FSRestrictionManager
             throw new DuoException("FSRestrictionManager cannot implement a restriction for a newState that is null");
         }
 
-        if (oldState != null && !"restricted".equals(oldState) && !"fail".equals(oldState) && !"pass".equals(oldState))
+        if (oldState != null && !"restricted".equals(oldState) && !"fail".equals(oldState) && !"pass".equals(oldState) && !"withdrawn".equals(oldState))
         {
             throw new DuoException("FSRestrictionManager received invalid oldState " + oldState);
         }
@@ -196,6 +185,7 @@ public class FSRestrictionManager
         }*/
 
         // for convenience, make a bunch of booleans
+        boolean fromWithdrawn = "withdrawn".equals(oldState);
         boolean fromRestrictedFail = "restricted".equals(oldState) || "fail".equals(oldState);
         boolean toRestrictedFail = "restricted".equals(newState) || "fail".equals(newState);
         boolean toPass = "pass".equals(newState);
@@ -238,6 +228,17 @@ public class FSRestrictionManager
                 this.applyPolicyPatternManager(item, context, false);
             }
         }
+        else if (fromWithdrawn)
+        {
+            if (toRestrictedFail)
+            {
+                this.fromWithdrawnToRestrictedFail(context, item);
+            }
+            else if (toPass)
+            {
+                this.fromWithdrawnToPass(context, item);
+            }
+        }
         else
         {
             log.info("You shouldn't be in this state, how did you get here?  Applying policy manager anyway");
@@ -256,7 +257,6 @@ public class FSRestrictionManager
             throws SQLException, AuthorizeException, IOException
     {
         log.info("Item " + item.getID() + " transitioning from no restricted/fail to pass");
-        // this.reinstate(item);
         this.applyPolicyPatternManager(item, context, false);
         this.alert(item, oldState, "pass");
     }
@@ -270,6 +270,22 @@ public class FSRestrictionManager
         this.applyPolicyPatternManager(item, context, asNew);
         this.withdraw(item);
         this.alert(item, oldState, newState);
+    }
+
+    private void fromWithdrawnToPass(Context context, Item item)
+            throws SQLException, AuthorizeException, IOException
+    {
+        log.info("Item " + item.getID() + " being restored to archive in state: pass");
+        this.applyPolicyPatternManager(item, context, false);
+    }
+
+    private void fromWithdrawnToRestrictedFail(Context context, Item item)
+            throws SQLException, AuthorizeException, IOException
+    {
+        log.info("Item " + item.getID() + " transitioning from withdrawn to restricted/fail");
+        this.original2Admin(item);
+        this.applyPolicyPatternManager(item, context, false);
+        this.withdraw(item);
     }
 
     /**
@@ -438,22 +454,7 @@ public class FSRestrictionManager
         log.info("Withdrawing item " + item.getID());
         item.withdraw();
     }
-
-    /**
-     * Reinstate an item into the repository
-     *
-     * @param item
-     * @throws SQLException
-     * @throws AuthorizeException
-     * @throws IOException
-     */
-    private void reinstate(Item item)
-            throws SQLException, AuthorizeException, IOException
-    {
-        log.info("Reinstating item " + item.getID());
-        item.reinstate();
-    }
-
+    
     /**
      * Send an email alert to the repository administrator indicating that the item has been restricted
      *

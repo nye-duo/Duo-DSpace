@@ -128,7 +128,7 @@ public class DuoEventConsumer implements Consumer
             {
                 log.info("Applying standard policy pattern to modified Item " + item.getID());
                 PolicyPatternManager ppm = new PolicyPatternManager();
-                ppm.applyToNewItem(item, context);
+                ppm.applyToExistingItem(item, context);
             }
             else
             {
@@ -154,7 +154,7 @@ public class DuoEventConsumer implements Consumer
             {
                 log.info("Applying standard policy pattern to reinstated Item " + item.getID());
                 PolicyPatternManager ppm = new PolicyPatternManager();
-                ppm.applyToNewItem(item, context);      // Note that although the item is not new, reinstating it is treating it like a newly submitted item
+                ppm.applyToExistingItem(item, context);      // Note that although the item is not new, reinstating it is treating it like a newly submitted item
             }
             else
             {

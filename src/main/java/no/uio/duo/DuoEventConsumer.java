@@ -3,6 +3,7 @@ package no.uio.duo;
 import no.uio.duo.policy.PolicyApplicationFilter;
 import no.uio.duo.policy.PolicyPatternManager;
 import org.apache.log4j.Logger;
+import org.dspace.content.DCValue;
 import org.dspace.content.Item;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
@@ -109,11 +110,20 @@ public class DuoEventConsumer implements Consumer
                 log.info("FSRestrictionManager and PolicyPatternManager not applicable; Not taking any action on installed Item " + item.getID());
             }
         }
+
+        item.addMetadata("dc", "contributor", "illustrator", null, "installed");
     }
 
     private void onModifyMetadata(Context context, Item item)
             throws Exception
     {
+        DCValue[] dcv = item.getMetadata("dc", "contributor", "illustrator", null);
+        if (dcv.length == 0 || !"installed".equals(dcv[0].value))
+        {
+            log.info("onModifyMetadata; Not Installed " + item.getID());
+            return;
+        }
+
         if (FSRestrictionManager.consumes(item))
         {
             log.info("FSRestrictionManager will apply restrictions to item " + item.getID());

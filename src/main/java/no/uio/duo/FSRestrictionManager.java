@@ -282,7 +282,7 @@ public class FSRestrictionManager
     private void fromWithdrawnToRestrictedFail(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
     {
-        log.info("Item " + item.getID() + " transitioning from withdrawn to restricted/fail");
+        log.info("Item " + item.getID() + " transitioning from withdrawn to archive in state: restricted/fail");
         this.original2Admin(item);
         this.applyPolicyPatternManager(item, context, false);
         this.withdraw(item);
@@ -454,7 +454,7 @@ public class FSRestrictionManager
         log.info("Withdrawing item " + item.getID());
         item.withdraw();
     }
-    
+
     /**
      * Send an email alert to the repository administrator indicating that the item has been restricted
      *

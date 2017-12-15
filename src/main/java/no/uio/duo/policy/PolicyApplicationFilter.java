@@ -24,6 +24,12 @@ public class PolicyApplicationFilter
     public static boolean allow(Context context, Item item)
             throws SQLException
     {
+        // don't apply policies to items that are in the workflow:
+        if (!item.isArchived() && !item.isWithdrawn())
+        {
+            return false;
+        }
+
         String scopeCfg = ConfigurationManager.getProperty("duo.embargo.communities");
         if (scopeCfg == null)
         {

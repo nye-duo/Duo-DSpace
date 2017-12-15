@@ -2,7 +2,6 @@ package no.uio.duo.livetest;
 
 import no.uio.duo.BitstreamIterator;
 import no.uio.duo.DuoConstants;
-import no.uio.duo.MetadataManager;
 import no.uio.duo.WorkflowManagerWrapper;
 import no.uio.duo.policy.ContextualBitstream;
 import org.apache.commons.cli.CommandLine;
@@ -14,20 +13,17 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.dspace.authorize.AuthorizeManager;
 import org.dspace.authorize.ResourcePolicy;
-import org.dspace.content.*;
-import org.dspace.core.ConfigurationManager;
+import org.dspace.content.Bitstream;
+import org.dspace.content.Bundle;
+import org.dspace.content.Item;
+import org.dspace.content.WorkspaceItem;
 import org.dspace.core.Context;
 import org.dspace.eperson.EPerson;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
-/**
- * Class which can apply a live test to ensure that the DuoEventConsumer is behaving correctly
- *
- */
-public class LiveInstallTest extends LiveTest
+public class LiveReinstateTest extends LiveTest
 {
     public static void main(String[] args)
             throws Exception
@@ -69,7 +65,7 @@ public class LiveInstallTest extends LiveTest
             System.exit(0);
         }
 
-        LiveInstallTest lit = new LiveInstallTest(line.getOptionValue("e"), line.getOptionValue("b"), line.getOptionValue("u"), line.getOptionValue("m"), line.getOptionValue("o"));
+        LiveReinstateTest lrt = new LiveReinstateTest(line.getOptionValue("e"), line.getOptionValue("b"), line.getOptionValue("u"), line.getOptionValue("m"), line.getOptionValue("o"));
 
         if (line.hasOption("-t"))
         {
@@ -81,14 +77,14 @@ public class LiveInstallTest extends LiveTest
             {
                 to = bits[1];
             }
-            lit.setRange(Integer.parseInt(from), Integer.parseInt(to));
+            lrt.setRange(Integer.parseInt(from), Integer.parseInt(to));
         }
-        lit.runAll();
+        lrt.runAll();
     }
 
-    private String baseUrl;
+    // private String baseUrl;
     private List<CSVRecord> testMatrix;
-    private String outPath;
+    // private String outPath;
 
     private Date past = new Date(0);
     private Date now = new Date();
@@ -97,12 +93,12 @@ public class LiveInstallTest extends LiveTest
 
 
     /**
-     * Create a new live install test instance
+     * Create a new live reinstate test instance
      *
      * @param epersonEmail
      * @throws Exception
      */
-    public LiveInstallTest(String epersonEmail, String bitstreamPath, String baseUrl, String matrixPath, String outPath)
+    public LiveReinstateTest(String epersonEmail, String bitstreamPath, String baseUrl, String matrixPath, String outPath)
             throws Exception
     {
         super(epersonEmail);
@@ -284,75 +280,13 @@ public class LiveInstallTest extends LiveTest
         WorkspaceItem wsi = WorkspaceItem.create(this.context, this.collection, false);
         Item item = wsi.getItem();
 
-        MetadataManager mm = new MetadataManager();
-
-        // set a convenient title
-        item.addMetadata("dc", "title", null, null, "Item ID " + item.getID());
-
-        // set the grade
-        if (!"none".equals(grade))
-        {
-            String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
-            DCValue gradeDcv = mm.makeDCValue(gradeField, null);
-            item.addMetadata(gradeDcv.schema, gradeDcv.element, gradeDcv.qualifier, null, grade);
-        }
-
-        // set the embargo date
-        String ed = null;
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
-        if ("past".equals(embargo))
-        {
-            // set to the start of the unix epoch
-            ed = sdf.format(this.past);
-        }
-        else if ("present".equals(embargo))
-        {
-            // set to today
-            ed = sdf.format(this.now);
-        }
-        else if ("future".equals(embargo))
-        {
-            // set in the far future (around 2970 or something)
-            ed = sdf.format(this.farFuture);
-        }
-        else if ("near_future".equals(embargo))
-        {
-            // set in the near future (around 2170 or something)
-            ed = sdf.format(this.nearFuture);
-        }
-        else if ("far_future".equals(embargo))
-        {
-            // set in the far future (around 2970 or something)
-            ed = sdf.format(this.farFuture);
-        }
-        else if ("none".equals(embargo))
-        {
-            // don't set an embargo date
-        }
-
-        if (ed != null)
-        {
-            String embargoField = ConfigurationManager.getProperty("embargo.field.terms");
-            DCValue embargoDcv = mm.makeDCValue(embargoField, null);
-            item.addMetadata(embargoDcv.schema, embargoDcv.element, embargoDcv.qualifier, null, ed);
-        }
-
-        // add the embargo type
-        if (!"none".equals(embargoType))
-        {
-            String typeField = ConfigurationManager.getProperty("studentweb", "embargo-type.field");
-            DCValue typeDcv = mm.makeDCValue(typeField, null);
-            item.addMetadata(typeDcv.schema, typeDcv.element, typeDcv.qualifier, null, embargoType);
-        }
+        // this.applyMetadata(item, grade, embargo, embargoType);
 
         // add a bitstream to the item
         List<Bitstream> originals = new ArrayList<Bitstream>();
         Bitstream original = this.makeBitstream(item, "ORIGINAL", 1);
         originals.add(original);
         result.bitstreamIDs.add(original.getID());
-
-        // clear out any existing resource policies
-        // this.clearResourcePolicies(item);
 
         if ("archive".equals(state))
         {
@@ -456,5 +390,4 @@ public class LiveInstallTest extends LiveTest
 
         return null;
     }
-
 }

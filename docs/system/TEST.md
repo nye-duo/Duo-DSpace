@@ -14,20 +14,20 @@ act when an item is added to the repository: the embargo setter and the Duo inst
 To do this, in dspace.cfg:
 
 * specify a duo.embargo.communities value which contains a non-existent community
-* Comment out the DuoInstallConsumer configuration:
+* Comment out the DuoEventConsumer configuration:
 
 Replace: 
 
     event.dispatcher.default.consumers = versioning, discovery, eperson, harvester, duo
-    event.consumer.duo.class = no.uio.duo.DuoInstallConsumer
-    event.consumer.duo.filters = Item+Install
+    event.consumer.duo.class = no.uio.duo.DuoEventConsumer
+    event.consumer.duo.filters = Item+Install|Modify_Metadata|Modify
 
 with
 
     event.dispatcher.default.consumers = versioning, discovery, eperson, harvester 
     #, duo
-    # event.consumer.duo.class = no.uio.duo.DuoInstallConsumer
-    # event.consumer.duo.filters = Item+Install
+    # event.consumer.duo.class = no.uio.duo.DuoEventConsumer
+    # event.consumer.duo.filters = Item+Install|Modify_Metadata|Modify
 
 Be sure to restart DSpace after making these changes, and don't forget to put them back after you have finished running
 the tests.
@@ -112,7 +112,7 @@ The configuration should look like this:
 
     event.dispatcher.default.consumers = versioning, discovery, eperson, harvester, duo
     event.consumer.duo.class = no.uio.duo.DuoEventConsumer
-    event.consumer.duo.filters = Item+Install|Modify_Metadata
+    event.consumer.duo.filters = Item+Install|Modify_Metadata|Modify
 
 Be sure to restart DSpace after making these changes, and don't forget to put them back after you have finished running
 the tests.

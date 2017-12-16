@@ -1,6 +1,7 @@
 package no.uio.duo.policy;
 
 import no.uio.duo.BitstreamIterator;
+import no.uio.duo.DuoState;
 import no.uio.duo.MetadataManager;
 import no.uio.duo.WorkflowManagerWrapper;
 import no.uio.duo.livetest.LiveTest;
@@ -136,6 +137,10 @@ public class LivePolicyTest extends LiveTest
                 "anon_read_1_result",
                 "anon_read_2_result",
                 "metadata",
+                "duo.state_installed",
+                "duo.state_state",
+                "duo.state_embargo",
+                "duo.state_restrictions",
                 "notes"
             ).parse(in);
         this.testMatrix = csv.getRecords();
@@ -211,7 +216,11 @@ public class LivePolicyTest extends LiveTest
                     adminRead,
                     record.get("item_type"),
                     readResults,
-                    record.get("metadata")
+                    record.get("metadata"),
+                    record.get("duo.state_installed"),
+                    record.get("duo.state_state"),
+                    record.get("duo.state_embargo"),
+                    record.get("duo.state_restrictions")
             );
         }
 
@@ -244,7 +253,11 @@ public class LivePolicyTest extends LiveTest
                          boolean adminRead,
                          String type,
                          List<String> anonReadResults,
-                         String metadataResult
+                         String metadataResult,
+                         String stateInstalled,
+                         String stateState,
+                         String stateEmbargo,
+                         String stateRestrictions
                         )
             throws Exception
     {
@@ -273,17 +286,21 @@ public class LivePolicyTest extends LiveTest
         }
 
         // check the item for appropriate policies
-        this.checkAndPrint(name, actOn.item, readMap, metadataResult);
+        this.checkAndPrint(name, actOn.item, readMap, metadataResult, stateInstalled, stateState, stateEmbargo, stateRestrictions);
 
         this.record(name, reference.item, actOn.item);
 
         this.testEnd(name);
     }
 
-    private void checkAndPrint(String testName, Item item, Map<Integer, String> anonReadResults, String metadataResult)
+    private void checkAndPrint(String testName, Item item, Map<Integer, String> anonReadResults, String metadataResult,
+                               String stateInstalled,
+                               String stateState,
+                               String stateEmbargo,
+                               String stateRestrictions)
             throws Exception
     {
-        String error = this.checkItem(item, anonReadResults, metadataResult);
+        String error = this.checkItem(item, anonReadResults, metadataResult, stateInstalled, stateState, stateEmbargo, stateRestrictions);
         if (error != null)
         {
             Map<String, String> errorRecord = new HashMap<String, String>();
@@ -491,7 +508,11 @@ public class LivePolicyTest extends LiveTest
         return result;
     }
 
-    private String checkItem(Item item, Map<Integer, String> anonReadResults, String metadataResult)
+    private String checkItem(Item item, Map<Integer, String> anonReadResults, String metadataResult,
+                             String stateInstalled,
+                             String stateState,
+                             String stateEmbargo,
+                             String stateRestrictions)
             throws Exception
     {
         // check that there are no bundle policies
@@ -686,6 +707,123 @@ public class LivePolicyTest extends LiveTest
             else if (!date.equals(this.farFuture))
             {
                 return "Item should have (far) future embargo metadata, had: " + val;
+            }
+        }
+
+        // check the duo state metadata to ensure it matches up
+        DuoState ds = new DuoState(item);
+
+        if ("false".equals(stateInstalled))
+        {
+            if (ds.isInstalled())
+            {
+                return "Item should have duo.state installed=false/missing but has installed=true";
+            }
+        }
+        else if ("true".equals(stateInstalled))
+        {
+            if (!ds.isInstalled())
+            {
+                return "Item should have duo.state installed=true but has installed=false/missing";
+            }
+        }
+
+        if ("archived".equals(stateState))
+        {
+            if (!"archived".equals(ds.getState()))
+            {
+                return "Item should have duo.state state=archived, but has state=" + ds.getState();
+            }
+        }
+        else if ("withdrawn".equals(stateState))
+        {
+            if (!"withdrawn".equals(ds.getState()))
+            {
+                return "Item should have duo.state state=withdrawn, but has state=" + ds.getState();
+            }
+        }
+        else if ("workflow".equals(stateState))
+        {
+            if (!"workflow".equals(ds.getState()))
+            {
+                return "Item should have duo.state state=workflow, but has state=" + ds.getState();
+            }
+        }
+
+        String seds = ds.getEmbargo();
+        Date sed = null;
+        if (seds != null)
+        {
+            sed = sdf.parse(seds);
+        }
+        sed = this.correctForTimeZone(sed);
+
+        if ("none".equals(stateEmbargo))
+        {
+            if (seds != null)
+            {
+                return "Item should have had no duo.state embargo metadata, had: " + seds;
+            }
+        }
+        else if ("past".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have past duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            if (sed.equals(this.now) || sed.after(this.now)) {
+                return "Item should have a past duo.state embargo date, but was equal to or later than now";
+            }
+        }
+        else if ("present".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have present duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            if (!sed.equals(this.now)) {
+                return "Item should have a present duo.state embargo date, but was either later than or earlier than now";
+            }
+        }
+        else if ("future".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have future duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!sed.after(this.now))
+            {
+                return "Item should have future duo.state embargo metadata, had: " + seds;
+            }
+        }
+        else if ("near_future".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have (near) future duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!sed.equals(this.nearFuture))
+            {
+                return "Item should have (near) future duo.state embargo metadata, had: " + seds;
+            }
+        }
+        else if ("far_future".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have (far) future duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!sed.equals(this.farFuture))
+            {
+                return "Item should have (far) future duo.state embargo metadata, had: " + seds;
+            }
+        }
+
+        if ("none".equals(stateRestrictions))
+        {
+            if (ds.getRestrictions() != null)
+            {
+                return "Item should have no duo.state restrictions, but has " + ds.getRestrictions();
             }
         }
 

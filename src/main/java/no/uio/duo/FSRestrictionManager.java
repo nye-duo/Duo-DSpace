@@ -52,6 +52,12 @@ public class FSRestrictionManager
     public void onInstall(Context context, Item item)
             throws SQLException, AuthorizeException, IOException, DuoException
     {
+        DuoState stateObj = new DuoState(item);
+        if (stateObj.isInstalled())
+        {
+            log.info("Item " + item.getID() + " is already installed, no need to run");
+            return;
+        }
         log.info("Processing install for StudentWeb item " + item.getID());
 
         boolean pass = this.isPass(item);
@@ -74,13 +80,13 @@ public class FSRestrictionManager
     public void onModifyMetadata(Context context, Item item)
             throws SQLException, AuthorizeException, IOException, DuoException
     {
-        log.info("Processing Modify_Metadata for StudentWeb item " + item.getID());
-
-        if (!item.isArchived() && !item.isWithdrawn())
+        DuoState stateObj = new DuoState(item);
+        if (!stateObj.isInstalled())
         {
             log.info("Item " + item.getID() + " is in workflow; not applying changes");
             return;
         }
+        log.info("Processing Modify_Metadata for StudentWeb item " + item.getID());
 
         boolean pass = this.isPass(item);
         boolean restricted = this.isRestricted(item);

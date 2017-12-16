@@ -89,6 +89,13 @@ public class DuoEventConsumer implements Consumer
     private void onInstall(Context context, Item item)
             throws Exception
     {
+        DuoState state = new DuoState(item);
+        if (state.isInstalled())
+        {
+            log.info("Item " + item.getID() + " is already installed, no need for install consumer to run");
+            return;
+        }
+
         if (FSRestrictionManager.consumes(item))
         {
             log.info("FSRestrictionManager will apply restrictions to item " + item.getID());
@@ -111,16 +118,24 @@ public class DuoEventConsumer implements Consumer
             }
         }
 
-        item.addMetadata("dc", "contributor", "illustrator", null, "installed");
+        state.setInstalled(true);
+        state.sychroniseItemState(false);
+        item.update();
     }
 
     private void onModifyMetadata(Context context, Item item)
             throws Exception
     {
-        DCValue[] dcv = item.getMetadata("dc", "contributor", "illustrator", null);
-        if (dcv.length == 0 || !"installed".equals(dcv[0].value))
+        DuoState state = new DuoState(item);
+        if (!state.isInstalled())
         {
-            log.info("onModifyMetadata; Not Installed " + item.getID());
+            log.info("Modify_Metadata on an item not yet installed: " + item.getID() + " - no action taken");
+            return;
+        }
+
+        if (!state.hasChanged())
+        {
+            log.info("Item " + item.getID() + " state has not changed since last run of Modify_Metadata - no action taken");
             return;
         }
 
@@ -129,6 +144,8 @@ public class DuoEventConsumer implements Consumer
             log.info("FSRestrictionManager will apply restrictions to item " + item.getID());
             FSRestrictionManager fsrm = new FSRestrictionManager();
             fsrm.onModifyMetadata(context, item);
+
+            state.sychroniseItemState(true);
         }
         else
         {
@@ -139,6 +156,8 @@ public class DuoEventConsumer implements Consumer
                 log.info("Applying standard policy pattern to modified Item " + item.getID());
                 PolicyPatternManager ppm = new PolicyPatternManager();
                 ppm.applyToExistingItem(item, context);
+
+                state.sychroniseItemState(true);
             }
             else
             {

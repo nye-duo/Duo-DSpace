@@ -1,8 +1,6 @@
 package no.uio.duo.livetest;
 
-import no.uio.duo.BitstreamIterator;
-import no.uio.duo.DuoConstants;
-import no.uio.duo.WorkflowManagerWrapper;
+import no.uio.duo.*;
 import no.uio.duo.policy.ContextualBitstream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -13,14 +11,13 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.dspace.authorize.AuthorizeManager;
 import org.dspace.authorize.ResourcePolicy;
-import org.dspace.content.Bitstream;
-import org.dspace.content.Bundle;
-import org.dspace.content.Item;
-import org.dspace.content.WorkspaceItem;
+import org.dspace.content.*;
+import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
 import org.dspace.eperson.EPerson;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class LiveReinstateTest extends LiveTest
@@ -82,9 +79,7 @@ public class LiveReinstateTest extends LiveTest
         lrt.runAll();
     }
 
-    // private String baseUrl;
     private List<CSVRecord> testMatrix;
-    // private String outPath;
 
     private Date past = new Date(0);
     private Date now = new Date();
@@ -120,7 +115,12 @@ public class LiveReinstateTest extends LiveTest
                 "result_status",
                 "original_files",
                 "admin_files",
-                "anon_read_result"
+                "anon_read_result",
+                "duo.state_installed",
+                "duo.state_state",
+                "duo.state_grade",
+                "duo.state_embargo",
+                "duo.state_restrictions"
         ).parse(in);
         this.testMatrix = csv.getRecords();
 
@@ -174,7 +174,12 @@ public class LiveReinstateTest extends LiveTest
                     record.get("result_status"),
                     Integer.parseInt(record.get("original_files")),
                     Integer.parseInt(record.get("admin_files")),
-                    record.get("anon_read_result")
+                    record.get("anon_read_result"),
+                    record.get("duo.state_installed"),
+                    record.get("duo.state_state"),
+                    record.get("duo.state_grade"),
+                    record.get("duo.state_embargo"),
+                    record.get("duo.state_restrictions")
             );
         }
 
@@ -220,7 +225,12 @@ public class LiveReinstateTest extends LiveTest
                          String resultStatus,
                          int originalFiles,
                          int adminFiles,
-                         String anonReadResult
+                         String anonReadResult,
+                         String stateInstalled,
+                         String stateState,
+                         String stateGrade,
+                         String stateEmbargo,
+                         String stateRestrictions
     )
             throws Exception
     {
@@ -229,10 +239,10 @@ public class LiveReinstateTest extends LiveTest
         // create two items
 
         // the first is the reference, it is in the submission state in the workflow
-        ItemMakeRecord workflow = this.makeItem(grade, embargo, embargoType, "workspace");
+        ItemMakeRecord workflow = this.makeItem(grade, embargo, embargoType, "withdrawn");
 
         // the second is the item in the archive, which will get processed by the install consumer
-        ItemMakeRecord archived = this.makeItem(grade, embargo, embargoType, "archive");
+        ItemMakeRecord archived = this.makeItem(grade, embargo, embargoType, "withdrawn");
 
         // make a map from bitstream id to expected anonRead results
         Map<Integer, String> readMap = new HashMap<Integer, String>();
@@ -241,18 +251,28 @@ public class LiveReinstateTest extends LiveTest
             readMap.put(archived.bitstreamIDs.get(i), anonReadResult);
         }
 
+        // now reinstate the item
+        archived.item.reinstate();
+        archived.item.update();
+        this.context.commit();
+
         // check the item for appropriate policies
-        this.checkAndPrint(name, archived.item, readMap, resultStatus, originalFiles, adminFiles);
+        this.checkAndPrint(name, archived.item, readMap, resultStatus, originalFiles, adminFiles, stateInstalled, stateState, stateGrade, stateEmbargo, stateRestrictions);
 
         this.record(name, workflow.item, archived.item);
 
         this.testEnd(name);
     }
 
-    private void checkAndPrint(String testName, Item item, Map<Integer, String> anonReadResults, String resultStatus, int originalFiles, int adminFiles)
+    private void checkAndPrint(String testName, Item item, Map<Integer, String> anonReadResults, String resultStatus, int originalFiles, int adminFiles,
+                               String stateInstalled,
+                               String stateState,
+                               String stateGrade,
+                               String stateEmbargo,
+                               String stateRestrictions)
             throws Exception
     {
-        String error = this.checkItem(item, anonReadResults, resultStatus, originalFiles, adminFiles);
+        String error = this.checkItem(item, anonReadResults, resultStatus, originalFiles, adminFiles, stateInstalled, stateState, stateGrade, stateEmbargo, stateRestrictions);
         if (error != null)
         {
             Map<String, String> errorRecord = new HashMap<String, String>();
@@ -280,7 +300,8 @@ public class LiveReinstateTest extends LiveTest
         WorkspaceItem wsi = WorkspaceItem.create(this.context, this.collection, false);
         Item item = wsi.getItem();
 
-        // this.applyMetadata(item, grade, embargo, embargoType);
+        // set the metadata
+        this.applyMetadata(item, grade, embargo, embargoType);
 
         // add a bitstream to the item
         List<Bitstream> originals = new ArrayList<Bitstream>();
@@ -288,10 +309,17 @@ public class LiveReinstateTest extends LiveTest
         originals.add(original);
         result.bitstreamIDs.add(original.getID());
 
+        // put the item in the right state
         if ("archive".equals(state))
         {
             WorkflowManagerWrapper.startWithoutNotify(this.context, wsi);
             item = Item.find(this.context, item.getID());
+        }
+        else if ("withdrawn".equals(state))
+        {
+            WorkflowManagerWrapper.startWithoutNotify(this.context, wsi);
+            item = Item.find(this.context, item.getID());
+            item.withdraw();
         }
 
         item.update();
@@ -303,7 +331,82 @@ public class LiveReinstateTest extends LiveTest
         return result;
     }
 
-    private String checkItem(Item item, Map<Integer, String> anonReadResults, String resultStatus, int originalFiles, int adminFiles)
+    private void applyMetadata(Item item, String grade, String embargo, String embargoType)
+            throws Exception
+    {
+        MetadataManager mm = new MetadataManager();
+
+        String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
+        DCValue gradeDcv = mm.makeDCValue(gradeField, null);
+
+        String embargoField = ConfigurationManager.getProperty("embargo.field.terms");
+        DCValue embargoDcv = mm.makeDCValue(embargoField, null);
+
+        String typeField = ConfigurationManager.getProperty("studentweb", "embargo-type.field");
+        DCValue typeDcv = mm.makeDCValue(typeField, null);
+
+        // clear any old metadata
+        item.clearMetadata(gradeDcv.schema, gradeDcv.element, gradeDcv.qualifier, null);
+        item.clearMetadata(embargoDcv.schema, embargoDcv.element, embargoDcv.qualifier, null);
+        item.clearMetadata(typeDcv.schema, typeDcv.element, typeDcv.qualifier, null);
+
+        // set the grade
+        if (!"none".equals(grade))
+        {
+            item.addMetadata(gradeDcv.schema, gradeDcv.element, gradeDcv.qualifier, null, grade);
+        }
+
+        // set the embargo date
+        String ed = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+        if ("past".equals(embargo))
+        {
+            // set to the start of the unix epoch
+            ed = sdf.format(this.past);
+        }
+        else if ("present".equals(embargo))
+        {
+            // set to today
+            ed = sdf.format(this.now);
+        }
+        else if ("future".equals(embargo))
+        {
+            // set in the far future (around 2970 or something)
+            ed = sdf.format(this.farFuture);
+        }
+        else if ("near_future".equals(embargo))
+        {
+            // set in the near future (around 2170 or something)
+            ed = sdf.format(this.nearFuture);
+        }
+        else if ("far_future".equals(embargo))
+        {
+            // set in the far future (around 2970 or something)
+            ed = sdf.format(this.farFuture);
+        }
+        else if ("none".equals(embargo))
+        {
+            // don't set an embargo date
+        }
+
+        if (ed != null)
+        {
+            item.addMetadata(embargoDcv.schema, embargoDcv.element, embargoDcv.qualifier, null, ed);
+        }
+
+        // add the embargo type
+        if (!"none".equals(embargoType))
+        {
+            item.addMetadata(typeDcv.schema, typeDcv.element, typeDcv.qualifier, null, embargoType);
+        }
+    }
+
+    private String checkItem(Item item, Map<Integer, String> anonReadResults, String resultStatus, int originalFiles, int adminFiles,
+                             String stateInstalled,
+                             String stateState,
+                             String stateGrade,
+                             String stateEmbargo,
+                             String stateRestrictions)
             throws Exception
     {
         int originals = 0;
@@ -386,6 +489,153 @@ public class LiveReinstateTest extends LiveTest
         if (adminFiles != admins)
         {
             return "There should be " + adminFiles + " files in " + DuoConstants.ADMIN_BUNDLE + " but there are " + admins;
+        }
+
+        // check the duo state metadata to ensure it matches up
+        DuoState ds = new DuoState(item);
+
+        if ("false".equals(stateInstalled))
+        {
+            if (ds.isInstalled())
+            {
+                return "Item should have duo.state installed=false/missing but has installed=true";
+            }
+        }
+        else if ("true".equals(stateInstalled))
+        {
+            if (!ds.isInstalled())
+            {
+                return "Item should have duo.state installed=true but has installed=false/missing";
+            }
+        }
+
+        if ("archived".equals(stateState))
+        {
+            if (!"archived".equals(ds.getState()))
+            {
+                return "Item should have duo.state state=archived, but has state=" + ds.getState();
+            }
+        }
+        else if ("withdrawn".equals(stateState))
+        {
+            if (!"withdrawn".equals(ds.getState()))
+            {
+                return "Item should have duo.state state=withdrawn, but has state=" + ds.getState();
+            }
+        }
+        else if ("workflow".equals(stateState))
+        {
+            if (!"workflow".equals(ds.getState()))
+            {
+                return "Item should have duo.state state=workflow, but has state=" + ds.getState();
+            }
+        }
+
+        if ("none".equals(stateGrade))
+        {
+            if (ds.getGrade() != null)
+            {
+                return "Item should have no duo.state grade, but has grade=" + ds.getGrade();
+            }
+        }
+        else if ("pass".equals(stateGrade))
+        {
+            if (!"pass".equals(ds.getGrade()))
+            {
+                return "Item should have duo.state grade=pass, but has grade=" + ds.getGrade();
+            }
+        }
+        else if ("fail".equals(stateGrade))
+        {
+            if (!"fail".equals(ds.getGrade()))
+            {
+                return "Item should have duo.state grade=fail, but has grade=" + ds.getGrade();
+            }
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String seds = ds.getEmbargo();
+        Date sed = null;
+        if (seds != null)
+        {
+            sed = sdf.parse(seds);
+        }
+        sed = this.correctForTimeZone(sed);
+
+        if ("none".equals(stateEmbargo))
+        {
+            if (seds != null)
+            {
+                return "Item should have had no duo.state embargo metadata, had: " + seds;
+            }
+        }
+        else if ("past".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have past duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            if (sed.equals(this.now) || sed.after(this.now)) {
+                return "Item should have a past duo.state embargo date, but was equal to or later than now";
+            }
+        }
+        else if ("present".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have present duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            if (!sed.equals(this.now)) {
+                return "Item should have a present duo.state embargo date, but was either later than or earlier than now";
+            }
+        }
+        else if ("future".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have future duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!sed.after(this.now))
+            {
+                return "Item should have future duo.state embargo metadata, had: " + seds;
+            }
+        }
+        else if ("near_future".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have (near) future duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!sed.equals(this.nearFuture))
+            {
+                return "Item should have (near) future duo.state embargo metadata, had: " + seds;
+            }
+        }
+        else if ("far_future".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have (far) future duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!sed.equals(this.farFuture))
+            {
+                return "Item should have (far) future duo.state embargo metadata, had: " + seds;
+            }
+        }
+
+        if ("none".equals(stateRestrictions))
+        {
+            if (ds.getRestrictions() != null)
+            {
+                return "Item should have no duo.state restrictions, but has " + ds.getRestrictions();
+            }
+        }
+        else if (stateRestrictions != null)
+        {
+            if (!stateRestrictions.equals(ds.getRestrictions()))
+            {
+                return "Item should have duo.state restrictions=" + stateRestrictions + " but has " + ds.getRestrictions();
+            }
         }
 
         return null;

@@ -26,7 +26,7 @@ import org.dspace.event.Event;
  * <pre>
  * event.dispatcher.default.consumers = search, browse, eperson, harvester, duo
    event.consumer.duo.class = no.uio.duo.DuoEventConsumer
-   event.consumer.duo.filters = Item+Install|Modify_Metadata
+   event.consumer.duo.filters = Item+Install|Modify_Metadata|Modify
  * </pre>
  */
 public class DuoEventConsumer implements Consumer
@@ -183,7 +183,7 @@ public class DuoEventConsumer implements Consumer
             {
                 log.info("Applying standard policy pattern to reinstated Item " + item.getID());
                 PolicyPatternManager ppm = new PolicyPatternManager();
-                ppm.applyToExistingItem(item, context);      // Note that although the item is not new, reinstating it is treating it like a newly submitted item
+                ppm.applyToExistingItem(item, context);
             }
             else
             {

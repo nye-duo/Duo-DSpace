@@ -165,7 +165,7 @@ was applied, and then again after.  This can be used for manually checking the r
 install test system does also check the results automatically.
 
 
-### Testing FS Policies - Modify
+### Testing FS Policies - Modify Metadata
 
 To test the event consumer for metadata modifies, you can run a live functional test on a running DSpace with the following command:
 
@@ -182,5 +182,26 @@ This will execute the tests as defined in src/test/resources/modifymatrix.csv
 
 The output of this process will be a csv file which you can open in Excel, which will give you the test number (from modifymatrix.csv) and
 a before/after URL which will take you to items which can be compared to show you what the item was like before the modification
+was applied, and then again after.  This can be used for manually checking the results of the process.  Note that the test 
+system does also check the results automatically.
+
+
+### Testing FS Policies - Reinstate
+
+To test the event consumer for item reinstates, you can run a live functional test on a running DSpace with the following command:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.livetest.LiveReinstateTest -e [eperson email] -b [path to bitstream] -u [dspace base url] -m [test matrix file] -o [output report path]
+
+**DO NOT UNDER ANY CIRCUMSTANCES RUN THIS ON A PRODUCTION SYSTEM** - it makes changes to the community and collection 
+structure, and adds/removes items from the system.
+    
+For example in [dspace]/bin:
+
+    ./dspace dsrun no.uio.duo.livetest.LiveReinstateTest -e richard@cottagelabs.com -b /home/richard/Code/External/Duo-DSpace/docs/system/TEST.md -u http://localhost:8080/xmlui -m /home/richard/Code/External/Duo-DSpace/src/test/resources/reinstatematrix.csv -o /home/richard/Code/External/Duo-DSpace/src/test/resources/check.csv
+
+This will execute the tests as defined in src/test/resources/reinstatematrix.csv
+
+The output of this process will be a csv file which you can open in Excel, which will give you the test number (from reinstatematrix.csv) and
+a before/after URL which will take you to items which can be compared to show you what the item was like before the reinstate
 was applied, and then again after.  This can be used for manually checking the results of the process.  Note that the test 
 system does also check the results automatically.

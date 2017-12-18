@@ -4,10 +4,13 @@ import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.DCValue;
 import org.dspace.content.Item;
 import org.dspace.core.ConfigurationManager;
-import org.dspace.core.Context;
 
 import java.sql.SQLException;
 
+/**
+ * Convenience class for representing the event state of an item in DSpace
+ *
+ */
 public class DuoState
 {
     private MetadataManager metadataManager = new MetadataManager();
@@ -25,6 +28,13 @@ public class DuoState
         public String restrictions = null;
     }
 
+    /**
+     * Construct a DuoState object around the given item.  This extracts all the metadata from the
+     * item which backs the interface to this object
+     *
+     * @param item
+     * @throws DuoException
+     */
     public DuoState(Item item)
             throws DuoException
     {
@@ -56,36 +66,67 @@ public class DuoState
         }
     }
 
+    /**
+     * Is the item installed in Duo?
+     * @return
+     */
     public boolean isInstalled()
     {
         return "true".equals(this.details.installed);
     }
 
+    /**
+     * Set the item's installed status.
+     * @param installed
+     */
     public void setInstalled(boolean installed)
     {
         this.details.installed = installed ? "true"  : "false";
     }
 
+    /**
+     * Get the current state of the item (workflow, withdrawn, archived)
+     * @return
+     */
     public String getState()
     {
         return this.details.state;
     }
 
+    /**
+     * Get the raw embargo metadata for the item
+     *
+     * @return
+     */
     public String getEmbargo()
     {
         return this.details.embargo;
     }
 
+    /**
+     * Get the current restrictions on the item
+     * @return
+     */
     public String getRestrictions()
     {
         return this.details.restrictions;
     }
 
-    public String getGrade()
+    /**
+     * Get the current grade for the item
+     * @return
+     */
+     public String getGrade()
     {
         return this.details.grade;
     }
 
+    /**
+     * Compare the current item metadata with the duo.state properties and determine if this
+     * item has changed.  For example, the item's metadata may have been updated by another process
+     *
+     * @return
+     */
     public boolean hasChanged()
     {
         String state = "workflow";
@@ -152,6 +193,14 @@ public class DuoState
         return false;
     }
 
+    /**
+     * Synchronise the current item metadata state to the duo.state field
+     *
+     * @param itemUpdate
+     * @throws DuoException
+     * @throws SQLException
+     * @throws AuthorizeException
+     */
     public void sychroniseItemState(boolean itemUpdate)
             throws DuoException, SQLException, AuthorizeException
     {
@@ -175,6 +224,15 @@ public class DuoState
         }
     }
 
+    /**
+     * Update this object's internal representation of the item's state.  This does not modify the
+     * item's metadata
+     *
+     * @param state
+     * @param grade
+     * @param embargo
+     * @param restrictions
+     */
     public void updateState(String state, String grade, String embargo, String restrictions)
     {
         this.details.state = state;
@@ -183,6 +241,11 @@ public class DuoState
         this.details.restrictions = restrictions;
     }
 
+    /**
+     * Record the current internal representation of the item's state onto the item in duo.state
+     *
+     * @throws DuoException
+     */
     public void recordStateOnItem()
             throws DuoException
     {
@@ -192,6 +255,13 @@ public class DuoState
         this.item.addMetadata(dcv.schema, dcv.element, dcv.qualifier, null, stateVal);
     }
 
+    /**
+     * Serialise the internal representation of the item's state to a string suitable for storage in
+     * a metadata field
+     *
+     * @param sd
+     * @return
+     */
     private String serialiseState(StateDetails sd)
     {
         StringBuilder sb = new StringBuilder();
@@ -234,6 +304,12 @@ public class DuoState
         return sb.toString();
     }
 
+    /**
+     * Parse a string representing the item's state into an internal representation.
+     *
+     * @param source
+     * @return
+     */
     private StateDetails parseSource(String source)
     {
         // System.out.println("State source " + source);
@@ -271,6 +347,12 @@ public class DuoState
         return details;
     }
 
+    /**
+     * Extract grade metadata from the item
+     *
+     * @param item
+     * @return
+     */
     private String getGradeMD(Item item)
     {
         String gradeField = ConfigurationManager.getProperty("studentweb", "grade.field");
@@ -282,6 +364,11 @@ public class DuoState
         return null;
     }
 
+    /**
+     * Extract restriction metadata from the item
+     * @param item
+     * @return
+     */
     private String getRestriction(Item item)
     {
         String gradeField = ConfigurationManager.getProperty("studentweb", "embargo-type.field");
@@ -293,6 +380,12 @@ public class DuoState
         return null;
     }
 
+    /**
+     * Extract embargo date metadata from the item
+     *
+     * @param item
+     * @return
+     */
     private String getRawEmbargoDate(Item item)
     {
         // first check that there is a date

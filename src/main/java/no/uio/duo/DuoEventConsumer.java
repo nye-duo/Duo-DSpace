@@ -86,6 +86,18 @@ public class DuoEventConsumer implements Consumer
         }
     }
 
+    /**
+     * When an item is installed, run this method.  This method will only work on an item
+     * that does not have the duo.state installed=true flag.  When it runs it will either delegate
+     * to the FSRestrictionManager, if the item is covered by FS rules, or it will call the PolicyPatternManager
+     *
+     * In either case, when complete, this method will set duo.state installed=true and any other relevant
+     * state information on the item.
+     *
+     * @param context
+     * @param item
+     * @throws Exception
+     */
     private void onInstall(Context context, Item item)
             throws Exception
     {
@@ -123,6 +135,20 @@ public class DuoEventConsumer implements Consumer
         item.update();
     }
 
+    /**
+     * When an items' metadata is modified, this method will run.
+     *
+     * This method will only run on items which have been installed by onInstall above.  It will also only run on
+     * items where the DuoState has changed in a way that is relevant.
+     *
+     * When it does run, it will apply the FSRestrictionManager or the PolicyPatternManager as appropriate.
+     *
+     * On completion, it will re-synchronise the duo.state property with the item's new state.
+     *
+     * @param context
+     * @param item
+     * @throws Exception
+     */
     private void onModifyMetadata(Context context, Item item)
             throws Exception
     {
@@ -166,6 +192,15 @@ public class DuoEventConsumer implements Consumer
         }
     }
 
+    /**
+     * When an item is reinstated into the archive from withdrawn, this method will run
+     *
+     * It will apply the FSRestrictionManager or PolicyPatternManager as appropriate
+     *
+     * @param context
+     * @param item
+     * @throws Exception
+     */
     private void onReinstate(Context context, Item item)
             throws Exception
     {

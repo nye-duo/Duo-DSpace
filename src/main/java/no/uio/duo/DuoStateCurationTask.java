@@ -11,15 +11,15 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 /**
- * Curation task which allows the {@link PolicyPatternManager} to be run from the user interface or
+ * Curation task which allows the {@link DuoState} method synchroniseItemState to be run from the user interface or
  * the command line
  */
 public class DuoStateCurationTask extends AbstractCurationTask
 {
     /**
-     * Execute the {@link PolicyPatternManager} over the given DSpace Object
+     * Execute the {@link DuoState} synchroniseItemState over the given DSpace Object
      *
-     * This will only run of the DSpace Object is an item, and it will execute PolicyPatternManager.applyToExistingItem
+     * This will only run of the DSpace Object is an item.
      *
      * @param dso
      * @return

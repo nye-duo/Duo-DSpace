@@ -115,6 +115,16 @@ public class FSRestrictionManager
         this.processStateTransition(context, item, oldState, newState, embargo);
     }
 
+    /**
+     * Method to run when the item is reinstated into the archive from withdrawn
+     *
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     * @throws DuoException
+     */
     public void onReinstate(Context context, Item item)
             throws SQLException, AuthorizeException, IOException, DuoException
     {
@@ -130,6 +140,13 @@ public class FSRestrictionManager
         this.processStateTransition(context, item, oldState, newState, embargo);
     }
 
+    /**
+     * Determine the string to specify the new state the item is moving to
+     *
+     * @param pass
+     * @param restricted
+     * @return
+     */
     private String getNewState(boolean pass, boolean restricted)
     {
         String newState = null;
@@ -148,6 +165,19 @@ public class FSRestrictionManager
         return newState;
     }
 
+    /**
+     * Process the transition of the item from the old state to the new state with the given current embargo
+     *
+     * @param context
+     * @param item
+     * @param oldState
+     * @param newState
+     * @param embargo
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     * @throws DuoException
+     */
     private void processStateTransition(Context context, Item item, String oldState, String newState, Date embargo)
             throws SQLException, AuthorizeException, IOException, DuoException
     {
@@ -167,28 +197,6 @@ public class FSRestrictionManager
         }
 
         log.info("Processing state transition for item " + item.getID() + "; oldState=" + oldState + " newState=" + newState + " embargo=" + embargo);
-
-        // first, let's ignore any null state transitions
-
-        // if the states are the same and we don't have to worry about an embargo, no need to go further
-        /*
-        if (newState.equals(oldState) && embargo == null)
-        {
-            log.info("Before and after states are equal, and no embargo.  No action.");
-            return;
-        }
-
-        // if we are moving from restricted to fail (or vice versa), and we don't have to worry about an embargo
-        if ("restricted".equals(oldState) && "fail".equals(newState) && embargo == null)
-        {
-            log.info("Before and after states are equivalent, and no embargo.  No action.");
-            return;
-        }
-        if ("fail".equals(oldState) && "restricted".equals(newState) && embargo == null)
-        {
-            log.info("Before and after states are equivalent, and no embargo.  No action.");
-            return;
-        }*/
 
         // for convenience, make a bunch of booleans
         boolean fromWithdrawn = "withdrawn".equals(oldState);
@@ -252,6 +260,15 @@ public class FSRestrictionManager
         }
     }
 
+    /**
+     * Transition an item from a null state (i.e. new), to the "pass" state
+     *
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     private void fromNullToPass(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
     {
@@ -259,6 +276,16 @@ public class FSRestrictionManager
         this.applyPolicyPatternManager(item, context, true);
     }
 
+    /**
+     * Transition an item from restricted/fail to pass
+     *
+     * @param context
+     * @param item
+     * @param oldState
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     private void fromRestrictedFailToPass(Context context, Item item, String oldState)
             throws SQLException, AuthorizeException, IOException
     {
@@ -267,6 +294,17 @@ public class FSRestrictionManager
         this.alert(item, oldState, "pass");
     }
 
+    /**
+     * Transition an item from either pass or new to restricted or fail
+     *
+     * @param context
+     * @param item
+     * @param oldState
+     * @param newState
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     private void fromPassNullToRestrictedFail(Context context, Item item, String oldState, String newState)
             throws SQLException, AuthorizeException, IOException
     {
@@ -278,6 +316,14 @@ public class FSRestrictionManager
         this.alert(item, oldState, newState);
     }
 
+    /**
+     * Transition an item from withdrawn to pass
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     private void fromWithdrawnToPass(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
     {
@@ -285,6 +331,14 @@ public class FSRestrictionManager
         this.applyPolicyPatternManager(item, context, false);
     }
 
+    /**
+     * Transition an item from withdrawn to restricted or failed
+     * @param context
+     * @param item
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
     private void fromWithdrawnToRestrictedFail(Context context, Item item)
             throws SQLException, AuthorizeException, IOException
     {

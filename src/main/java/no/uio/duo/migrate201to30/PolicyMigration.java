@@ -330,8 +330,8 @@ public class PolicyMigration extends TraverseDSpace
         // after the first stage, commit the context
         this.context.commit();
 
-        // apply the policy pattern manager to items in the repository
-        if (item.isArchived())
+        // apply the policy pattern manager to items in the repository (archived or withdrawn)
+        if (item.isArchived() || item.isWithdrawn())
         {
             PolicyPatternManager ppm = new PolicyPatternManager();
             ppm.applyToExistingItem(item, this.context);

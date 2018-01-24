@@ -361,6 +361,11 @@ public class PolicyPatternManager
 
         EmbargoSetter setter = (EmbargoSetter) PluginManager.getSinglePlugin(EmbargoSetter.class);
         DCDate embargoDate = setter.parseTerms(context, item, embargoes[0].value);
+        if (embargoDate == null)
+        {
+            // this can happen if the embargo date was an empty field, or malformed in the metadata
+            return null;
+        }
         return embargoDate.toDate();
     }
 

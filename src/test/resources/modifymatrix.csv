@@ -1,0 +1,73 @@
+name,initial_grade,initial_embargo,initial_type,modify_grade,modify_embargo,modify_type,result_status,original_files,admin_files,anon_read_result,duo.state_installed,duo.state_state,duo.state_grade,duo.state_embargo,duo.state_restrictions
+1,pass,none,none,pass,none,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,none,restricted
+2,pass,none,none,pass,none,1 year,archived,1,0,unbound,true,archived,pass,none,1 year
+3,pass,none,none,pass,future,none,archived,1,0,future,true,archived,pass,future,none
+4,pass,none,none,pass,future,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,future,restricted
+5,pass,none,none,pass,future,1 year,archived,1,0,future,true,archived,pass,future,1 year
+6,pass,none,none,fail,none,none,withdrawn,0,1,n/a,true,withdrawn,fail,none,none
+7,pass,none,none,none,none,none,archived,1,0,unbound,true,archived,none,none,none
+8,pass,none,none,none,future,none,archived,1,0,future,true,archived,none,future,none
+9,pass,none,restricted,pass,none,none,withdrawn,0,1,unbound,true,withdrawn,pass,none,none
+10,pass,none,restricted,pass,none,1 year,withdrawn,0,1,unbound,true,withdrawn,pass,none,1 year
+11,pass,none,restricted,pass,future,none,withdrawn,0,1,future,true,withdrawn,pass,future,none
+12,pass,none,restricted,pass,future,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,future,restricted
+13,pass,none,restricted,pass,future,1 year,withdrawn,0,1,future,true,withdrawn,pass,future,1 year
+14,pass,none,restricted,fail,none,none,withdrawn,0,1,n/a,true,withdrawn,fail,none,none
+15,pass,none,restricted,none,none,none,withdrawn,0,1,unbound,true,withdrawn,none,none,none
+16,pass,none,restricted,none,future,none,withdrawn,0,1,future,true,withdrawn,none,future,none
+17,pass,none,1 year,pass,none,none,archived,1,0,unbound,true,archived,pass,none,none
+18,pass,none,1 year,pass,none,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,none,restricted
+19,pass,none,1 year,pass,future,none,archived,1,0,future,true,archived,pass,future,none
+20,pass,none,1 year,pass,future,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,future,restricted
+21,pass,none,1 year,pass,future,1 year,archived,1,0,future,true,archived,pass,future,1 year
+22,pass,none,1 year,fail,none,none,withdrawn,0,1,n/a,true,withdrawn,fail,none,none
+23,pass,none,1 year,none,none,none,archived,1,0,unbound,true,archived,none,none,none
+24,pass,none,1 year,none,future,none,archived,1,0,future,true,archived,none,future,none
+25,pass,future,none,pass,none,none,archived,1,0,future,true,archived,pass,future,none
+26,pass,future,none,pass,none,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,none,restricted
+27,pass,future,none,pass,none,1 year,archived,1,0,future,true,archived,pass,future,1 year
+28,pass,future,none,pass,future,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,future,restricted
+29,pass,future,none,pass,future,1 year,archived,1,0,future,true,archived,pass,future,1 year
+30,pass,future,none,fail,none,none,withdrawn,0,1,n/a,true,withdrawn,fail,none,none
+31,pass,future,none,none,none,none,archived,1,0,future,true,archived,none,future,none
+32,pass,future,none,none,future,none,archived,1,0,future,true,archived,none,future,none
+33,pass,future,restricted,pass,none,none,withdrawn,0,1,future,true,withdrawn,pass,none,none
+34,pass,future,restricted,pass,none,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,none,restricted
+35,pass,future,restricted,pass,none,1 year,withdrawn,0,1,future,true,withdrawn,pass,none,1 year
+36,pass,future,restricted,pass,future,none,withdrawn,0,1,future,true,withdrawn,pass,future,none
+37,pass,future,restricted,pass,future,1 year,withdrawn,0,1,future,true,withdrawn,pass,future,1 year
+38,pass,future,restricted,fail,none,none,withdrawn,0,1,n/a,true,withdrawn,fail,none,none
+39,pass,future,restricted,none,none,none,withdrawn,0,1,future,true,withdrawn,none,none,none
+40,pass,future,restricted,none,future,none,withdrawn,0,1,future,true,withdrawn,none,future,none
+41,pass,future,1 year,pass,none,none,archived,1,0,future,true,archived,pass,future,none
+42,pass,future,1 year,pass,none,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,none,restricted
+43,pass,future,1 year,pass,none,1 year,archived,1,0,future,true,archived,pass,future,1 year
+44,pass,future,1 year,pass,future,none,archived,1,0,future,true,archived,pass,future,none
+45,pass,future,1 year,pass,future,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,future,restricted
+46,pass,future,1 year,fail,none,none,withdrawn,0,1,n/a,true,withdrawn,fail,none,none
+47,pass,future,1 year,none,none,none,archived,1,0,future,true,archived,none,future,none
+48,pass,future,1 year,none,future,none,archived,1,0,future,true,archived,none,future,none
+49,fail,none,none,pass,none,none,withdrawn,0,1,unbound,true,withdrawn,pass,none,none
+50,fail,none,none,pass,none,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,none,restricted
+51,fail,none,none,pass,none,1 year,withdrawn,0,1,unbound,true,withdrawn,pass,none,1 year
+52,fail,none,none,pass,future,none,withdrawn,0,1,future,true,withdrawn,pass,future,none
+53,fail,none,none,pass,future,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,future,restricted
+54,fail,none,none,pass,future,1 year,withdrawn,0,1,future,true,withdrawn,pass,future,1 year
+55,fail,none,none,none,none,none,withdrawn,0,1,unbound,true,withdrawn,none,none,none
+56,fail,none,none,none,future,none,withdrawn,0,1,future,true,withdrawn,none,future,none
+57,none,none,none,pass,none,none,archived,1,0,unbound,true,archived,pass,none,none
+58,none,none,none,pass,none,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,none,restricted
+59,none,none,none,pass,none,1 year,archived,1,0,unbound,true,archived,pass,none,1 year
+60,none,none,none,pass,future,none,archived,1,0,future,true,archived,pass,future,none
+61,none,none,none,pass,future,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,future,restricted
+62,none,none,none,pass,future,1 year,archived,1,0,future,true,archived,pass,future,1 year
+63,none,none,none,fail,none,none,withdrawn,0,1,n/a,true,withdrawn,fail,none,none
+64,none,none,none,none,future,none,archived,1,0,future,true,archived,none,future,none
+65,none,future,none,pass,none,none,archived,1,0,future,true,archived,pass,future,none
+66,none,future,none,pass,none,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,none,restricted
+67,none,future,none,pass,none,1 year,archived,1,0,future,true,archived,pass,future,1 year
+68,none,future,none,pass,future,none,archived,1,0,future,true,archived,pass,future,none
+69,none,future,none,pass,future,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,future,restricted
+70,none,future,none,pass,future,1 year,archived,1,0,future,true,archived,pass,future,1 year
+71,none,future,none,fail,none,none,withdrawn,0,1,n/a,true,withdrawn,fail,none,none
+72,none,future,none,none,none,none,archived,1,0,future,true,archived,none,future,none

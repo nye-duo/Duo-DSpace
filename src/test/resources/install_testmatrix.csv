@@ -1,0 +1,10 @@
+name,grade,embargo,type,result_status,original_files,admin_files,anon_read_result,duo.state_installed,duo.state_state,duo.state_grade,duo.state_embargo,duo.state_restrictions
+1,pass,none,none,archived,1,0,unbound,true,archived,pass,none,none
+2,pass,none,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,none,restricted
+3,pass,none,1 year,archived,1,0,unbound,true,archived,pass,none,1 year
+4,pass,future,none,archived,1,0,future,true,archived,pass,future,none
+5,pass,future,restricted,withdrawn,0,1,n/a,true,withdrawn,pass,future,restricted
+6,pass,future,1 year,archived,1,0,future,true,archived,pass,future,1 year
+7,fail,none,none,withdrawn,0,1,n/a,true,withdrawn,fail,none,none
+8,none,none,none,archived,1,0,unbound,true,archived,none,none,none
+9,none,future,none,archived,1,0,future,true,archived,none,future,none

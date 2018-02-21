@@ -1,7 +1,10 @@
 package no.uio.duo.policy;
 
 import no.uio.duo.BitstreamIterator;
+// import no.uio.duo.DuoState;
+import no.uio.duo.MetadataManager;
 import no.uio.duo.WorkflowManagerWrapper;
+import no.uio.duo.livetest.LiveTest;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
@@ -34,7 +37,7 @@ import java.util.*;
  * <p>Install this in your test DSpace, then run the main method of the class, and it will execute a suite
  * of tests.  The DSpace will not be in a clean state after.</p>
  */
-public class LivePolicyTest
+public class LivePolicyTest extends LiveTest
 {
     public static void main(String[] args)
             throws Exception
@@ -96,45 +99,23 @@ public class LivePolicyTest
         lpt.runAll();
     }
 
-    class CheckReport
-    {
-        public String testName;
-        public String reference;
-        public int referenceId;
-        public String changed;
-    }
-
-    class ItemMakeRecord
-    {
-        public Item item;
-        List<Integer> bitstreamIDs = new ArrayList<Integer>();
-    }
-
-    private Context context;
-    private Collection collection;
-    private EPerson eperson;
-    private File bitstream;
     private PolicyPatternManager policyManager;
-    private List<CheckReport> checkList = new ArrayList<CheckReport>();
     private String baseUrl;
     private List<CSVRecord> testMatrix;
-    private List<Map<String, String>> failures = new ArrayList<Map<String, String>>();
     private String outPath;
 
     private boolean workspaceMode = false;
-    private int from = -1;
-    private int to = -1;
 
     private Date past = new Date(0);
     private Date now = new Date();
     private Date nearFuture = new Date(3153600000000L);
     private Date farFuture = new Date(31535996400000L);     // has to be set to this specific date, because of rounding oddities in the java Date library
 
-
-
     public LivePolicyTest(String epersonEmail, String bitstreamPath, String baseUrl, String matrixPath, String outPath, boolean workspace)
             throws Exception
     {
+        super(epersonEmail);
+
         System.out.println("===========================================");
         System.out.println("== Starting up                           ==");
         System.out.println("===========================================");
@@ -156,6 +137,10 @@ public class LivePolicyTest
                 "anon_read_1_result",
                 "anon_read_2_result",
                 "metadata",
+                "duo.state_installed",
+                "duo.state_state",
+                "duo.state_embargo",
+                "duo.state_restrictions",
                 "notes"
             ).parse(in);
         this.testMatrix = csv.getRecords();
@@ -174,12 +159,6 @@ public class LivePolicyTest
         System.out.println("== Startup complete                      ==");
         System.out.println("===========================================");
         System.out.println("\n\n");
-    }
-
-    public void setRange(int from, int to)
-    {
-        this.from = from;
-        this.to = to;
     }
 
     public void runAll()
@@ -237,7 +216,11 @@ public class LivePolicyTest
                     adminRead,
                     record.get("item_type"),
                     readResults,
-                    record.get("metadata")
+                    record.get("metadata"),
+                    record.get("duo.state_installed"),
+                    record.get("duo.state_state"),
+                    record.get("duo.state_embargo"),
+                    record.get("duo.state_restrictions")
             );
         }
 
@@ -270,7 +253,11 @@ public class LivePolicyTest
                          boolean adminRead,
                          String type,
                          List<String> anonReadResults,
-                         String metadataResult
+                         String metadataResult,
+                         String stateInstalled,
+                         String stateState,
+                         String stateEmbargo,
+                         String stateRestrictions
                         )
             throws Exception
     {
@@ -299,22 +286,21 @@ public class LivePolicyTest
         }
 
         // check the item for appropriate policies
-        this.checkAndPrint(name, actOn.item, readMap, metadataResult);
+        this.checkAndPrint(name, actOn.item, readMap, metadataResult, stateInstalled, stateState, stateEmbargo, stateRestrictions);
 
         this.record(name, reference.item, actOn.item);
 
         this.testEnd(name);
     }
 
-    private void testStart(String name)
-    {
-        System.out.println("-- Running test " + name);
-    }
-
-    private void checkAndPrint(String testName, Item item, Map<Integer, String> anonReadResults, String metadataResult)
+    private void checkAndPrint(String testName, Item item, Map<Integer, String> anonReadResults, String metadataResult,
+                               String stateInstalled,
+                               String stateState,
+                               String stateEmbargo,
+                               String stateRestrictions)
             throws Exception
     {
-        String error = this.checkItem(item, anonReadResults, metadataResult);
+        String error = this.checkItem(item, anonReadResults, metadataResult, stateInstalled, stateState, stateEmbargo, stateRestrictions);
         if (error != null)
         {
             Map<String, String> errorRecord = new HashMap<String, String>();
@@ -330,47 +316,18 @@ public class LivePolicyTest
         }
     }
 
-    private void record(String name, Item reference, Item actOn)
+    protected void record(String name, Item reference, Item actOn)
     {
         CheckReport report = new CheckReport();
         report.testName = name;
-        report.reference = reference.getHandle();
-        report.referenceId = reference.getID();
-        report.changed = actOn.getHandle();
+        report.referenceHandle = reference.getHandle();
+        report.reference = reference.getID();
+        report.changedHandle = actOn.getHandle();
         this.checkList.add(report);
     }
 
-    private void testEnd(String name)
-            throws Exception
-    {
-        // commit the context, and record the references to the before and after items
-        this.context.commit();
-        System.out.println("-- Finished test " + name);
-        System.out.println("\n");
-    }
-
-
     /////////////////////////////////////////////////
     // utilities for making test data
-
-    private Collection makeCollection()
-            throws Exception
-    {
-        Community community = Community.create(null, this.context);
-        community.setMetadata("name", "Policy Test Community " + community.getID());
-        community.update();
-
-        Collection collection = community.createCollection();
-        collection.setMetadata("name", "Policy Test Collection " + collection.getID());
-        collection.update();
-
-        this.context.commit();
-
-        System.out.println("Created community with id " + community.getID() + "; handle " + community.getHandle());
-        System.out.println("Created collection with id " + collection.getID() + "; handle " + collection.getHandle());
-
-        return collection;
-    }
 
     private ItemMakeRecord makeItem(String embargoDate, List<String> anonReads, boolean adminFile, boolean adminRead, String state)
             throws Exception
@@ -437,7 +394,8 @@ public class LivePolicyTest
         if (ed != null)
         {
             String md = ConfigurationManager.getProperty("embargo.field.terms");
-            DCValue dcv = this.stringToDC(md);
+            MetadataManager mm = new MetadataManager();
+            DCValue dcv = mm.makeDCValue(md, null);
             item.addMetadata(dcv.schema, dcv.element, dcv.qualifier, null, ed);
         }
 
@@ -449,12 +407,6 @@ public class LivePolicyTest
         for (String ar : anonReads)
         {
             Bitstream original = this.makeBitstream(item, "ORIGINAL", idx++);
-            /*
-            InputStream originalFile = new FileInputStream(this.bitstream);
-            Bitstream original = item.createSingleBitstream(originalFile, "ORIGINAL");
-            original.setName("originalfile" + idx++ + ".txt");
-            original.update();
-            */
             originals.add(original);
             result.bitstreamIDs.add(original.getID());
         }
@@ -556,34 +508,11 @@ public class LivePolicyTest
         return result;
     }
 
-    private Bitstream makeBitstream(Item item, String bundle, int ident)
-            throws Exception
-    {
-        InputStream originalFile = new FileInputStream(this.bitstream);
-        Bundle[] bundles = item.getBundles();
-
-        Bundle container = null;
-        for (Bundle b : bundles)
-        {
-            if (b.getName().equals(bundle))
-            {
-                container = b;
-                break;
-            }
-        }
-
-        if (container == null)
-        {
-            container = item.createBundle(bundle);
-        }
-
-        Bitstream bs = container.createBitstream(originalFile);
-        bs.setName(bundle + "file" + ident + ".txt");
-        bs.update();
-        return bs;
-    }
-
-    private String checkItem(Item item, Map<Integer, String> anonReadResults, String metadataResult)
+    private String checkItem(Item item, Map<Integer, String> anonReadResults, String metadataResult,
+                             String stateInstalled,
+                             String stateState,
+                             String stateEmbargo,
+                             String stateRestrictions)
             throws Exception
     {
         // check that there are no bundle policies
@@ -781,6 +710,126 @@ public class LivePolicyTest
             }
         }
 
+        /*
+         * state is disabled for now - do not check
+        // check the duo state metadata to ensure it matches up
+        DuoState ds = new DuoState(item);
+
+        if ("false".equals(stateInstalled))
+        {
+            if (ds.isInstalled())
+            {
+                return "Item should have duo.state installed=false/missing but has installed=true";
+            }
+        }
+        else if ("true".equals(stateInstalled))
+        {
+            if (!ds.isInstalled())
+            {
+                return "Item should have duo.state installed=true but has installed=false/missing";
+            }
+        }
+
+        if ("archived".equals(stateState))
+        {
+            if (!"archived".equals(ds.getState()))
+            {
+                return "Item should have duo.state state=archived, but has state=" + ds.getState();
+            }
+        }
+        else if ("withdrawn".equals(stateState))
+        {
+            if (!"withdrawn".equals(ds.getState()))
+            {
+                return "Item should have duo.state state=withdrawn, but has state=" + ds.getState();
+            }
+        }
+        else if ("workflow".equals(stateState))
+        {
+            if (!"workflow".equals(ds.getState()))
+            {
+                return "Item should have duo.state state=workflow, but has state=" + ds.getState();
+            }
+        }
+
+        String seds = ds.getEmbargo();
+        Date sed = null;
+        if (seds != null)
+        {
+            sed = sdf.parse(seds);
+        }
+        sed = this.correctForTimeZone(sed);
+
+        if ("none".equals(stateEmbargo))
+        {
+            if (seds != null)
+            {
+                return "Item should have had no duo.state embargo metadata, had: " + seds;
+            }
+        }
+        else if ("past".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have past duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            if (sed.equals(this.now) || sed.after(this.now)) {
+                return "Item should have a past duo.state embargo date, but was equal to or later than now";
+            }
+        }
+        else if ("present".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have present duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            if (!sed.equals(this.now)) {
+                return "Item should have a present duo.state embargo date, but was either later than or earlier than now";
+            }
+        }
+        else if ("future".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have future duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!sed.after(this.now))
+            {
+                return "Item should have future duo.state embargo metadata, had: " + seds;
+            }
+        }
+        else if ("near_future".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have (near) future duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!sed.equals(this.nearFuture))
+            {
+                return "Item should have (near) future duo.state embargo metadata, had: " + seds;
+            }
+        }
+        else if ("far_future".equals(stateEmbargo))
+        {
+            if (seds == null || sed == null)
+            {
+                return "Item should have (far) future duo.state embargo metadata, but date could not be found or could not be parsed";
+            }
+            else if (!sed.equals(this.farFuture))
+            {
+                return "Item should have (far) future duo.state embargo metadata, had: " + seds;
+            }
+        }
+
+        if ("none".equals(stateRestrictions))
+        {
+            if (ds.getRestrictions() != null)
+            {
+                return "Item should have no duo.state restrictions, but has " + ds.getRestrictions();
+            }
+        }
+        */
+
         return null;
     }
 
@@ -805,31 +854,18 @@ public class LivePolicyTest
         }
     }
 
-    private DCValue stringToDC(String field)
-    {
-        String[] bits = field.split("\\.");
-        DCValue dcv = new DCValue();
-        dcv.schema = bits[0];
-        dcv.element = bits[1];
-        if (bits.length > 2)
-        {
-            dcv.qualifier = bits[2];
-        }
-        return dcv;
-    }
-
-    private void outputCheckList()
+    protected void outputCheckList()
             throws Exception
     {
         String csv = "Test Name,Reference Item,Affected Item";
         for (CheckReport report : this.checkList)
         {
-            String reference = this.baseUrl + "/handle/" + report.reference;
-            if (report.reference == null)
+            String reference = this.baseUrl + "/handle/" + report.referenceHandle;
+            if (report.referenceHandle == null)
             {
-                reference = this.baseUrl + "/admin/item?itemID=" + report.referenceId;
+                reference = this.baseUrl + "/admin/item?itemID=" + report.reference;
             }
-            String changed = this.baseUrl + "/handle/" + report.changed;
+            String changed = this.baseUrl + "/handle/" + report.changedHandle;
             String row = report.testName + "," + reference + "," + changed;
             System.out.println(row);
             csv += "\n" + row;
@@ -839,55 +875,5 @@ public class LivePolicyTest
         out.write(csv);
         out.flush();
         out.close();
-    }
-
-    private void outputFailures()
-    {
-        for (Map<String, String> pair : this.failures)
-        {
-            for (String key : pair.keySet())
-            {
-                System.out.println(key + " - " + pair.get(key));
-            }
-        }
-    }
-
-    private Date correctForTimeZone(Date date)
-    {
-        // FIXME: this still doesn't work quite right for timezones west of Greenwich, but I'm not sure why
-        // not going to work harder to fix it, as it won't be run in that timezone, and it's only a test script anyway
-        //
-        // but just in case you are interested, test 15 for example, yields an apparent difference between the resource policy
-        // time and the far future time of 42 hours, and I have no idea how that's possible.
-        if (date != null)
-        {
-            //System.out.println(date.getTime());
-
-            // This bit of code corrects for the issue that arises once dates have been round-tripped into the database without the time portion or any time
-            // zone information, such that those dates can still be compared to the absolute near/far future dates used in testing.
-            //
-            // first we get the local timezone and get the offset from UTC.
-            TimeZone tz = Calendar.getInstance().getTimeZone();
-            int offset = tz.getRawOffset();
-            //System.out.println(offset);
-
-            // if the offset is less than 0, this is a timezone west of Greenwich.  Since all the dates coming back from the database are without
-            // time information, they are all treated as if they represent UTC.  This means dates actually in -ve UTC will appear to be further in the
-            // future, not back in the past.  That is, a -6 UTC needs to actually be interpreted as a +18 UTC.  That's what this next bit of code
-            // calculates.
-            if (offset < 0)
-            {
-                offset = 86400000 + offset;
-            }
-            //System.out.println(offset);
-
-            // now create a new date from the new number of milliseconds
-            long startCompare = date.getTime() + (long) offset;
-            date = new Date(startCompare);
-
-            //System.out.println(date.getTime());
-        }
-
-        return date;
     }
 }

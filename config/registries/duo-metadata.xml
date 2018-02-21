@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+
+<dspace-dc-types>
+
+    <dspace-header>
+        <title>Duo Administrative Metadata</title>
+    </dspace-header>
+
+    <!-- schemas used -->
+
+    <dc-schema>
+        <name>duo</name>
+        <namespace>https://duo.uio.no/terms</namespace>
+    </dc-schema>
+
+    <!-- metadata elements required -->
+
+    <dc-type>
+        <schema>duo</schema>
+        <element>state</element>
+        <scope_note>State information for use by event handlers</scope_note>
+    </dc-type>
+
+</dspace-dc-types>

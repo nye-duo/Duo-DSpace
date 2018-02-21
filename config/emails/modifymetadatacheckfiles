@@ -1,0 +1,19 @@
+# Email sent to DSpace admin when a restricted StudentWeb item is set to pass.
+#
+# Parameters: {0} the item that has changed
+#
+#
+# See org.dspace.core.Email for information on the format of this file.
+#
+Subject: DSpace - StudentWeb item has been reinstated
+The item:
+
+{0}
+
+Has been reinstated into the archive, because the metadata was updated to a "pass" grade.
+
+When items are reinstated, their files are not restored from the DUO_ADMIN bundle to the ORIGINAL
+bundle - this must be done manually.  Once you have restored the files as needed, you should ensure
+that the policy patterns applied are correct by running the curation task on the item.
+
+- The Duo Event Consumer

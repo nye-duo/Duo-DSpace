@@ -7,7 +7,7 @@
     <groupId>no.uio</groupId>
     <artifactId>duo</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.0</version>
+    <version>3.1.0</version>
 
     <build>
 		<plugins>
@@ -82,6 +82,12 @@
             <artifactId>commons-csv</artifactId>
             <version>1.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.10.3</version>
+        </dependency>
+
     </dependencies>
     
 </project>

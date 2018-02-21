@@ -1,6 +1,6 @@
 # DUO Extensions for DSpace 4.2
 
-**version: 3.0**
+**version: 3.1.0**
 
 
 This module contains plugins, extensions, and configuration for a DSpace implementation which will

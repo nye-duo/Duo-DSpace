@@ -52,6 +52,7 @@ public class MultiFileAnalyser extends TraverseDSpace
 
         MultiFileAnalyser mfa = new MultiFileAnalyser(line.getOptionValue("e"), line.getOptionValue("o"), line.hasOption("n"), line.hasOption("b"), line.hasOption("v"));
         mfa.analyse();
+        mfa.report();
     }
 
     class ReportRow
@@ -92,7 +93,7 @@ public class MultiFileAnalyser extends TraverseDSpace
      * @param item
      * @throws Exception
      */
-    public void doItem(Item item)
+    public void processItem(Item item)
             throws Exception
     {
         if (item.getHandle() == null && !this.noHandle)

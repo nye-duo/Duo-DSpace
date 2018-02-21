@@ -1,0 +1,16 @@
+# Email sent to DSpace admin when a fail or pass+restricted item is installed
+#
+# Parameters: {0} the prefix for the subject
+#             {1} the item that has changed
+#
+#
+# See org.dspace.core.Email for information on the format of this file.
+#
+Subject: DSpace - {0} StudentWeb item has been withdrawn
+The item:
+
+{1}
+
+Has been installed into the archive in a withdrawn state because it is {0}
+
+- The Duo Event Consumer

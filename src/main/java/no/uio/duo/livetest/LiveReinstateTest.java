@@ -491,6 +491,8 @@ public class LiveReinstateTest extends LiveTest
             return "There should be " + adminFiles + " files in " + DuoConstants.ADMIN_BUNDLE + " but there are " + admins;
         }
 
+        /*
+         * state is disabled for now - do not check
         // check the duo state metadata to ensure it matches up
         DuoState ds = new DuoState(item);
 
@@ -637,6 +639,7 @@ public class LiveReinstateTest extends LiveTest
                 return "Item should have duo.state restrictions=" + stateRestrictions + " but has " + ds.getRestrictions();
             }
         }
+        */
 
         return null;
     }

@@ -9,9 +9,11 @@ The following changes have been made to the software in 3.1.0
 * A metadata cleanup script has been added, to clear HTML tags from the item metadata
 * The restrictions applied to items coming from StudentWeb have been extended
 * A notification email is now sent when a failed or restricted item is archived from StudentWeb
-* The Install Consumer has been generalised as an event consumer, and now also applies policies when item metadata is edited (e.g. by an admin),
-or when the item is Reinstated from Withdrawn status.
+* The Install Consumer has been generalised as an event consumer, and now also applies policies when the item is Reinstated from Withdrawn status.
 * A new curation task has been added which can add required state metadata for operation with 3.1.0 event handlers
+
+In addition, this version contains a disabled feature to allow policies to be applied when the metadata is edited.  This feature requires
+minor code changes to enable.
 
 
 ## How to update
@@ -26,10 +28,28 @@ configuration.
 In particular, the following configuration files have changed:
 
 * dspace.cfg
-* modules/curate.cfg
 
+
+## Actions after the upgrade
+
+### Run the Metadata Cleanup
+
+After the code has been deployed, the following script should be run:
+
+    [dspace]/bin/dspace dsrun no.uio.duo.cleanup.MetadataCleanup -e [admin email]
+    
+This will clean all HTML from the item metadata.  See CLEANUP.md and TEST.md for more information and options for 
+this script.
+
+
+
+## If Enabling Modify_Metadata
+
+If, at a later date, it is decided to enable support for metadata modify, the following information is relevant:
 
 ### Required Metadata
+
+**IMPORTANT: this step does NOT need to be done unless enabling Modify_Metadata event handling**
 
 In order to support the new metadata fields required, there is a new schema document: config/registries/duo-metadata.xml
 
@@ -40,11 +60,9 @@ To run this yourself, you can use:
     [dspace]/bin/dspace dsrun org.dspace.administer.MetadataImporter -f config/registries/duo-metadata.xml
 
 
-## Actions after the upgrade
-
 ### Update the item metadata to work with the new event system
 
-**THIS UPDATE MUST BE RUN IMMEDIATELY AFTER THE CODE UPGRADE ABOVE**
+**IMPORTANT: this step does NOT need to be done unless enabling the Modify_Metadata event handling**
 
 So that all the items have the appropriate state information associated with them, you need to run a curation task to update
 the item metadata.  This is to allow the event handlers that were added in this version to correctly identify item states
@@ -61,14 +79,3 @@ This migration is provided as a curation task, so can be executed as follows:
 
 To be sure that this task has worked correctly on a given item, go to the item metadata page as an administrator.  You should see
 the field "duo.state" set on the item, with information about the item's state.
-
-
-### Run the Metadata Cleanup
-
-After the code has been deployed, the following script should be run:
-
-    [dspace]/bin/dspace dsrun no.uio.duo.cleanup.MetadataCleanup -e [admin email]
-    
-This will clean all HTML from the item metadata.  See CLEANUP.md and TEST.md for more information and options for 
-this script.
-

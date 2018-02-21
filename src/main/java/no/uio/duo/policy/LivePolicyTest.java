@@ -1,7 +1,7 @@
 package no.uio.duo.policy;
 
 import no.uio.duo.BitstreamIterator;
-import no.uio.duo.DuoState;
+// import no.uio.duo.DuoState;
 import no.uio.duo.MetadataManager;
 import no.uio.duo.WorkflowManagerWrapper;
 import no.uio.duo.livetest.LiveTest;
@@ -710,6 +710,8 @@ public class LivePolicyTest extends LiveTest
             }
         }
 
+        /*
+         * state is disabled for now - do not check
         // check the duo state metadata to ensure it matches up
         DuoState ds = new DuoState(item);
 
@@ -826,6 +828,7 @@ public class LivePolicyTest extends LiveTest
                 return "Item should have no duo.state restrictions, but has " + ds.getRestrictions();
             }
         }
+        */
 
         return null;
     }

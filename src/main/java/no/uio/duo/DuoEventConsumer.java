@@ -11,7 +11,7 @@ import org.dspace.event.Consumer;
 import org.dspace.event.Event;
 
 /**
- * <p>Event consumer for Duo which responds to Item Installs and Modify_Metadata.</p>
+ * <p>Event consumer for Duo which responds to Item Installs and Modify (and potentially Modify_Metadata too).</p>
  *
  * <p>This consumer will first determine if an item has embargo metadata attached to it.  If not
  * it will apply the default access policies to the item as per the Duo requirements.  To do this
@@ -26,7 +26,7 @@ import org.dspace.event.Event;
  * <pre>
  * event.dispatcher.default.consumers = search, browse, eperson, harvester, duo
    event.consumer.duo.class = no.uio.duo.DuoEventConsumer
-   event.consumer.duo.filters = Item+Install|Modify_Metadata|Modify
+   event.consumer.duo.filters = Item+Install|Modify
  * </pre>
  */
 public class DuoEventConsumer implements Consumer
@@ -101,12 +101,14 @@ public class DuoEventConsumer implements Consumer
     private void onInstall(Context context, Item item)
             throws Exception
     {
+        /*
+        * Re-enable DuoState if we ever decide to start monitoring on Modify_Metadata
         DuoState state = new DuoState(item);
         if (state.isInstalled())
         {
             log.info("Item " + item.getID() + " is already installed, no need for install consumer to run");
             return;
-        }
+        }*/
 
         if (FSRestrictionManager.consumes(item))
         {
@@ -130,8 +132,9 @@ public class DuoEventConsumer implements Consumer
             }
         }
 
-        state.setInstalled(true);
-        state.sychroniseItemState(false);
+        // re-activate if the code at the start of this function is ever re-activated.
+        //state.setInstalled(true);
+        //state.sychroniseItemState(false);
         item.update();
     }
 

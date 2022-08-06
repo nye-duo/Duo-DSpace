@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>org.dspace</groupId>
 			<artifactId>dspace-api</artifactId>
-			<version>4.2</version>
+			<version>5.11</version>
 		</dependency>
         <dependency>
             <groupId>org.dspace</groupId>
